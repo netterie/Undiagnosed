@@ -1,0 +1,57 @@
+"Subgroup","Quantity","Min ","1st Qu ","Median","Mean","3rd Qu ","Max "
+"MSM","# Diagnosed",65,79,87.5,87.08,94.25,108
+"MSM","Incidence (Base Case)",75.75,81.27,87.99,85.4,89.94,90.47
+"MSM","Incidence (Worst Case Obs)",74.45,78.65,86.11,83.82,88.74,90.08
+"MSM","Incidence (Worst Case Miss)",72.12,75.31,81.42,79.98,84.39,86.23
+"MSM","Undiagnosed (Base Case)",672.2,705.5,731,721,739.9,750.7
+"MSM","Undiagnosed (Worst Case Obs)",1341,1389,1445,1424,1459,1473
+"MSM","Undiagnosed (Worst Case Miss)",2600,2665,2765,2741,2814,2856
+"Hetero","# Diagnosed",18,31.75,37,37.06,41.5,51
+"Hetero","Incidence (Base Case)",30.7,31.68,33.32,34.71,38.52,39.09
+"Hetero","Incidence (Worst Case Obs)",30.15,30.36,31.2,32.49,35.23,35.99
+"Hetero","Incidence (Worst Case Miss)",31.51,31.59,31.84,32.3,33.2,33.5
+"Hetero","Undiagnosed (Base Case)",654.5,681.7,708.9,708.9,740.5,754.2
+"Hetero","Undiagnosed (Worst Case Obs)",1264,1307,1338,1349,1407,1425
+"Hetero","Undiagnosed (Worst Case Miss)",1742,1771,1793,1815,1869,1907
+"White","# Diagnosed",57,67,78,77.03,85.25,97
+"White","Incidence (Base Case)",61.52,66.99,74.21,73.42,79.86,84.37
+"White","Incidence (Worst Case Obs)",58.71,62.95,70.27,69.98,76.49,82.44
+"White","Incidence (Worst Case Miss)",54.06,56.98,62.66,62.8,68.15,73.34
+"White","Undiagnosed (Base Case)",651.3,701.2,746.5,734.3,769.9,795.9
+"White","Undiagnosed (Worst Case Obs)",1303,1385,1465,1449,1515,1568
+"White","Undiagnosed (Worst Case Miss)",2439,2562,2702,2694,2819,2953
+"Black","# Diagnosed",11,19,22.5,22,25.25,31
+"Black","Incidence (Base Case)",17.96,19.44,20.86,20.76,22.28,23.59
+"Black","Incidence (Worst Case Obs)",17.48,18.37,19.34,19.58,21.33,22.17
+"Black","Incidence (Worst Case Miss)",17.62,17.89,18.33,18.59,19.55,20.08
+"Black","Undiagnosed (Base Case)",297.8,310.9,319.5,323.7,340,347.7
+"Black","Undiagnosed (Worst Case Obs)",582.7,610.8,622.4,629.2,660,673.2
+"Black","Undiagnosed (Worst Case Miss)",877.9,915.3,929.6,937.9,974.6,1002
+"Hisp","# Diagnosed",10,16,21,20.33,23,32
+"Hisp","Incidence (Base Case)",16.31,17.62,19.19,20.19,23.37,24.28
+"Hisp","Incidence (Worst Case Obs)",16.17,17.2,19.8,20.21,23.35,24.4
+"Hisp","Incidence (Worst Case Miss)",16.98,17.43,19.56,19.65,21.62,22.25
+"Hisp","Undiagnosed (Base Case)",218.4,226.7,232.3,234.1,241,255.1
+"Hisp","Undiagnosed (Worst Case Obs)",430.8,441.8,452,453.6,467.9,479.6
+"Hisp","Undiagnosed (Worst Case Miss)",771.6,779,793.3,793.8,808.9,813.9
+"Native","# Diagnosed",0,1.75,2.5,2.639,3,6
+"Native","Incidence (Base Case)",0.8688,2.088,2.713,2.637,3.218,4.508
+"Native","Incidence (Worst Case Obs)",1.089,2.042,2.547,2.641,3.295,4.501
+"Native","Incidence (Worst Case Miss)",2.087,2.364,2.541,2.816,3.328,4.114
+"Native","Undiagnosed (Base Case)",35.71,37.56,40.41,40.03,41.82,45.5
+"Native","Undiagnosed (Worst Case Obs)",69.5,71.03,74.79,74.47,76.99,81.33
+"Native","Undiagnosed (Worst Case Miss)",110.8,114.1,115.4,116.2,118.3,125.8
+"Asian","# Diagnosed",3,4,6,6.111,8,9
+"Asian","Incidence (Base Case)",3.92,5.576,6.615,6.31,6.926,7.512
+"Asian","Incidence (Worst Case Obs)",4.67,5.857,6.676,6.453,7.012,7.305
+"Asian","Incidence (Worst Case Miss)",5.452,6.282,6.608,6.44,6.671,6.894
+"Asian","Undiagnosed (Base Case)",83.06,90.24,94.16,93.3,97.29,100.4
+"Asian","Undiagnosed (Worst Case Obs)",164.6,175.4,178.5,177.6,182.3,185.1
+"Asian","Undiagnosed (Worst Case Miss)",262.2,270.9,272.5,272.3,275.3,277.7
+"Multi","# Diagnosed",0,2,3.5,3.667,5,7
+"Multi","Incidence (Base Case)",1.542,3.688,4.085,4.011,4.578,5.681
+"Multi","Incidence (Worst Case Obs)",2.027,3.907,4.256,4.213,4.845,5.905
+"Multi","Incidence (Worst Case Miss)",3.057,4.213,4.521,4.42,4.883,5.239
+"Multi","Undiagnosed (Base Case)",19.67,30.75,34.6,32.97,36.66,38.9
+"Multi","Undiagnosed (Worst Case Obs)",40.76,54.88,60.67,58.75,63.77,66.89
+"Multi","Undiagnosed (Worst Case Miss)",85.51,96.44,105.4,103.3,110.4,113.5

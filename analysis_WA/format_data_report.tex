@@ -1,0 +1,755 @@
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+
+
+
+
+\title{WA State HIV Testing Histories - Data Exploration and Formatting}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Data Structure}
+
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{str}\hlstd{(dataf)}
+\end{alltt}
+\begin{verbatim}
+## 'data.frame':	25233 obs. of  19 variables:
+##  $ FirstVL         : num  658 19914 NA 51 9050 ...
+##  $ FirstCD4cnt     : num  566 243 1406 711 858 ...
+##  $ tth_ever_neg    : chr  NA NA NA NA ...
+##  $ new_race        : int  2 2 1 1 1 1 3 1 1 1 ...
+##  $ hst             : chr  "WA" "WA" "WA" "WA" ...
+##  $ hdx_age         : int  51 25 41 34 38 33 33 41 45 19 ...
+##  $ new_mode        : int  3 6 8 1 1 1 3 1 1 1 ...
+##  $ hdx_yr_qtr      : chr  "1998_3Q" "1999_3Q" "1995_2Q" "1990_" ...
+##  $ HDX_DT_FLAG     : chr  "M" "M" "M" "Y" ...
+##  $ adx_yr_qtr      : chr  "2003_2Q" "2000_1Q" NA NA ...
+##  $ adx_DT_FLAG     : chr  "M" "M" NA NA ...
+##  $ TTH_lneg_DT_FLAG: chr  NA NA NA NA ...
+##  $ LAG_LNEG_HDX_DT : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ TTH_ppos_DT_FLAG: chr  NA NA NA NA ...
+##  $ LAG_PPOS_HDX_DT : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ TTH_PREV_POS    : chr  "N" "N" "N" "N" ...
+##  $ VL_DAYS         : int  181 111 NA 4032 30 3061 2618 1810 0 4461 ...
+##  $ CD4_DAYS        : int  122 122 1553 3271 683 1765 30 1218 304 3195 ...
+##  $ METH_USE        : chr  NA NA NA NA ...
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\section{Overview}
+
+
+
+
+\begin{itemize}
+    \item N = 25233
+\end{itemize}
+
+\section{Raw Variable Summaries}
+
+
+
+
+\section{Variable Transformations}
+
+\subsection{Split the combined year-quarter of diagnosis and AIDS variables}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{############################################################# SPLIT COMBINED YR-QTR VARIABLE Year, quarter, and}
+\hlcom{############################################################# quarter-year of Dx (diagnosis)}
+\hlstd{dataf}\hlopt{$}\hlstd{yearDx} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(}\hlkwd{substring}\hlstd{(dataf}\hlopt{$}\hlstd{hdx_yr_qtr,} \hlnum{0}\hlstd{,} \hlnum{4}\hlstd{))}
+\hlstd{dataf}\hlopt{$}\hlstd{quarterDx} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(}\hlkwd{substring}\hlstd{(dataf}\hlopt{$}\hlstd{hdx_yr_qtr,} \hlnum{6}\hlstd{,}
+    \hlnum{6}\hlstd{))}
+\hlstd{dataf}\hlopt{$}\hlstd{timeDx} \hlkwb{<-} \hlstd{dataf}\hlopt{$}\hlstd{yearDx} \hlopt{+} \hlstd{(dataf}\hlopt{$}\hlstd{quarterDx} \hlopt{-} \hlnum{1}\hlstd{)}\hlopt{/}\hlnum{4}
+\hlcom{# AIDS at Dx - if missing, assumed to be false}
+\hlstd{dataf}\hlopt{$}\hlstd{aidsAtDx} \hlkwb{<-} \hlstd{dataf}\hlopt{$}\hlstd{hdx_yr_qtr} \hlopt{==} \hlstd{dataf}\hlopt{$}\hlstd{adx_yr_qtr}
+\hlstd{dataf}\hlopt{$}\hlstd{aidsAtDx[}\hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{aidsAtDx)]} \hlkwb{<-} \hlnum{FALSE}
+\hlcom{# Year, quarter, and quarter-year of AIDS (diagnosis)}
+\hlstd{dataf}\hlopt{$}\hlstd{yearAids} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(}\hlkwd{substring}\hlstd{(dataf}\hlopt{$}\hlstd{adx_yr_qtr,} \hlnum{0}\hlstd{,} \hlnum{4}\hlstd{))}
+\hlstd{dataf}\hlopt{$}\hlstd{quarterAids} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(}\hlkwd{substring}\hlstd{(dataf}\hlopt{$}\hlstd{adx_yr_qtr,} \hlnum{6}\hlstd{,}
+    \hlnum{6}\hlstd{))}
+\hlstd{dataf}\hlopt{$}\hlstd{timeAids} \hlkwb{<-} \hlstd{dataf}\hlopt{$}\hlstd{yearAids} \hlopt{+} \hlstd{(dataf}\hlopt{$}\hlstd{quarterAids} \hlopt{-} \hlnum{1}\hlstd{)}\hlopt{/}\hlnum{4}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{Now subset the data based on essentials}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{############################################################# SUBSET THE DATA - INITIAL RESTRICTIONS}
+\hlstd{year_min} \hlkwb{<-} \hlnum{2005}
+\hlstd{year_max} \hlkwb{<-} \hlnum{2013}
+
+\hlcom{# Non-sequential look}
+\hlkwd{table}\hlstd{(}\hlkwc{hst_included} \hlstd{= dataf}\hlopt{$}\hlstd{hst} \hlopt{==} \hlstr{"WA"}\hlstd{,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## hst_included
+## FALSE  TRUE  <NA> 
+##  5478 19752     3
+\end{verbatim}
+\begin{alltt}
+\hlkwd{table}\hlstd{(}\hlkwc{yearDx_included} \hlstd{= dataf}\hlopt{$}\hlstd{yearDx} \hlopt{>=} \hlstd{year_min} \hlopt{&} \hlstd{dataf}\hlopt{$}\hlstd{yearDx} \hlopt{<=}
+    \hlstd{year_max,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## yearDx_included
+## FALSE  TRUE  <NA> 
+## 19052  6038   143
+\end{verbatim}
+\begin{alltt}
+\hlkwd{table}\hlstd{(}\hlkwc{yearDx_missing} \hlstd{=} \hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{hdx_yr_qtr))}
+\end{alltt}
+\begin{verbatim}
+## yearDx_missing
+## FALSE  TRUE 
+## 25090   143
+\end{verbatim}
+\begin{alltt}
+\hlkwd{table}\hlstd{(}\hlkwc{age_missing_and_missing_lastNeg} \hlstd{= (}\hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{hdx_age)} \hlopt{&}
+    \hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{lag_lneg_hdx_dt)))}
+\end{alltt}
+\begin{verbatim}
+## age_missing_and_missing_lastNeg
+## FALSE  TRUE 
+## 25016   217
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Sequential look}
+\hlstd{(hst_included} \hlkwb{<-} \hlkwd{table}\hlstd{(}\hlkwc{hst_included} \hlstd{= dataf}\hlopt{$}\hlstd{hst} \hlopt{==} \hlstr{"WA"}\hlstd{,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+## hst_included
+## FALSE  TRUE  <NA> 
+##  5478 19752     3
+\end{verbatim}
+\begin{alltt}
+\hlstd{dataf} \hlkwb{<-} \hlkwd{subset}\hlstd{(dataf, hst} \hlopt{==} \hlstr{"WA"}\hlstd{)}
+\hlstd{(yearDx_included} \hlkwb{<-} \hlkwd{table}\hlstd{(}\hlkwc{yearDx_included} \hlstd{= (dataf}\hlopt{$}\hlstd{yearDx} \hlopt{>=}
+    \hlstd{year_min} \hlopt{&} \hlstd{dataf}\hlopt{$}\hlstd{yearDx} \hlopt{<=} \hlstd{year_max),} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+## yearDx_included
+## FALSE  TRUE 
+## 14940  4812
+\end{verbatim}
+\begin{alltt}
+\hlstd{dataf} \hlkwb{<-} \hlkwd{subset}\hlstd{(dataf, yearDx} \hlopt{>=} \hlstd{year_min} \hlopt{&} \hlstd{yearDx} \hlopt{<=} \hlstd{year_max)}
+\hlstd{(age_included} \hlkwb{<-} \hlkwd{table}\hlstd{(}\hlkwc{age_and_lastNeg_present} \hlstd{=} \hlopt{!}\hlstd{(}\hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{hdx_age)} \hlopt{&}
+    \hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{lag_lneg_hdx_dt))))}
+\end{alltt}
+\begin{verbatim}
+## age_and_lastNeg_present
+## TRUE 
+## 4812
+\end{verbatim}
+\begin{alltt}
+\hlstd{dataf} \hlkwb{<-} \hlkwd{subset}\hlstd{(dataf,} \hlopt{!}\hlstd{(}\hlkwd{is.na}\hlstd{(hdx_age)} \hlopt{&} \hlkwd{is.na}\hlstd{(lag_lneg_hdx_dt)))}
+\hlstd{(Nobs1} \hlkwb{<-} \hlkwd{nrow}\hlstd{(dataf))}
+\end{alltt}
+\begin{verbatim}
+## [1] 4812
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Excluded 20421 cases based on year and hst restrictions and missingness in age and year of diagnosis.
+
+\subsubsection{Diagnosis}
+Years of initial diagnosis represented:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## 
+## 2005 2006 2007 2008 2009 2010 2011 2012 2013 
+##  560  543  584  540  546  556  496  517  470
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+Quarters of initial diagnosis represented:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## 
+##    1    2    3    4 <NA> 
+## 1280 1251 1133 1139    9
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{Split the combined year-quarter of diagnosis and AIDS variables}
+
+\paragraph{Editing} For those cases when we don't know the quarter, when should the diagnosis fall? Should we evenly distribute them throughout the 4 quarters? I will do that for now:
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{############################################################# IMPUTE A QUARTER IF ONLY YEAR IS KNOWN}
+\hlstd{impute_qtr} \hlkwb{<-} \hlopt{!}\hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{yearDx)} \hlopt{&} \hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{quarterDx)}
+\hlkwd{set.seed}\hlstd{(}\hlnum{98103}\hlstd{)}
+\hlstd{dataf}\hlopt{$}\hlstd{quarterDx[impute_qtr]} \hlkwb{<-} \hlkwd{sample}\hlstd{(}\hlnum{4}\hlstd{,} \hlkwc{size} \hlstd{=} \hlkwd{sum}\hlstd{(impute_qtr),}
+    \hlkwc{replace} \hlstd{=} \hlnum{TRUE}\hlstd{)}
+\hlstd{dataf}\hlopt{$}\hlstd{timeDx} \hlkwb{<-} \hlstd{dataf}\hlopt{$}\hlstd{yearDx} \hlopt{+} \hlstd{(dataf}\hlopt{$}\hlstd{quarterDx} \hlopt{-} \hlnum{1}\hlstd{)}\hlopt{/}\hlnum{4}
+\hlkwd{summary}\hlstd{(dataf}\hlopt{$}\hlstd{timeDx)}
+\end{alltt}
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    2005    2007    2009    2009    2012    2014
+\end{verbatim}
+\begin{alltt}
+\hlstd{time_min} \hlkwb{<-} \hlkwd{min}\hlstd{(dataf}\hlopt{$}\hlstd{timeDx)}
+\hlstd{time_max} \hlkwb{<-} \hlkwd{max}\hlstd{(dataf}\hlopt{$}\hlstd{timeDx)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{Tabulate and collapse race and mode of diagnosis variables}
+
+Investigating counts of race by year and mode by year:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{table}\hlstd{(dataf}\hlopt{$}\hlstd{new_race, dataf}\hlopt{$}\hlstd{yearDx,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##          
+##           2005 2006 2007 2008 2009 2010 2011 2012 2013
+##   White    340  345  344  288  319  317  281  294  252
+##   Black    104   82  104  103   91   79   91   98   91
+##   Hisp      76   65   90   94   86  105   76   63   79
+##   Asian     20   24   22   28   25   26   25   31   24
+##   NHoPI      2    5    3    0    2    1    5    7    8
+##   AI/AN      9    6    6   12    5    9    5    5    5
+##   Multi      9   16   15   15   18   19   13   19   11
+##   Unknown    0    0    0    0    0    0    0    0    0
+\end{verbatim}
+\begin{alltt}
+\hlkwd{table}\hlstd{(dataf}\hlopt{$}\hlstd{new_mode, dataf}\hlopt{$}\hlstd{yearDx,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##                
+##                 2005 2006 2007 2008 2009 2010 2011 2012
+##   MSM            295  312  336  300  322  347  296  281
+##   IDU             40   42   32   26   26   32   30   22
+##   MSM/IDU         61   45   48   31   41   27   47   40
+##   Transfus         1    0    1    1    0    0    0    0
+##   Hemo             1    0    0    0    0    0    0    0
+##   Hetero          69   54   54   60   39   49   22   23
+##   Ped              0    3    2    2    9   10    6    4
+##   F Pres Hetero   22   17   29   25   35   19   18   16
+##   NIR             71   70   82   95   74   72   77  131
+##                
+##                 2013
+##   MSM            273
+##   IDU             20
+##   MSM/IDU         35
+##   Transfus         0
+##   Hemo             0
+##   Hetero          20
+##   Ped              4
+##   F Pres Hetero   18
+##   NIR            100
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{############################################################# COLLAPSE RACE AND MODE OF DIAGNOSIS}
+
+\hlstd{race_levels} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"White"}\hlstd{,} \hlstr{"Black"}\hlstd{,} \hlstr{"Hisp"}\hlstd{,} \hlstr{"Asian"}\hlstd{,} \hlstr{"Native"}\hlstd{,}
+    \hlstr{"Multi"}\hlstd{)}
+\hlstd{mode_levels} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"MSM"}\hlstd{,} \hlstr{"Hetero"}\hlstd{,} \hlstr{"Blood/Needle"}\hlstd{)}
+\hlstd{dataf} \hlkwb{<-} \hlkwd{within}\hlstd{(dataf, \{}
+    \hlstd{race} \hlkwb{<-} \hlkwd{as.character}\hlstd{(new_race)}
+    \hlstd{race[race} \hlopt{==} \hlstr{"AI/AN"} \hlopt{|} \hlstd{race} \hlopt{==} \hlstr{"NHoPI"}\hlstd{]} \hlkwb{<-} \hlstr{"Native"}
+    \hlstd{race} \hlkwb{<-} \hlkwd{factor}\hlstd{(race,} \hlkwc{labels} \hlstd{= race_levels,} \hlkwc{levels} \hlstd{= race_levels)}
+    \hlstd{mode} \hlkwb{<-} \hlkwd{as.character}\hlstd{(new_mode)}
+    \hlstd{mode[mode} \hlopt{==} \hlstr{"MSM/IDU"}\hlstd{]} \hlkwb{<-} \hlstr{"MSM"}
+    \hlstd{mode[mode} \hlopt{==} \hlstr{"F Pres Hetero"} \hlopt{|} \hlstd{mode} \hlopt{==} \hlstr{"NIR"}\hlstd{]} \hlkwb{<-} \hlstr{"Hetero"}
+    \hlstd{mode[mode} \hlopt{==} \hlstr{"IDU"} \hlopt{|} \hlstd{mode} \hlopt{==} \hlstr{"Transfus"} \hlopt{|} \hlstd{mode} \hlopt{==} \hlstr{"Hemo"} \hlopt{|}
+        \hlstd{mode} \hlopt{==} \hlstr{"Ped"}\hlstd{]} \hlkwb{<-} \hlstr{"Blood/Needle"}
+    \hlstd{mode} \hlkwb{<-} \hlkwd{factor}\hlstd{(mode,} \hlkwc{levels} \hlstd{= mode_levels,} \hlkwc{labels} \hlstd{= mode_levels)}
+\hlstd{\})}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{table}\hlstd{(dataf}\hlopt{$}\hlstd{race, dataf}\hlopt{$}\hlstd{yearDx,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##         
+##          2005 2006 2007 2008 2009 2010 2011 2012 2013
+##   White   340  345  344  288  319  317  281  294  252
+##   Black   104   82  104  103   91   79   91   98   91
+##   Hisp     76   65   90   94   86  105   76   63   79
+##   Asian    20   24   22   28   25   26   25   31   24
+##   Native   11   11    9   12    7   10   10   12   13
+##   Multi     9   16   15   15   18   19   13   19   11
+\end{verbatim}
+\begin{alltt}
+\hlkwd{table}\hlstd{(dataf}\hlopt{$}\hlstd{mode, dataf}\hlopt{$}\hlstd{yearDx,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##               
+##                2005 2006 2007 2008 2009 2010 2011 2012 2013
+##   MSM           356  357  384  331  363  374  343  321  308
+##   Hetero        162  141  165  180  148  140  117  170  138
+##   Blood/Needle   42   45   35   29   35   42   36   26   24
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\subsubsection{AIDS at diagnosis}
+
+AIDS at initial diagnosis?
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## 
+## FALSE  TRUE 
+##  3531  1281
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+Years of AIDS diagnosis represented:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## 
+## 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 <NA> 
+##  166  209  215  257  278  235  232  202  167   13 2838
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+Quarters of AIDS diagnosis represented:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{verbatim}
+## 
+##    1    2    3    4 <NA> 
+##  507  509  486  469 2841
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{Make a flag for everHadNegTest}
+
+This variable will be coded as Yes=TRUE, No=FALSE, and Don't Know/Refused/Missing=NA
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{############################################################# CREATE everHadNegTest Define everHadNegTest based on}
+\hlcom{############################################################# tth_ever_neg}
+\hlstd{dataf} \hlkwb{<-} \hlkwd{transform}\hlstd{(dataf,} \hlkwc{everHadNegTest} \hlstd{=} \hlkwd{ifelse}\hlstd{(tth_ever_neg} \hlopt{==}
+    \hlstr{"Y"}\hlstd{,} \hlnum{TRUE}\hlstd{,} \hlkwd{ifelse}\hlstd{(tth_ever_neg} \hlopt{==} \hlstr{"N"}\hlstd{,} \hlnum{FALSE}\hlstd{,} \hlnum{NA}\hlstd{)))}
+\hlkwd{with}\hlstd{(dataf,} \hlkwd{table}\hlstd{(everHadNegTest, tth_ever_neg,} \hlkwc{useNA} \hlstd{=} \hlstr{"always"}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+##               tth_ever_neg
+## everHadNegTest    D    N    R    Y <NA>
+##          FALSE    0  511    0    0    0
+##          TRUE     0    0    0 2182    0
+##          <NA>   364    0    6    0 1749
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Now cross-check it with the lag_lneg_hdx_dt, which actually}
+\hlcom{# has the time since last negative test}
+\hlstd{(checkEver} \hlkwb{<-} \hlkwd{with}\hlstd{(dataf,} \hlkwd{table}\hlstd{(everHadNegTest,} \hlkwc{TID_NA} \hlstd{=} \hlkwd{is.na}\hlstd{(lag_lneg_hdx_dt),}
+    \hlkwc{useNA} \hlstd{=} \hlstr{"always"}\hlstd{)))}
+\end{alltt}
+\begin{verbatim}
+##               TID_NA
+## everHadNegTest FALSE TRUE <NA>
+##          FALSE     2  509    0
+##          TRUE   2099   83    0
+##          <NA>     15 2104    0
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Look at actual lag_lneg_hdx_dt values by everHadNegTest}
+\hlkwd{ddply}\hlstd{(dataf,} \hlkwd{.}\hlstd{(everHadNegTest),} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlkwd{c}\hlstd{(}\hlkwd{summary}\hlstd{(x}\hlopt{$}\hlstd{lag_lneg_hdx_dt)))}
+\end{alltt}
+\begin{verbatim}
+##   everHadNegTest Min. 1st Qu. Median  Mean 3rd Qu. Max.
+## 1          FALSE  112   354.0    596 596.0     838 1080
+## 2           TRUE    0   181.0    431 931.4    1118 9938
+## 3             NA  122   210.5    569 790.1    1274 2022
+##   NA's
+## 1  509
+## 2   83
+## 3 2104
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\paragraph{Editing} We have 2 cases with everHadNegTest=FALSE and 15 with everHadNegTest=NA but have a time since last negative test. Change their everHadNegTest flag.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{toTRUE1} \hlkwb{<-} \hlopt{!}\hlstd{dataf}\hlopt{$}\hlstd{everHadNegTest} \hlopt{& !}\hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{lag_lneg_hdx_dt)}
+\hlstd{toTRUE2} \hlkwb{<-} \hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{everHadNegTest)} \hlopt{& !}\hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{lag_lneg_hdx_dt)}
+\hlstd{dataf}\hlopt{$}\hlstd{everHadNegTest[toTRUE1]} \hlkwb{<-} \hlnum{TRUE}
+\hlstd{dataf}\hlopt{$}\hlstd{everHadNegTest[toTRUE2]} \hlkwb{<-} \hlnum{TRUE}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\paragraph{More editing} We have 83 cases who have everHadNegTest=TRUE but have NO time since last negative test. Change their everHadNegTest flag.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{toFALSE} \hlkwb{<-} \hlstd{dataf}\hlopt{$}\hlstd{everHadNegTest} \hlopt{&} \hlkwd{is.na}\hlstd{(dataf}\hlopt{$}\hlstd{lag_lneg_hdx_dt)}
+\hlstd{dataf}\hlopt{$}\hlstd{everHadNegTest[toFALSE]} \hlkwb{<-} \hlnum{FALSE}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\paragraph{Better?} 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{(checkEver} \hlkwb{<-} \hlkwd{with}\hlstd{(dataf,} \hlkwd{table}\hlstd{(everHadNegTest,} \hlkwc{TID_NA} \hlstd{=} \hlkwd{is.na}\hlstd{(lag_lneg_hdx_dt),}
+    \hlkwc{useNA} \hlstd{=} \hlstr{"always"}\hlstd{)))}
+\end{alltt}
+\begin{verbatim}
+##               TID_NA
+## everHadNegTest FALSE TRUE <NA>
+##          FALSE     0  592    0
+##          TRUE   2116    0    0
+##          <NA>      0 2104    0
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{Define TID, aka infPeriod}
+
+Define aidsUB=17.98 years, and lastNeg\_yrs as lag\_lneg\_hdx\_dt/365, and infPeriod as follows:
+\\
+
+\begin{tabular}{ll}
+    everHadNegTest & infPeriod \\
+    \hline
+    TRUE & min(lastNeg\_yrs, aidsUB) \\
+    FALSE & min(age-16, aidsUB) \\
+    NA & NA \\
+\end{tabular}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{############################################################# CREATE infPeriod and then look at it}
+
+\hlcom{#### TEMPORARY: dataf$age=35}
+
+\hlstd{aidsUB} \hlkwb{<-} \hlkwd{qweibull}\hlstd{(}\hlnum{0.95}\hlstd{,} \hlkwc{shape} \hlstd{=} \hlnum{2.516}\hlstd{,} \hlkwc{scale} \hlstd{=} \hlnum{1}\hlopt{/}\hlnum{0.086}\hlstd{)}  \hlcom{#17.98418}
+\hlstd{dataf} \hlkwb{<-} \hlkwd{within}\hlstd{(dataf, \{}
+    \hlstd{lastNeg_yrs} \hlkwb{<-} \hlstd{lag_lneg_hdx_dt}\hlopt{/}\hlnum{365}
+    \hlstd{infPeriod} \hlkwb{<-} \hlkwd{ifelse}\hlstd{(everHadNegTest,} \hlkwd{pmin}\hlstd{(lastNeg_yrs, aidsUB),}
+        \hlkwd{ifelse}\hlstd{(}\hlopt{!}\hlstd{everHadNegTest,} \hlkwd{pmin}\hlstd{(hdx_age} \hlopt{-} \hlnum{16}\hlstd{, aidsUB),} \hlnum{NA}\hlstd{))}
+    \hlstd{earliestInf} \hlkwb{<-} \hlstd{hdx_age} \hlopt{-} \hlstd{infPeriod}
+\hlstd{\})}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{summary}\hlstd{(dataf}\hlopt{$}\hlstd{infPeriod,} \hlkwc{digits} \hlstd{=} \hlnum{3}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##  -2.000   0.643   2.030   5.230   7.490  18.000    2104
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+\paragraph{Diagnoses younger than age 16} 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# Number of cases who got a negative infPeriod}
+\hlstd{(neginfPeriod} \hlkwb{<-} \hlkwd{sum}\hlstd{(dataf}\hlopt{$}\hlstd{infPeriod} \hlopt{<} \hlnum{0}\hlstd{,} \hlkwc{na.rm} \hlstd{=} \hlnum{TRUE}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+## [1] 1
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Diagnoses at or under age 16 by everHadNegTest}
+\hlstd{(a1} \hlkwb{<-} \hlkwd{table}\hlstd{(}\hlkwc{atunder16} \hlstd{= dataf}\hlopt{$}\hlstd{hdx_age} \hlopt{<=} \hlnum{16}\hlstd{,} \hlkwc{everHadNegTest} \hlstd{= dataf}\hlopt{$}\hlstd{everHadNegTest,}
+    \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+##          everHadNegTest
+## atunder16 FALSE TRUE <NA>
+##     FALSE   589 2112 2039
+##     TRUE      3    4   65
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Diagnoses at or under age 16 by year, 2005-2013}
+\hlkwd{table}\hlstd{(}\hlkwc{atunder16count} \hlstd{=} \hlkwd{subset}\hlstd{(dataf, yearDx} \hlopt{>=} \hlstd{year_min} \hlopt{&} \hlstd{yearDx} \hlopt{<=}
+    \hlstd{year_max)}\hlopt{$}\hlstd{hdx_age} \hlopt{<=} \hlnum{16}\hlstd{,} \hlkwc{year} \hlstd{=} \hlkwd{subset}\hlstd{(dataf, yearDx} \hlopt{>=} \hlstd{year_min} \hlopt{&}
+    \hlstd{yearDx} \hlopt{<=} \hlstd{year_max)}\hlopt{$}\hlstd{yearDx,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##               year
+## atunder16count 2005 2006 2007 2008 2009 2010 2011 2012 2013
+##          FALSE  557  538  578  534  536  544  488  505  460
+##          TRUE     3    5    6    6   10   12    8   12   10
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Now just under 16, excluding hdx_age=16 Diagnoses under age}
+\hlcom{# 16 by everHadNegTest}
+\hlstd{(a2} \hlkwb{<-} \hlkwd{table}\hlstd{(}\hlkwc{under16} \hlstd{= dataf}\hlopt{$}\hlstd{hdx_age} \hlopt{<} \hlnum{16}\hlstd{,} \hlkwc{everHadNegTest} \hlstd{= dataf}\hlopt{$}\hlstd{everHadNegTest,}
+    \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+##        everHadNegTest
+## under16 FALSE TRUE <NA>
+##   FALSE   591 2114 2043
+##   TRUE      1    2   61
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Diagnoses under age 16 by year}
+\hlkwd{table}\hlstd{(}\hlkwc{under16count} \hlstd{=} \hlkwd{subset}\hlstd{(dataf, yearDx} \hlopt{>=} \hlstd{year_min} \hlopt{&} \hlstd{yearDx} \hlopt{>=}
+    \hlstd{year_max)}\hlopt{$}\hlstd{hdx_age} \hlopt{<} \hlnum{16}\hlstd{,} \hlkwc{year} \hlstd{=} \hlkwd{subset}\hlstd{(dataf, yearDx} \hlopt{>=} \hlstd{year_min} \hlopt{&}
+    \hlstd{yearDx} \hlopt{>=} \hlstd{year_max)}\hlopt{$}\hlstd{yearDx,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##             year
+## under16count 2013
+##        FALSE  461
+##        TRUE     9
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Among those diagnosed at or under 16: everHadNegTest by}
+\hlcom{# mode}
+\hlkwd{table}\hlstd{(}\hlkwc{everHadNegTest} \hlstd{=} \hlkwd{subset}\hlstd{(dataf, hdx_age} \hlopt{<=} \hlnum{16}\hlstd{)}\hlopt{$}\hlstd{everHadNegTest,}
+    \hlkwc{mode} \hlstd{=} \hlkwd{subset}\hlstd{(dataf, hdx_age} \hlopt{<=} \hlnum{16}\hlstd{)}\hlopt{$}\hlstd{new_mode,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##               mode
+## everHadNegTest MSM IDU MSM/IDU Transfus Hemo Hetero Ped
+##          FALSE   1   0       0        0    0      1   1
+##          TRUE    1   0       0        0    0      1   0
+##          <NA>    1   0       0        0    0      1  38
+##               mode
+## everHadNegTest F Pres Hetero NIR
+##          FALSE             0   0
+##          TRUE              1   1
+##          <NA>              0  25
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+
+There are 68 cases who do not have a date of last negative test and may not fit the assumption of TID=age-16. Of those, 6 are age 16 at diagnosis and will have TID=0 using this assumption. Primary mode of transmission is Ped ('Perinatal or pediatric').
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{(young_included} \hlkwb{<-} \hlkwd{with}\hlstd{(dataf,} \hlkwd{table}\hlstd{(}\hlkwc{over16_or_atunder16_with_obs_infPeriod} \hlstd{= (hdx_age} \hlopt{>}
+    \hlnum{16} \hlopt{| !}\hlstd{(hdx_age} \hlopt{<=} \hlnum{16} \hlopt{&} \hlstd{(}\hlopt{!}\hlstd{everHadNegTest} \hlopt{|} \hlkwd{is.na}\hlstd{(everHadNegTest)))))))}
+\end{alltt}
+\begin{verbatim}
+## over16_or_atunder16_with_obs_infPeriod
+## FALSE  TRUE 
+##    68  4744
+\end{verbatim}
+\begin{alltt}
+\hlstd{dataf} \hlkwb{<-} \hlkwd{subset}\hlstd{(dataf,} \hlopt{!}\hlstd{(hdx_age} \hlopt{<=} \hlnum{16} \hlopt{&} \hlstd{(}\hlopt{!}\hlstd{everHadNegTest} \hlopt{|} \hlkwd{is.na}\hlstd{(everHadNegTest))))}
+\hlstd{(Nobs2} \hlkwb{<-} \hlkwd{nrow}\hlstd{(dataf))}
+\end{alltt}
+\begin{verbatim}
+## [1] 4744
+\end{verbatim}
+\begin{alltt}
+\hlkwd{summary}\hlstd{(dataf}\hlopt{$}\hlstd{infPeriod,} \hlkwc{digits} \hlstd{=} \hlnum{3}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##   0.000   0.649   2.030   5.240   7.560  18.000    2039
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Excluded 68 cases due to age$\leq$16 and no observed infPeriod data.
+
+\subsection{Check effect of TID definition}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# We did cap some people whose TID's were >aidsUB}
+\hlstd{(check_cap1} \hlkwb{<-} \hlkwd{with}\hlstd{(}\hlkwd{subset}\hlstd{(dataf, everHadNegTest),} \hlkwd{table}\hlstd{(}\hlkwc{original_over_aidsUB} \hlstd{= lastNeg_yrs} \hlopt{>}
+    \hlstd{aidsUB,} \hlkwc{infPeriod_over_aidsUB} \hlstd{= infPeriod} \hlopt{>} \hlstd{aidsUB,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)))}
+\end{alltt}
+\begin{verbatim}
+##                     infPeriod_over_aidsUB
+## original_over_aidsUB FALSE
+##                FALSE  2096
+##                TRUE     20
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Among those with everHadNegTest=TRUE, we capped 20 cases at aidsUB.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{(check_cap2} \hlkwb{<-} \hlkwd{with}\hlstd{(}\hlkwd{subset}\hlstd{(dataf,} \hlopt{!}\hlstd{everHadNegTest),} \hlkwd{table}\hlstd{(}\hlkwc{original_over_aidsUB} \hlstd{= lastNeg_yrs} \hlopt{>}
+    \hlstd{aidsUB,} \hlkwc{infPeriod_over_aidsUB} \hlstd{= infPeriod} \hlopt{>} \hlstd{aidsUB,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)))}
+\end{alltt}
+\begin{verbatim}
+##                     infPeriod_over_aidsUB
+## original_over_aidsUB FALSE
+##                 <NA>   589
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Among those with everHadNegTest=FALSE, no one had an original TID value.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{(check_cap3} \hlkwb{<-} \hlkwd{with}\hlstd{(}\hlkwd{subset}\hlstd{(dataf,} \hlkwd{is.na}\hlstd{(everHadNegTest)),} \hlkwd{table}\hlstd{(}\hlkwc{original_over_aidsUB} \hlstd{= lastNeg_yrs} \hlopt{>}
+    \hlstd{aidsUB,} \hlkwc{infPeriod_over_aidsUB} \hlstd{= infPeriod} \hlopt{>} \hlstd{aidsUB,} \hlkwc{useNA} \hlstd{=} \hlstr{"ifany"}\hlstd{)))}
+\end{alltt}
+\begin{verbatim}
+##                     infPeriod_over_aidsUB
+## original_over_aidsUB <NA>
+##                 <NA> 2039
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Among those with everHadNegTest=NA, no one had an original TID value.
+
+\section{Analysis Subset}
+
+Final subset is 
+\begin{itemize}
+    \item 2005 onwards
+    \item Diagnosis made in WA state
+    \item If missing age, must have recorded time of last negative test
+    \item If age<=16, must have recorded time of last negative test
+    \item Non-missing year of diagnosis
+\end{itemize}
+
+Final look at data:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{nrow}\hlstd{(dataf)}
+\end{alltt}
+\begin{verbatim}
+## [1] 4744
+\end{verbatim}
+\begin{alltt}
+\hlkwa{if} \hlstd{(printSummaries) \{}
+    \hlkwa{for} \hlstd{(var} \hlkwa{in} \hlkwd{c}\hlstd{(}\hlstr{"hdx_age"}\hlstd{,} \hlstr{"timeDx"}\hlstd{,} \hlstr{"everHadNegTest"}\hlstd{,} \hlstr{"lastNeg_yrs"}\hlstd{,}
+        \hlstr{"infPeriod"}\hlstd{)) \{}
+        \hlkwd{cat}\hlstd{(}\hlstr{"\textbackslash{}nVARIABLE:"}\hlstd{, var,} \hlstr{"\textbackslash{}n"}\hlstd{)}
+        \hlkwd{print}\hlstd{(}\hlkwd{summary}\hlstd{(dataf[, var]))}
+    \hlstd{\}}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\end{document}
+

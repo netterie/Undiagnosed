@@ -1,0 +1,242 @@
+\documentclass{article}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+#rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/other.R')
+
+# ALL-WA
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/WA_BACKCALC_DATA_v2.csv',
+                  source_these='analysis_WA/format_data.R')
+
+# MSM-KC
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/MSM_KingCounty_rev.csv',
+                  source_these='analysis_KC/data-cleaning_JKB.R',
+                  loadlib=FALSE,
+                  msm=TRUE)
+
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE,
+               cache.path='cache/compare_MSM')
+options(replace.assign=TRUE,width=100,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+
+@
+
+
+\title{WA State HIV Testing Histories - Comparison of MSM-WA and MSM-KC}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Samples}
+
+<<subset_to_MSM, echo=FALSE>>=
+    # Subset dataf to just MSM (MSM+MSM/IDU)
+    datafm <- subset(dataf, mode=='MSM')
+@
+
+\paragraph{WA Sample}
+\begin{itemize}
+    \item N = \Sexpr{nrow(datafm)}
+    \item Years = \Sexpr{min(datafm$yearDx)} to \Sexpr{max(datafm$yearDx)}
+    \item everHadNegTest = TRUE for \Sexpr{sum(datafm$everHadNegTest, na.rm=TRUE)} (\Sexpr{round(100*sum(datafm$everHadNegTest, na.rm=TRUE)/nrow(datafm),2)}\%), FALSE for \Sexpr{sum(!datafm$everHadNegTest, na.rm=TRUE)} (\Sexpr{round(100*sum(!datafm$everHadNegTest, na.rm=TRUE)/nrow(datafm),2)}\%), and NA for \Sexpr{sum(is.na(datafm$everHadNegTest))} (\Sexpr{round(100*sum(is.na(datafm$everHadNegTest))/nrow(datafm),2)}\%)
+\end{itemize}
+
+\paragraph{KC Sample}
+\begin{itemize}
+    \item N = \Sexpr{nrow(msm)}
+    \item Years = \Sexpr{min(msm$yearDx)} to \Sexpr{max(msm$yearDx)}
+    \item everTested = TRUE for \Sexpr{sum(msm$everTested, na.rm=TRUE)} (\Sexpr{round(100*sum(msm$everTested, na.rm=TRUE)/nrow(msm),2)}\%), FALSE for \Sexpr{sum(!msm$everTested, na.rm=TRUE)} (\Sexpr{round(100*sum(!msm$everTested, na.rm=TRUE)/nrow(msm),2)}\%), and NA for \Sexpr{sum(is.na(msm$everTested))} (\Sexpr{round(100*sum(is.na(msm$everTested))/nrow(msm),2)}\%)
+\end{itemize}
+
+Note on KC sample: in the Venn Diagram where I double-checked the revised Table 1 numbers, I found 1132 with a negative test and 289 with no testing history. I'm not sure why the data-cleaning.R file turns everTested=TRUE for 19 of those cases and we get 1151 flagged as having a negative test. Will have to investigate. Below when we look at the TID variable ('infPeriod'), it is NA for 289 cases, as we would expect. So, it looks like the everTested=TRUE flag is just wrong for those 19 cases, which shouldn't affect the results.
+
+\section{TIDs}
+
+<<combine_msms, echo=FALSE>>=
+    # Rename cols so we can combine
+    msm <- rename(msm, c('everTested'='everHadNegTest',
+                         'hiv_age_yrs'='hdx_age'))
+    # Combine
+    these_cols <- c('hdx_age', 'everHadNegTest', 'timeDx', 'yearDx',
+                    'infPeriod', 'infPeriod_imputeNA')
+    all <- rbind(data.frame(Population='KC',
+                            msm[,these_cols]),
+                 data.frame(Population='WA',
+                            datafm[,these_cols]))
+@
+
+<<compare_TID_1>>=
+   summarize_infPeriod(all$infPeriod,
+                       bygroup=all$Population)
+@
+
+<<compare_TID_2, echo=FALSE, fig.pos='h', fig.width=5, fig.height=4, fig.cap='Time from infection to diagnosis (TID) for MSM, with panels representing difference cases (Base vs Upper Bound) and colors distinguishing populations (KC vs WA)'>>=
+tid_WA <- fig1(subset(all, Population=='WA')$infPeriod, returnFig=FALSE)
+tid_KC <- fig1(subset(all, Population=='KC')$infPeriod, returnFig=FALSE)
+tid_all <- rbind(data.frame(Population='KC', tid_KC),
+                 data.frame(Population='WA', tid_WA))
+
+p <- ggplot(tid_all) + geom_line(aes(x=Time,y=1-value,color=Population)) + 
+  scale_color_hue(name="") +
+  theme_bw() + 
+  ylab("Undiagnosed Fraction") +
+  xlab("Time Since Infection") +
+  scale_x_continuous(expand=c(0,.2)) +
+  theme(legend.position='bottom') + 
+  facet_grid(.~var)
+
+p
+@
+
+Figure \ref{fig:compare_TID_2} compares the TIDs for MSM in KC (red) versus MSM in WA (green). Both the Base Case (left) and Upper Bound (right) exclude those with TID=NA from the computation of TID, just as in the paper.
+\section{Incidence and Undiagnosed Cases}
+<<run_pre_WA, echo=FALSE, cache=FALSE, message=FALSE, include=FALSE>>=
+dataf <- datafm
+time_min <- min(dataf$timeDx)
+time_max <- max(dataf$timeDx)
+@
+<<qtrCounts, echo=FALSE, cache=FALSE, message=FALSE, include=FALSE>>=
+@
+<<run_noimpute, echo=FALSE, cache=TRUE, cache.path='cache/compare_MSM_WA', message=FALSE, include=FALSE>>=
+@
+<<run_post_WA, echo=FALSE, cache=FALSE, message=FALSE, include=FALSE>>=
+ 
+summaries_noimpute_WA <- summarize_runBackCalc(results=all_noimpute,
+                                   diagnosedCounts=allCounts,
+                                   times=allTimes)
+@
+<<run_pre_KC, echo=FALSE, cache=FALSE, message=FALSE, include=FALSE>>=
+dataf <- msm
+time_min <- min(dataf$timeDx)
+time_max <- max(dataf$timeDx)
+@
+<<qtrCounts, echo=FALSE, cache=FALSE, message=FALSE, include=FALSE>>=
+@
+<<run_noimpute, echo=FALSE, cache=TRUE, cache.path='cache/compare_MSM_KC', message=FALSE, include=FALSE>>=
+@
+<<run_post_KC, echo=FALSE, cache=FALSE, message=FALSE, include=TRUE>>=
+ 
+summaries_noimpute_KC <- summarize_runBackCalc(results=all_noimpute,
+                                   diagnosedCounts=allCounts,
+                                   times=allTimes)
+@
+
+\subsection{Summary across quarters, KC}
+<<compare_summaries_KC, echo=TRUE>>=
+# KC - replicates paper
+summaries_noimpute_KC[[1]]
+@
+
+Replication of the paper results confirms that the code is working correctly.
+\subsection{Summary across quarters, WA}
+<<compare_summaries_WA, echo=TRUE>>=
+# WA - using same code as the code that replicates the paper, this is what we get:
+summaries_noimpute_WA[[1]]
+@
+
+
+<<compare_diagIncPrev_prep, echo=FALSE>>=
+s2 <- rbind(data.frame(Population='KC', summaries_noimpute_KC[[2]]), 
+            data.frame(Population='WA', summaries_noimpute_WA[[2]]))
+s5 <- rbind(data.frame(Population='KC', summaries_noimpute_KC[[5]]), 
+            data.frame(Population='WA', summaries_noimpute_WA[[5]]))
+prev <- read.csv(file.path(workd, 'data', 'Reported_Prevalence.csv'),
+                 header=TRUE)
+prev <- as.numeric(subset(prev, Category=='Mode-consolidated' & 
+                          Group=='MSM')[,paste0('y',2005:2013)])
+
+
+# Don't use this--shouldn't be adding incidences or prevalences
+if (1==0) {
+    yearlys2 <- transform(s2,time=floor(time))
+    yearlys2 <- aggregate(formula=value~Population+time+var, data=yearlys2,
+                          FUN=sum)
+    yearlys2 <- dcast(yearlys2, Population+time~var)
+    yearlys2 <- within(yearlys2, {
+                       Reported_Prev=c(rep(4*((5884+5850)/2),7),prev)
+                       Diag_Inc_Ratio_BC=`# Diagnosed  `/`Incidence (Base Case)  `
+                       Diag_Inc_Ratio_UB=`# Diagnosed  `/`Incidence (Upper Bound)  `
+                       Diag_RepPrev_Ratio=`# Diagnosed  `/Reported_Prev
+                       })
+    yearlys2 = yearlys2[,c('Population', 'time', '# Diagnosed  ', 'Reported_Prev', grep('^Diag', colnames(yearlys2), value=TRUE))]
+    yearlys2 <- format(yearlys2, digits=2)
+}
+
+# START HERE
+# Calculate min and max undiagnosed estimates across quarters, per year
+yearlys5 <- transform(s5,time=floor(time))
+yearlys5 <- cbind(aggregate(formula=value~time+var+Population, 
+                            data=yearlys5, FUN=min), 
+                  UndiagQtrAvg=aggregate(formula=value~time+var+Population, 
+                                   data=yearlys5, FUN=mean)$value,
+                  UndiagQtrMax=aggregate(formula=value~time+var+Population, 
+                                   data=yearlys5, FUN=max)$value)
+yearlys5 <- rename(yearlys5, c('time'='Year', 'var'='Case', 'value'='UndiagQtrMin'))
+# Now merge in reported prevalence (PLWH)
+yearlys5 <- within(yearlys5, {
+                   Category='Mode-consolidated'
+                   Group='MSM'
+                   UndiagQtrMax=round(UndiagQtrMax,1)
+                   UndiagQtrAvg=round(UndiagQtrAvg,1)
+                   UndiagQtrMin=round(UndiagQtrMin,1)
+                   Reported_Prev=c(rep(5516,14),
+                                   rep(prev,2))
+                   TruePrevMin=UndiagQtrMin+Reported_Prev 
+                   TruePrevAvg=UndiagQtrAvg+Reported_Prev 
+                   TruePrevMax=UndiagQtrMax+Reported_Prev 
+                   UndiagPercMin=round(100*UndiagQtrMin/TruePrevMin,1)
+                   UndiagPercAvg=round(100*UndiagQtrAvg/TruePrevAvg,1)
+                   UndiagPercMax=round(100*UndiagQtrMax/TruePrevMax,1)
+                   Case = gsub('Undiagnosed ', '', Case)
+                   Case = gsub('\\(', '', Case)
+                   Case = gsub('\\)', '', Case)
+            })
+yearlys5 <- yearlys5[,c('Population', 'Category', 'Group', 
+                        'Year', 'Case', 'Reported_Prev',
+                        rev(grep('Qtr', colnames(yearlys5), value=TRUE)),
+                        rev(grep('True', colnames(yearlys5), value=TRUE)),
+                        rev(grep('Perc', colnames(yearlys5), value=TRUE)))]
+write.csv(yearlys5,
+          file=file.path(workd, 'analysis_WA', 'results', 
+                         'true_prevalence_from_compare_MSM_report.csv'),
+          row.names=FALSE)
+@
+
+\clearpage
+\subsection{Reported prevalence, undiagnosed counts, true prevalence, and the undiagnosed fraction}
+
+In this table, UndiagQtrMin and UndiagQtrMax give the min-max range of quarterly undiagnosed counts across the quarters of one year, for a given Case and Population. TruePrevMin and TruePrevMax are the sum of ReportedPrev and the Min/Max UndiagQtr counts. UndiagPercMin and UndiagPercMax are the Min/Max of UndiagQtr divided by the Min/Max of TruePrev, converted to percents. 
+
+<<display_comparison>>=
+yearlys5
+@
+
+<<mins_maxes>>=
+ddply(yearlys5, .(Population, Case), numcolwise(range))
+@
+
+As in the paper, the undiagnosed fraction in KC MSM over 2006-2012 is 5.7-6.3 (BC) or 10.7-11.5 (UB). In MSM in WA over 2005-2013, the undiagnosed fraction is 7.2-9.5 (BC) or 13.4-17.2 (UB). 
+\end{document}
+
+

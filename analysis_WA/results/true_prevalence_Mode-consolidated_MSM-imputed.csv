@@ -1,0 +1,19 @@
+"Population","Category","Group","Year","Case","Reported_Prev","UndiagQtrMax","UndiagQtrAvg","UndiagQtrMin","TruePrevMin","TruePrevAvg","TruePrevMax","UndiagPercMin","UndiagPercAvg","UndiagPercMax"
+"WA","Mode-consolidated","MSM",2005,"Base Case  ",7063,1467.5,1463.5,1460,8523,8526.5,8530.5,17.1,17.2,17.2
+"WA","Mode-consolidated","MSM",2005,"Upper Bound  ",7063,2856.2,2852.1,2849.7,9912.7,9915.1,9919.2,28.7,28.8,28.8
+"WA","Mode-consolidated","MSM",2006,"Base Case  ",7373,1466.5,1462.9,1458.3,8831.3,8835.9,8839.5,16.5,16.6,16.6
+"WA","Mode-consolidated","MSM",2006,"Upper Bound  ",7373,2846.6,2837.8,2832,10205,10210.8,10219.6,27.8,27.8,27.9
+"WA","Mode-consolidated","MSM",2007,"Base Case  ",7655,1464.6,1446.7,1433.9,9088.9,9101.7,9119.6,15.8,15.9,16.1
+"WA","Mode-consolidated","MSM",2007,"Upper Bound  ",7655,2828.7,2803.6,2785.4,10440.4,10458.6,10483.7,26.7,26.8,27
+"WA","Mode-consolidated","MSM",2008,"Base Case  ",7871,1446.1,1441,1436.3,9307.3,9312,9317.1,15.4,15.5,15.5
+"WA","Mode-consolidated","MSM",2008,"Upper Bound  ",7871,2791,2785.6,2780,10651,10656.6,10662,26.1,26.1,26.2
+"WA","Mode-consolidated","MSM",2009,"Base Case  ",8075,1445.9,1438.4,1434.4,9509.4,9513.4,9520.9,15.1,15.1,15.2
+"WA","Mode-consolidated","MSM",2009,"Upper Bound  ",8075,2781.3,2767.4,2757.5,10832.5,10842.4,10856.3,25.5,25.5,25.6
+"WA","Mode-consolidated","MSM",2010,"Base Case  ",8308,1428.5,1411.1,1397.4,9705.4,9719.1,9736.5,14.4,14.5,14.7
+"WA","Mode-consolidated","MSM",2010,"Upper Bound  ",8308,2744.7,2719.7,2699.4,11007.4,11027.7,11052.7,24.5,24.7,24.8
+"WA","Mode-consolidated","MSM",2011,"Base Case  ",8291,1390.4,1379.3,1372.2,9663.2,9670.3,9681.4,14.2,14.3,14.4
+"WA","Mode-consolidated","MSM",2011,"Upper Bound  ",8291,2687.5,2671.8,2659.9,10950.9,10962.8,10978.5,24.3,24.4,24.5
+"WA","Mode-consolidated","MSM",2012,"Base Case  ",8367,1362.3,1346.2,1336.5,9703.5,9713.2,9729.3,13.8,13.9,14
+"WA","Mode-consolidated","MSM",2012,"Upper Bound  ",8367,2646.5,2626.8,2615.5,10982.5,10993.8,11013.5,23.8,23.9,24
+"WA","Mode-consolidated","MSM",2013,"Base Case  ",8673,1335.5,1328.3,1325.5,9998.5,10001.3,10008.5,13.3,13.3,13.3
+"WA","Mode-consolidated","MSM",2013,"Upper Bound  ",8673,2611.8,2603.4,2599.6,11272.6,11276.4,11284.8,23.1,23.1,23.1

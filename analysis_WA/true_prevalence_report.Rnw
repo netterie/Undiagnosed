@@ -1,0 +1,84 @@
+\documentclass{article}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/other.R')
+
+# ALL-WA
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/WA_BACKCALC_DATA_v2.csv',
+                  source_these='analysis_WA/format_data.R')
+
+# MSM-KC
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/MSM_KingCounty_rev.csv',
+                  source_these='analysis_KC/data-cleaning_JKB.R',
+                  loadlib=FALSE,
+                  msm=TRUE)
+
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE,
+               cache.path='cache/compare_MSM')
+options(replace.assign=TRUE,width=100,digits=7)
+
+source(file.path(workd,'analysis_WA/true_prevalence.R'))
+
+@
+
+
+\title{Estimating the undiagnosed fraction and total number of PLWHA in WA state: Backcalculation from testing history data}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{WA State Estimates for All HIV Cases}
+``Total-weighted" refers to the sum of separate estimates for MSM vs non-MSM, whereas ``Total" refers to estimates made pooling all cases at once. The former allows the cases with missing testing history to draw upon data from those in their transmission group, rather than the whole population.
+
+<<all-WA, echo=FALSE, fig.pos='h', fig.width=7, fig.height=5.5, fig.cap='Estimated undiagnosed cases, total PLWHA (known PLWHA + undiagnosed cases) and the undiagnosed fraction (undiagnosed cases as a percent of total PLWHA). Ranges represent a base case and an upper bound case'>>=
+trueprev_fig_AllandWeighted
+@
+
+\pagebreak
+\section{WA State Estimates for MSM vs non-MSM Cases}
+MSM refers to MSM and MSM/IDU transmission groups, and non-MSM to all other cases. 
+
+\subsection{Years 2005-2013}
+<<WA-MSM, echo=FALSE, fig.pos='h', fig.width=7, fig.height=5.5, fig.cap='For MSM and non-MSM in WA, estimated undiagnosed cases, total PLWHA (known PLWHA + undiagnosed cases) and the undiagnosed fraction (undiagnosed cases as a percent of total PLWHA). Ranges represent a base case and an upper bound case'>>=
+trueprev_fig_WA
+@
+
+\pagebreak
+\subsection{2013 Estimates Including Missing Data}
+In all other figures, the ranges reflect a base case and upper bound estimate derived only using cases who answered the testing history question, ``Have you ever had a negative test?", as ``Yes" or ``No." In the figure below, we include two additional estimates, a base case and an upper bound, that incorporated the cases who had missing data for the testing history question. The estimates that exclude and include missing data are labeled (Observed) and (Missing) respectively. (Note: in a previous report, Upper Bound was called Worst Case). 
+<<WA-MSM-allcases, echo=FALSE, fig.pos='h', fig.width=7, fig.height=5.5, fig.cap='For MSM and non-MSM in WA in 2013, estimated undiagnosed cases, total PLWHA (known PLWHA + undiagnosed cases) and the undiagnosed fraction (undiagnosed cases as a percent of total PLWHA). The four points represent a base case and an upper bound case for Observed, when missing data were excluded, and Missing, when missing data were included'>>=
+trueprev_fig_4cases_MSMvNon
+@
+
+\pagebreak
+\section{WA State and KC Estimates for MSM}
+MSM refers to MSM and MSM/IDU transmission groups only.
+
+<<MSM, echo=FALSE, message=FALSE, fig.pos='h', fig.width=7, fig.height=5.5, fig.cap='Among MSM in WA and KC only, estimated undiagnosed cases, total PLWHA (known PLWHA + undiagnosed cases) and the undiagnosed fraction (undiagnosed cases as a percent of total PLWHA). Ranges represent a base case and an upper bound case'>>=
+suppressWarnings(print(trueprev_fig_MSM))
+@
+
+\end{document}
+
+

@@ -1,0 +1,339 @@
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/other.R')
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/WA_BACKCALC_DATA_v2.csv',
+                  source_these='analysis_WA/format_data.R')
+
+library(xtable)
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE)
+options(replace.assign=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+read_chunk(file.path(workd,'analysis_WA/describe_data.R'))
+
+@
+
+
+\title{Backcalculation of Undiagnosed HIV in WA State, 2005-2013}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Background}
+This report uses the approach developed by Fellows et al\footnote{Fellows I, Morris M, Dombrowski J, Buskin S, Bennett A, and Golden M. \emph{A New HIV Testing History-Based Approach for Estimating the Undiagnosed Fraction of Persons with HIV Infection: Findings Suggest That Few HIV-Infected Men Who Have Sex with Men in King County, WA, U.S.A. Are  Undiagnosed.} Submitted, 2014.} to estimate HIV incidence and undiagnosed cases. The method combines data on the number of diagnoses per quarter with information on the distribution of the time between HIV infection and diagnosis, or TID. These two elements are used to ``backcalculate" the number of incident cases per quarter that must have occurred to result in the observed number of diagnoses. The number of undiagnosed cases per quarter are those cases who are estimated to have already been infected but not yet diagnosed in a given quarter.
+
+Because TID is not directly observed, the method uses the time between last negative HIV test and diagnosis to approximate TID. The features of this approximation will define the uncertainty in the results.
+
+\section{Data}
+\subsection{Description of analytic sample}
+Data from the advanced HIV/AIDS reporting system (eHARS) and the CDC treatment and testing history questionnaire (HIS) provided records for \Sexpr{Nobs0} HIV cases in WA state.\footnote{Provided by Jason Carr, Washington State Department of Health, June 13 2014}
+\subsubsection{Exclusions}
+Figure \ref{fig:exclusion} diagrams the construction of the analytic sample. We first restricted to cases diagnosed in WA state in the years 2005-2013. We further excluded cases diagnosed at age 16 or younger if their date of last negative test was missing, because the assumptions we use when date of last negative test is missing are not applicable to this age group (details given in Section~\ref{sec:methods}).
+
+The final sample includes \Sexpr{Nobs2} cases.
+
+% \begin{wrapfigure}{r}{0.5\textwidth}
+%\begin{center}
+%    \includegraphics[width=0.48\textwidth]{exclusion_diagram}
+%      \end{center}
+%        \caption{A gull}
+%    \end{wrapfigure}
+    
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=3in]{exclusion_diagram}
+    \caption{Construction of analytic sample}
+    \label{fig:exclusion}
+\end{figure}
+
+\subsubsection{Sample characteristics}
+
+Table \ref{tab:sample} describes the sample by age, race and mode of transmission. Column \% sums to 100\% within each characteristic. Six race/ethnicity groups are represented, White, Black, Hispanic, Asian, Native (NHoPI and AI/AN) and Multiracial, and three modes of transmission, MSM (including MSM/IDU), Hetero (including NIR and Female Presumed Hetero) and Blood/Needle (IDU, Ped, Hemo and Transfusion). 
+
+For each level of these three characteristics, the table provides the breakdown of responses to the testing history question ``Have you ever had a prior negative HIV test?"  If a person ever had a negative test prior to diagnosis, they are in the \% Yes column. If they never had a negative test prior to diagnosis, they are in the \% No column. Those in the \% Missing column did not answer the question. These are row \%s that sum to 100\% across the \% Yes, \% No and \% Missing columns for each row. For example, 56\% of MSM have had a negative test, while 10\% have not. For 35\% of MSM, testing history is unknown. (These \%s sum to 101\% due to rounding error.) 
+
+Table \ref{tab:sampleracebydx} further breaks down the sample into racial composition of cases within transmission modes. 
+<<everHadNegTest_subgroups, echo=FALSE, results='hide'>>=
+@
+<<everHadNegTest_print, results='asis', tidy=FALSE, echo=FALSE>>=
+# Marginal
+print(xtable(everHadNegTest_subgrouptab,
+             caption='Composition of analytic sample by age, race and mode of transmission. Column \\% sums to 100 within each characteristic. Availability of testing history data within each subgroup level is shown as row percents of \\% Yes, \\% No, and \\% Missing)',
+             label='tab:sample',
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=FALSE,
+      size='small',
+#      include.colnames=FALSE,
+#      add.to.row=list(pos=list(-1),
+#                      command='Characteristic & Subgroup & N & Column \\% & \\% Yes & \\% No & \\% Missing'))
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+          #gsub('<=', '', str)
+      })
+
+# Crosstab
+colnames(everHadNegTest_racebydx)[1:2] <- c('Mode of Transmission', 'Race/Ethnicity')
+print(xtable(everHadNegTest_racebydx,
+             caption='Composition of racial groups within modes of transmission. Column \\% sums to 100 within each mode. Availability of testing history data by mode-race subgroup levels is shown as row percents of \\% Yes, \\% No, and \\% Missing',
+             label='tab:sampleracebydx',
+             digits=0),
+      caption.placement='top',
+      table.placement='!h',
+      include.rownames=FALSE,
+      size='small',
+#      include.colnames=FALSE,
+#      add.to.row=list(pos=list(-1),
+#                      command='Characteristic & Subgroup & N & Column \\% & \\% Yes & \\% No & \\% Missing'))
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+          #gsub('<=', '', str)
+      })
+@
+Minor assumptions made during data cleaning are given in Section~\ref{sec:missdata}.
+
+\label{sec:sample}
+\subsection{Time trends in diagnoses and testing history}
+<<diagnoses, echo=FALSE, results='hide', include=FALSE>>=
+@
+<<plot_diagnoses, echo=FALSE, fig.pos='!h', fig.width=5, fig.height=3, fig.cap='Quarterly diagnosis counts over time'>>=
+plot_diag
+@
+<<time_everHadNegTest, results='hide',echo=FALSE>>=
+@
+<<plot_time, echo=FALSE, fig.pos='!h', fig.width=4.5, fig.height=3.5, fig.cap='Testing history responses over time (y-axis is in \\%)'>>=
+plot_time
+@
+Figure \ref{fig:plot_diagnoses} shows a downward trend in quarterly diagnosis counts over time, and Figure \ref{fig:plot_time} shows the overall trend in testing history responses over time. The percent of missing responses appears to have increased in recent years.
+
+Time rends by race and mode of diagnosis subgroups are given in Section~\ref{sec:testingBySubgroup}.
+
+\section{Scenarios}
+\label{sec:methods}
+
+We consider three alternative scenarios to approximate the TID from the testing history data. The essential differences are described below, with more details in Section~\ref{sec:imputemiss}.
+
+\begin{enumerate}
+    \item \textbf{Base Case}  Missing testing history data are considered missing at random and are excluded from calculating the TID. The probability of infection is uniformly distributed between the time of last negative test and time of diagnosis.
+    \item \textbf{Worst Case (Obs)} Missing testing history data are considered missing at random and are excluded from calculating the TID. Infection is assumed to occur immediately following the date of last negative test, a worst case assumption.
+    \item \textbf{Worst Case (Miss)} Missing testing history data are imputed using the assumption that infection occurred either 18 years prior to diagnosis or at age 16, whichever is more recent. For cases with testing history, infection is assumed to occur immediately following the date of last negative test.
+\end{enumerate}
+
+In all three scenarios, cases who reported ``No" to ever having a negative test are also assumed to have a last negative test either 18 years prior to diagnosis or at age 16, whichever is more recent (see Section~\ref{sec:imputemiss} for more details). 
+\section{Results}
+
+\subsection{Time from infection to diagnosis (TID)}
+
+Figure \ref{fig:plot_newfig1} shows the estimated distribution of TID in the analytic sample for each of the three scenarios. When worst case assumptions are made, the proportion of undiagnosed cases at shorter times since infection increases. The artifical drop at 18 years is a result of the assumption that all cases are diagnosed within 18 years.
+<<smoothsurv_combined, echo=FALSE>>=
+@
+<<plot_newfig1, echo=FALSE, fig.pos='!h', fig.width=6, fig.height=3, fig.cap='Time from infection to diagnosis (TID) under the three scenarios'>>=
+newfig1
+@
+Times from infection to diagnosis by race and mode of diagnosis subgroups are given in Section~\ref{sec:TIDBySubgroup}.
+
+\subsection{Incidence and undiagnosed cases}
+
+We use observed quarterly diagnoses with each the three TID scenarios shown in Figure \ref{fig:plot_newfig1} to perform the backcalculation for each scenario. The estimated incidence and undiagnosed counts for each scenario are shown as quarterly counts in Figure \ref{fig:results_plot} and summarized over all quarters in Table \ref{tab:res_main}.
+<<format_results, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  source(file.path(workd, 'analysis_WA', 'run_main.R'))
+  #res <- read.csv(file.path(workd, 'analysis_WA', 'results', 
+  #                            'run_main.csv'), stringsAsFactors=FALSE)  
+  #res <- format_stats(res)
+ @
+
+<<results_plot, echo=FALSE, fig.pos='!h', fig.width=6, fig.height=5, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state'>>=
+summaries_both
+@
+
+<<format_results_print, echo=FALSE, results='asis'>>=
+  res <- format_stats(stats)
+print(xtable(res,
+             caption='Observed diagnoses and estimated quarterly incidence and undiagnosed counts over 2005-2013 in WA state',
+             label='tab:res_main',
+             digits=0),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+
+Estimated incidence and undiagnosed counts by race and mode of diagnosis subgroups are given in Section~\ref{sec:undiagBySubgroup}.
+
+\appendix
+\section{Assumptions}
+\subsection{Assumptions for missing or inconsistent data}
+\label{sec:missdata}
+The following assumptions were made during data cleaning:
+\begin{table}[h]
+\centering
+\caption{Assumptions for missing or inconsistent data}
+\begin{tabular}{|p{8cm}|p{4cm}|c|}
+  \hline
+Issue & Assumption & Cases Affected \\
+  \hline
+Year of diagnosis is recorded but quarter is not & Quarter is randomly assigned & 9 \\
+  \hline
+Case responded ``No'' or missing to ``Ever had negative test?" but has a date of last negative test & Change response to ``Yes" & 17 \\
+\hline
+Case responded ``Yes'' to ``Ever had negative test?" but has no date of last negative test & Change response to ``No" & 83 \\
+\hline
+\end{tabular}
+\label{tab:data_assumptions}
+\end{table}
+
+Note: the analysis assumes that that there are a negligible number of cases whose HIV/AIDS diagnosis is never captured by eHARS.
+
+\subsection{Assumptions for TID}
+\label{sec:imputemiss}
+
+As described in Section~\ref{sec:methods}, we construct three scenarios for TID that use different assumptions for missing data and the precise time of infection within the window between last negative test and diagnosis. 
+
+\paragraph{Missing data} There are two ways we can treat cases whose date of last negative test is not known. The first is to exclude them when TID is computed, which assumes that their data are missing at random. This is reasonable only if the cases who do have a date of last negative test are representative of those who do not. Alternatively, we can impute their date of last negative test using a worst case assumption, that the last negative test occurred either 18 years ago or at age 16, whichever is more recent. This assumption is based on data suggesting that 95\% of HIV infections will develop AIDS within 18 years\footnote{Liu, K.J, et al., \emph{A model-based approach for estimating the mean incubation period of transfusion-associated acquired-immunodeficiency-syndrome.} PNAS, 1986. 83(10):p.3051-3055.} and on the median age of sexual debut in the U.S. 
+
+\paragraph{Time of infection within the window between negative test and diagnosis} There are also two ways we can assign the precise time of infection within the possible infection window. The first is to assume that infections are uniformly distributed within the window, i.e. there is equal probability of infection at each time point within the window. The second is a worst case assumption, that infection occurred immediately after the negative test.
+
+\paragraph{Assumptions for all scenarios} We additionally make three assumptions in all three scenarios. The first is that those who repond ``No" to the question ``Ever had a negative test?" have a date of last negative test imputed using the minimum of 18 years and age-16 approach described above. Since these cases confirmed never having a negative test, we use a worst case testing history to bound their infection window. The second is that dates of last negative test occurring more than 18 years prior to diagnosis are re-set to 18 years prior to diagnosis, to reflect a more likely maximum window in which infection could occur. Finally, we assume that the TID distrition does not change over time. In order to have enough cases to stably estimate the TID, we pool testing history data over all years. The time trends in the results are thus driven by the time trends in diagnosis counts.
+
+\paragraph{} Table \ref{tab:TID_case_assumptions} outlines which assumptions are used for each of the three scenarios. Note that these assumptions influence the analysis solely through the TID distribution (see Figures \ref{fig:plot_newfig1}, \ref{fig:plot_modeTID} and \ref{fig:plot_raceTID}).
+
+\begin{table}[!h]
+\centering
+\caption{Assumptions for each of the three cases used to approximate TID from testing history data}
+\begin{tabular}{|p{7cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|}
+  \hline
+Assumption & Base Case & Worst Case (Obs) & Worst Case (Miss) & Cases Affected \\ 
+  \hline
+Data are missing at random & X & X &  & 2104 \\
+  \hline
+Those with missing testing history are given a TID that is the minimum of 18 years or their age at diagnosis minus 16 years &  &  & X & 2104 \\
+   \hline
+Time of infection is uniformly distributed across the TID period  & X &  &   & All \\
+  \hline
+Infection occurs immediately after last negative test &  & X & X & All \\
+  \hline
+Those who never had a negative test are given a TID that is the minimum of 18 years or their age at diagnosis minus 16 years & X & X & X & 592 \\
+  \hline
+TID is capped at 18 years & X & X & X & 20 \\
+  \hline
+TID is stationary over time & X & X & X & All \\
+  \hline
+\end{tabular}
+\label{tab:TID_case_assumptions}
+\end{table}
+
+
+\section{Subanalyses by Race and Mode of Diagnosis}
+\subsection{Trends in diagnoses and testing history}
+\label{sec:testingBySubgroup}
+
+Figure \ref{fig:plot_diagnoses_subgroup} shows the trend in quarterly diagnoses for subgroups over time.  Figure \ref{fig:plot_modetime} shows the yearly trend in testing history by mode of transmission, and Figure \ref{fig:plot_racetime} shows the trend by race. Trends appear similar across subgroups, with variations in the levels of yes, no and missing responses each year.
+
+<<plot_diagnoses_subgroup, cache=TRUE, echo=FALSE, fig.pos='!h', fig.width=6, fig.height=4, fig.cap='Quarterly diagnosis counts over time, by mode of transmission and race'>>=
+plot_diag_subgroup
+@
+<<plot_modetime, cache=TRUE, echo=FALSE, fig.pos='!h', fig.width=6, fig.height=3.5, fig.cap='Testing history responses over time, by mode of transmission (y-axis is in \\%)'>>=
+plot_modetime
+@
+
+<<plot_racetime, cache=TRUE, echo=FALSE, fig.pos='hb', fig.width=8, fig.height=4, fig.cap='Testing history responses over time, by race (y-axis is in \\%)'>>=
+plot_racetime
+@
+
+\subsection{Times from infection to diagnosis}
+\label{sec:TIDBySubgroup}
+The estimated TIDs for each of the three scenarios is shown by mode of transmission in Figure \ref{fig:plot_modeTID} and by race in Figure \ref{fig:plot_raceTID}.
+
+<<plot_modeTID, cache=TRUE, echo=FALSE, fig.pos='hb', fig.width=5, fig.height=3, fig.cap='Time from infection to diagnosis (TID) under the three scenarios, by mode'>>=
+modefig1
+@
+
+<<plot_raceTID, cache=TRUE, echo=FALSE, fig.pos='hb', fig.width=8, fig.height=4, fig.cap='Time from infection to diagnosis (TID) under the three scenarios, by race'>>=
+racefig1
+@
+
+
+\subsection{Incidence and undiagnosed cases}
+\label{sec:undiagBySubgroup}
+Table \ref{tab:res_subgroup} summarizes quarterly observed diagnoses and estimated incidence and undiagnosed counts over 2005-2013 and Figures \ref{fig:plot_subgroup_MSM}-\ref{fig:plot_subgroup_Multi} show the quarterly estimates for 2 mode and 6 race groups. No estimates were obtained for the ``Blood/Needle" subgroup due to an estimation problem with the smoothing parameter.\footnote{Error given by rootSolve: \emph{Error in stode(y, time, func, parms = parms, ...) : 
+  Model function must return a list of values, of which first element has length =length of y}} We will investigate whether this can be overcome to produce results for this subgroup.
+<<subgroup_results, echo=FALSE, results='asis'>>=
+  sgres <- read.csv(file.path(workd, 'analysis_WA', 'results', 
+                              'run_main_subgroups.csv'), stringsAsFactors=FALSE)  
+print(xtable(sgres,
+             caption='Observed diagnoses and estimated quarterly incidence and undiagnosed counts over 2005-2013 in WA state, by subgroup',
+             label='tab:res_subgroup',
+             digits=0),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+<<run_subgroup, include=FALSE, cache=TRUE, echo=FALSE>>=
+source(file.path(workd, 'analysis_WA', 'run_main_subgroups.R'))
+@
+
+<<plot_subgroup_MSM, echo=FALSE, fig.width=6, fig.height=6, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state, MSM'>>=
+fullres[['mode=MSM']]
+@
+
+<<plot_subgroup_Hetero, echo=FALSE, fig.width=6, fig.height=6, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state, Hetero'>>=
+fullres[['mode=Hetero']]
+@
+
+<<plot_subgroup_White, echo=FALSE, fig.width=6, fig.height=6, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state, White'>>=
+fullres[['race=White']]
+@
+
+<<plot_subgroup_Black, echo=FALSE, fig.width=6, fig.height=6, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state, Black'>>=
+fullres[['race=Black']]
+@
+
+<<plot_subgroup_Hisp, echo=FALSE, fig.width=6, fig.height=6, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state, Hisp'>>=
+fullres[['race=Hisp']]
+@
+
+<<plot_subgroup_Native, echo=FALSE, fig.width=6, fig.height=6, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state, Native'>>=
+fullres[['race=Native']]
+@
+
+<<plot_subgroup_Asian, echo=FALSE, fig.width=6, fig.height=6, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state, Asian'>>=
+fullres[['race=Asian']]
+@
+
+<<plot_subgroup_Multi, echo=FALSE, fig.width=6, fig.height=6, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2013 in WA state, Multi'>>=
+fullres[['race=Multi']]
+@
+
+\end{document}
+
+

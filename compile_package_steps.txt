@@ -1,0 +1,66 @@
+**************
+IN R (easiest in the directory containing the package folder, e.g. trunk)
+**************
+
+Test the code by sourcing files in HIVBackCalc/R before loading the package.
+
+(This is obvious, but since the package compilation process takes time, don't forget to do this!)
+
+Rerun inlinedocs to update help files:
+library(inlinedocs)
+package.skeleton.dx("cantrance") - or insert path to cantrance
+
+
+**************
+IN THE DIRECTORY CONTAINING THE PACKAGE FOLDER, e.g. trunk:
+**************
+
+R CMD INSTALL -l "/home/jbirnbau/R/x86_64-unknown-linux-gnu-library/2.15" HIVBackCalc
+
+** above path is whatever is returned by R when you type .libPaths()
+
+R CMD build HIVBackCalc
+
+** this step makes the .tar.gz file
+** version number will reflect whatever's in the DECSRIPTION file
+
+R CMD check HIVBackCalc_1.1.tar.gz
+
+** insert whatever version we're on
+
+
+**************
+IN A NEW INSTANCE OF R, IN THE DIRECTORY CONTAINING THE .tar.gz FILE:
+**************
+
+install.packages("cantrance_1.1.tar.gz", repos=NULL)
+
+library(cantrance)
+
+
+**************
+DEALING WITH VERSION CONTROL
+**************
+
+It is bad to have the whole 'trunk' folder under version control because recompiling the package deletes the cantrance.Rcheck folder, including its .svn folder. 
+
+If it comes under version control and then gets recreated by a new package build, delete the local copy, and then do svn update. svn should check it out from the repo and stop complaining. 
+
+
+**************
+BUILDING FOR WINDOWS
+**************
+
+1) Make sure that your email is in the MAINTAINER section of the DESCRIPTION FILE
+2) Open R in the directory containing the package folder, e.g. trunk
+3) Type:
+
+library(devtools) >>> install this package if you don't have it already
+build_win(pkg='cantrance')
+
+4) Wait for an email that will link to your Windows HIVBackCalc package .zip file build, and download it
+5) Install it the same way as you do on Linux: 
+In a new instance of R in the directory containing the .zip file, type:
+
+install.packages("HIVBackCalc_1.1.zip", repos=NULL)
+library(HIVBackCalc)

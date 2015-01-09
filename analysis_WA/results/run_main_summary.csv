@@ -1,0 +1,11 @@
+"imputed","var","Min.","X1st.Qu.","Median","Mean","X3rd.Qu.","Max."
+"Yes","# Diagnosed  ",106,121,129.5,131.8,140.2,162
+"Yes","Incidence (Base Case)  ",111.6,115.5,123.3,123,130.4,134.6
+"Yes","Incidence (Upper Bound)  ",109.5,111.9,117.3,117.4,122.7,126.2
+"Yes","Undiagnosed (Base Case)  ",2411,2498,2605,2589,2691,2739
+"Yes","Undiagnosed (Upper Bound)  ",4700,4807,4952,4950,5098,5217
+"No","# Diagnosed  ",106,121,129.5,131.8,140.2,162
+"No","Incidence (Base Case)  ",115.2,120.3,128.9,127.7,135.5,138.1
+"No","Incidence (Upper Bound)  ",112.5,116.2,124.3,124,131.7,135.7
+"No","Undiagnosed (Base Case)  ",1329,1386,1446,1429,1480,1501
+"No","Undiagnosed (Upper Bound)  ",2652,2735,2836,2816,2910,2942

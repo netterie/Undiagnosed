@@ -1,0 +1,89 @@
+\documentclass{article}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+#rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/other.R')
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/WA_BACKCALC_DATA_v2.csv',
+                  source_these='analysis_WA/format_data.R')
+
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE)
+options(replace.assign=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+
+@
+
+
+\title{WA State HIV Testing Histories - Description of Analysis Sample}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Sample Reminder}
+
+\begin{itemize}
+    \item N = \Sexpr{nrow(dataf)}
+    \item Years = \Sexpr{min(dataf$yearDx)} to \Sexpr{max(dataf$yearDx)}
+    \item everHadNegTest = TRUE for \Sexpr{sum(dataf$everHadNegTest, na.rm=TRUE)} (\Sexpr{round(100*sum(dataf$everHadNegTest, na.rm=TRUE)/nrow(dataf),2)}\%), FALSE for \Sexpr{sum(!dataf$everHadNegTest, na.rm=TRUE)} (\Sexpr{round(100*sum(!dataf$everHadNegTest, na.rm=TRUE)/nrow(dataf),2)}\%), and NA for \Sexpr{sum(is.na(dataf$everHadNegTest))} (\Sexpr{round(100*sum(is.na(dataf$everHadNegTest))/nrow(dataf),2)}\%)
+\end{itemize}
+
+<<run_noimpute, echo=FALSE, cache=TRUE, message=FALSE, include=FALSE>>=
+@
+<<run_impute, echo=FALSE, cache=TRUE, message=FALSE, include=FALSE>>=
+@
+<<summarize, echo=FALSE>>=
+@
+
+\section{Base Case and Upper Bound, Minimal Imputation}
+
+<<noimpute, echo=FALSE>>=
+library(gridExtra)
+summaries_noimpute[[1]]
+grid.arrange(
+    summaries_noimpute[[2]] + ggtitle('Diagnosis and Incidence'),
+    summaries_noimpute[[3]] + ggtitle('Undiagnosed Counts'),
+    nrow=2)
+@
+
+\section{Base Case and Upper Bound, Full Imputation}
+
+<<impute, echo=FALSE>>=
+summaries_impute[[1]]
+grid.arrange(
+    summaries_impute[[2]] + ggtitle('Diagnosis and Incidence'),
+    summaries_impute[[3]] + ggtitle('Undiagnosed Counts'),
+    nrow=2)
+@
+
+\section{Combined Results}
+<<tidy, echo=FALSE>>=
+@
+<<stats, echo=FALSE>>=
+stats
+@
+<<save, echo=FALSE>>=
+@
+
+\end{document}
+
+

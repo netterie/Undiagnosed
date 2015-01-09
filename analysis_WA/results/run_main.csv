@@ -1,0 +1,361 @@
+"imputed","time","var","value"
+"Yes",2005,"# Diagnosed  ",155
+"Yes",2005.25,"# Diagnosed  ",129
+"Yes",2005.5,"# Diagnosed  ",131
+"Yes",2005.75,"# Diagnosed  ",142
+"Yes",2006,"# Diagnosed  ",129
+"Yes",2006.25,"# Diagnosed  ",153
+"Yes",2006.5,"# Diagnosed  ",121
+"Yes",2006.75,"# Diagnosed  ",135
+"Yes",2007,"# Diagnosed  ",162
+"Yes",2007.25,"# Diagnosed  ",148
+"Yes",2007.5,"# Diagnosed  ",150
+"Yes",2007.75,"# Diagnosed  ",119
+"Yes",2008,"# Diagnosed  ",124
+"Yes",2008.25,"# Diagnosed  ",162
+"Yes",2008.5,"# Diagnosed  ",126
+"Yes",2008.75,"# Diagnosed  ",124
+"Yes",2009,"# Diagnosed  ",141
+"Yes",2009.25,"# Diagnosed  ",140
+"Yes",2009.5,"# Diagnosed  ",122
+"Yes",2009.75,"# Diagnosed  ",133
+"Yes",2010,"# Diagnosed  ",156
+"Yes",2010.25,"# Diagnosed  ",130
+"Yes",2010.5,"# Diagnosed  ",137
+"Yes",2010.75,"# Diagnosed  ",121
+"Yes",2011,"# Diagnosed  ",139
+"Yes",2011.25,"# Diagnosed  ",112
+"Yes",2011.5,"# Diagnosed  ",109
+"Yes",2011.75,"# Diagnosed  ",129
+"Yes",2012,"# Diagnosed  ",138
+"Yes",2012.25,"# Diagnosed  ",140
+"Yes",2012.5,"# Diagnosed  ",116
+"Yes",2012.75,"# Diagnosed  ",111
+"Yes",2013,"# Diagnosed  ",123
+"Yes",2013.25,"# Diagnosed  ",118
+"Yes",2013.5,"# Diagnosed  ",106
+"Yes",2013.75,"# Diagnosed  ",113
+"Yes",2005,"Incidence (Base Case)  ",134.591146279221
+"Yes",2005.25,"Incidence (Base Case)  ",134.118557946152
+"Yes",2005.5,"Incidence (Base Case)  ",133.710346393627
+"Yes",2005.75,"Incidence (Base Case)  ",133.317144211506
+"Yes",2006,"Incidence (Base Case)  ",132.894156379854
+"Yes",2006.25,"Incidence (Base Case)  ",132.474975810806
+"Yes",2006.5,"Incidence (Base Case)  ",131.975798272602
+"Yes",2006.75,"Incidence (Base Case)  ",131.506919272177
+"Yes",2007,"Incidence (Base Case)  ",130.943802133886
+"Yes",2007.25,"Incidence (Base Case)  ",130.200485815362
+"Yes",2007.5,"Incidence (Base Case)  ",129.381663695905
+"Yes",2007.75,"Incidence (Base Case)  ",128.532451947142
+"Yes",2008,"Incidence (Base Case)  ",127.777984056552
+"Yes",2008.25,"Incidence (Base Case)  ",127.02802482646
+"Yes",2008.5,"Incidence (Base Case)  ",126.153185423223
+"Yes",2008.75,"Incidence (Base Case)  ",125.336761293278
+"Yes",2009,"Incidence (Base Case)  ",124.547695138081
+"Yes",2009.25,"Incidence (Base Case)  ",123.704000754408
+"Yes",2009.5,"Incidence (Base Case)  ",122.833683937226
+"Yes",2009.75,"Incidence (Base Case)  ",121.991805809779
+"Yes",2010,"Incidence (Base Case)  ",121.085987543736
+"Yes",2010.25,"Incidence (Base Case)  ",120.061651110629
+"Yes",2010.5,"Incidence (Base Case)  ",119.063802386232
+"Yes",2010.75,"Incidence (Base Case)  ",118.082141389546
+"Yes",2011,"Incidence (Base Case)  ",117.185975593494
+"Yes",2011.25,"Incidence (Base Case)  ",116.326276612772
+"Yes",2011.5,"Incidence (Base Case)  ",115.627177517951
+"Yes",2011.75,"Incidence (Base Case)  ",115.031373686105
+"Yes",2012,"Incidence (Base Case)  ",114.406881374144
+"Yes",2012.25,"Incidence (Base Case)  ",113.731548412204
+"Yes",2012.5,"Incidence (Base Case)  ",113.061791921177
+"Yes",2012.75,"Incidence (Base Case)  ",112.535769436263
+"Yes",2013,"Incidence (Base Case)  ",112.147778141834
+"Yes",2013.25,"Incidence (Base Case)  ",111.836534434452
+"Yes",2013.5,"Incidence (Base Case)  ",111.638359915232
+"Yes",2013.75,"Incidence (Base Case)  ",111.579229724719
+"Yes",2005,"Incidence (Upper Bound)  ",126.226322890755
+"Yes",2005.25,"Incidence (Upper Bound)  ",125.907323012918
+"Yes",2005.5,"Incidence (Upper Bound)  ",125.571920027485
+"Yes",2005.75,"Incidence (Upper Bound)  ",125.21217150101
+"Yes",2006,"Incidence (Upper Bound)  ",124.864491279505
+"Yes",2006.25,"Incidence (Upper Bound)  ",124.50352114889
+"Yes",2006.5,"Incidence (Upper Bound)  ",124.090723006564
+"Yes",2006.75,"Incidence (Upper Bound)  ",123.632965862062
+"Yes",2007,"Incidence (Upper Bound)  ",123.110143153444
+"Yes",2007.25,"Incidence (Upper Bound)  ",122.536912113782
+"Yes",2007.5,"Incidence (Upper Bound)  ",121.92059772892
+"Yes",2007.75,"Incidence (Upper Bound)  ",121.303453213809
+"Yes",2008,"Incidence (Upper Bound)  ",120.727183209597
+"Yes",2008.25,"Incidence (Upper Bound)  ",120.129104717643
+"Yes",2008.5,"Incidence (Upper Bound)  ",119.495828168266
+"Yes",2008.75,"Incidence (Upper Bound)  ",118.881580396872
+"Yes",2009,"Incidence (Upper Bound)  ",118.275732464441
+"Yes",2009.25,"Incidence (Upper Bound)  ",117.656176632852
+"Yes",2009.5,"Incidence (Upper Bound)  ",117.016614518565
+"Yes",2009.75,"Incidence (Upper Bound)  ",116.361508084559
+"Yes",2010,"Incidence (Upper Bound)  ",115.666480195182
+"Yes",2010.25,"Incidence (Upper Bound)  ",114.955153157894
+"Yes",2010.5,"Incidence (Upper Bound)  ",114.256856387032
+"Yes",2010.75,"Incidence (Upper Bound)  ",113.600257487536
+"Yes",2011,"Incidence (Upper Bound)  ",113.002266328636
+"Yes",2011.25,"Incidence (Upper Bound)  ",112.470848195479
+"Yes",2011.5,"Incidence (Upper Bound)  ",112.009140928611
+"Yes",2011.75,"Incidence (Upper Bound)  ",111.566963440724
+"Yes",2012,"Incidence (Upper Bound)  ",111.119573948296
+"Yes",2012.25,"Incidence (Upper Bound)  ",110.680483950982
+"Yes",2012.5,"Incidence (Upper Bound)  ",110.294413535005
+"Yes",2012.75,"Incidence (Upper Bound)  ",109.999327440175
+"Yes",2013,"Incidence (Upper Bound)  ",109.782821000479
+"Yes",2013.25,"Incidence (Upper Bound)  ",109.633198213428
+"Yes",2013.5,"Incidence (Upper Bound)  ",109.558680248358
+"Yes",2013.75,"Incidence (Upper Bound)  ",109.541276903418
+"No",2005,"# Diagnosed  ",155
+"No",2005.25,"# Diagnosed  ",129
+"No",2005.5,"# Diagnosed  ",131
+"No",2005.75,"# Diagnosed  ",142
+"No",2006,"# Diagnosed  ",129
+"No",2006.25,"# Diagnosed  ",153
+"No",2006.5,"# Diagnosed  ",121
+"No",2006.75,"# Diagnosed  ",135
+"No",2007,"# Diagnosed  ",162
+"No",2007.25,"# Diagnosed  ",148
+"No",2007.5,"# Diagnosed  ",150
+"No",2007.75,"# Diagnosed  ",119
+"No",2008,"# Diagnosed  ",124
+"No",2008.25,"# Diagnosed  ",162
+"No",2008.5,"# Diagnosed  ",126
+"No",2008.75,"# Diagnosed  ",124
+"No",2009,"# Diagnosed  ",141
+"No",2009.25,"# Diagnosed  ",140
+"No",2009.5,"# Diagnosed  ",122
+"No",2009.75,"# Diagnosed  ",133
+"No",2010,"# Diagnosed  ",156
+"No",2010.25,"# Diagnosed  ",130
+"No",2010.5,"# Diagnosed  ",137
+"No",2010.75,"# Diagnosed  ",121
+"No",2011,"# Diagnosed  ",139
+"No",2011.25,"# Diagnosed  ",112
+"No",2011.5,"# Diagnosed  ",109
+"No",2011.75,"# Diagnosed  ",129
+"No",2012,"# Diagnosed  ",138
+"No",2012.25,"# Diagnosed  ",140
+"No",2012.5,"# Diagnosed  ",116
+"No",2012.75,"# Diagnosed  ",111
+"No",2013,"# Diagnosed  ",123
+"No",2013.25,"# Diagnosed  ",118
+"No",2013.5,"# Diagnosed  ",106
+"No",2013.75,"# Diagnosed  ",113
+"No",2005,"Incidence (Base Case)  ",138.06027364772
+"No",2005.25,"Incidence (Base Case)  ",137.720663762679
+"No",2005.5,"Incidence (Base Case)  ",137.494753908196
+"No",2005.75,"Incidence (Base Case)  ",137.311204414011
+"No",2006,"Incidence (Base Case)  ",137.093929673439
+"No",2006.25,"Incidence (Base Case)  ",136.898530491856
+"No",2006.5,"Incidence (Base Case)  ",136.587081564647
+"No",2006.75,"Incidence (Base Case)  ",136.348661917261
+"No",2007,"Incidence (Base Case)  ",135.974704376552
+"No",2007.25,"Incidence (Base Case)  ",135.311397833221
+"No",2007.5,"Incidence (Base Case)  ",134.531077260295
+"No",2007.75,"Incidence (Base Case)  ",133.707178504028
+"No",2008,"Incidence (Base Case)  ",133.04847726364
+"No",2008.25,"Incidence (Base Case)  ",132.402495113288
+"No",2008.5,"Incidence (Base Case)  ",131.552180487165
+"No",2008.75,"Incidence (Base Case)  ",130.802200466483
+"No",2009,"Incidence (Base Case)  ",130.097988259352
+"No",2009.25,"Incidence (Base Case)  ",129.298206398752
+"No",2009.5,"Incidence (Base Case)  ",128.446608647805
+"No",2009.75,"Incidence (Base Case)  ",127.63377289044
+"No",2010,"Incidence (Base Case)  ",126.700082045452
+"No",2010.25,"Incidence (Base Case)  ",125.543998676695
+"No",2010.5,"Incidence (Base Case)  ",124.403469123199
+"No",2010.75,"Incidence (Base Case)  ",123.257668455868
+"No",2011,"Incidence (Base Case)  ",122.219097004777
+"No",2011.25,"Incidence (Base Case)  ",121.201334580963
+"No",2011.5,"Incidence (Base Case)  ",120.414334783891
+"No",2011.75,"Incidence (Base Case)  ",119.763699049812
+"No",2012,"Incidence (Base Case)  ",119.02373806491
+"No",2012.25,"Incidence (Base Case)  ",118.151138507949
+"No",2012.5,"Incidence (Base Case)  ",117.236894090924
+"No",2012.75,"Incidence (Base Case)  ",116.515916043882
+"No",2013,"Incidence (Base Case)  ",115.982422372405
+"No",2013.25,"Incidence (Base Case)  ",115.535763667038
+"No",2013.5,"Incidence (Base Case)  ",115.243395661637
+"No",2013.75,"Incidence (Base Case)  ",115.159212455569
+"No",2005,"Incidence (Upper Bound)  ",135.692455646363
+"No",2005.25,"Incidence (Upper Bound)  ",135.348474236179
+"No",2005.5,"Incidence (Upper Bound)  ",135.013846819048
+"No",2005.75,"Incidence (Upper Bound)  ",134.653017334094
+"No",2006,"Incidence (Upper Bound)  ",134.288929739515
+"No",2006.25,"Incidence (Upper Bound)  ",133.886862504748
+"No",2006.5,"Incidence (Upper Bound)  ",133.422980216483
+"No",2006.75,"Incidence (Upper Bound)  ",132.894309698325
+"No",2007,"Incidence (Upper Bound)  ",132.231430701465
+"No",2007.25,"Incidence (Upper Bound)  ",131.46361450443
+"No",2007.5,"Incidence (Upper Bound)  ",130.637959225236
+"No",2007.75,"Incidence (Upper Bound)  ",129.813580851446
+"No",2008,"Incidence (Upper Bound)  ",129.041666796034
+"No",2008.25,"Incidence (Upper Bound)  ",128.220081999752
+"No",2008.5,"Incidence (Upper Bound)  ",127.348664215079
+"No",2008.75,"Incidence (Upper Bound)  ",126.510766122549
+"No",2009,"Incidence (Upper Bound)  ",125.673464818279
+"No",2009.25,"Incidence (Upper Bound)  ",124.800074356673
+"No",2009.5,"Incidence (Upper Bound)  ",123.893251228877
+"No",2009.75,"Incidence (Upper Bound)  ",122.952061368426
+"No",2010,"Incidence (Upper Bound)  ",121.922828080617
+"No",2010.25,"Incidence (Upper Bound)  ",120.850200709734
+"No",2010.5,"Incidence (Upper Bound)  ",119.794697476834
+"No",2010.75,"Incidence (Upper Bound)  ",118.803484236783
+"No",2011,"Incidence (Upper Bound)  ",117.898295876693
+"No",2011.25,"Incidence (Upper Bound)  ",117.094616908253
+"No",2011.5,"Incidence (Upper Bound)  ",116.402278650086
+"No",2011.75,"Incidence (Upper Bound)  ",115.731070125106
+"No",2012,"Incidence (Upper Bound)  ",115.032687896544
+"No",2012.25,"Incidence (Upper Bound)  ",114.331642430511
+"No",2012.5,"Incidence (Upper Bound)  ",113.710295162997
+"No",2012.75,"Incidence (Upper Bound)  ",113.235917851799
+"No",2013,"Incidence (Upper Bound)  ",112.885966021401
+"No",2013.25,"Incidence (Upper Bound)  ",112.641315219879
+"No",2013.5,"Incidence (Upper Bound)  ",112.519689517536
+"No",2013.75,"Incidence (Upper Bound)  ",112.491873721549
+"Yes",2005,"Undiagnosed (Base Case)  ",2739.01668243772
+"Yes",2005.25,"Undiagnosed (Base Case)  ",2729.4057794411
+"Yes",2005.5,"Undiagnosed (Base Case)  ",2732.71214101181
+"Yes",2005.75,"Undiagnosed (Base Case)  ",2730.3209250943
+"Yes",2006,"Undiagnosed (Base Case)  ",2727.6114593781
+"Yes",2006.25,"Undiagnosed (Base Case)  ",2721.20357215605
+"Yes",2006.5,"Undiagnosed (Base Case)  ",2715.37745085056
+"Yes",2006.75,"Undiagnosed (Base Case)  ",2721.36080722035
+"Yes",2007,"Undiagnosed (Base Case)  ",2708.52171026641
+"Yes",2007.25,"Undiagnosed (Base Case)  ",2685.68647858806
+"Yes",2007.5,"Undiagnosed (Base Case)  ",2666.85277259879
+"Yes",2007.75,"Undiagnosed (Base Case)  ",2658.44814784203
+"Yes",2008,"Undiagnosed (Base Case)  ",2664.60943407084
+"Yes",2008.25,"Undiagnosed (Base Case)  ",2651.80869708716
+"Yes",2008.5,"Undiagnosed (Base Case)  ",2632.48681066572
+"Yes",2008.75,"Undiagnosed (Base Case)  ",2632.13665892335
+"Yes",2009,"Undiagnosed (Base Case)  ",2625.54407203387
+"Yes",2009.25,"Undiagnosed (Base Case)  ",2609.40580118074
+"Yes",2009.5,"Undiagnosed (Base Case)  ",2600.54002164103
+"Yes",2009.75,"Undiagnosed (Base Case)  ",2596.59110850817
+"Yes",2010,"Undiagnosed (Base Case)  ",2576.04659261685
+"Yes",2010.25,"Undiagnosed (Base Case)  ",2552.47164696169
+"Yes",2010.5,"Undiagnosed (Base Case)  ",2537.64948049325
+"Yes",2010.75,"Undiagnosed (Base Case)  ",2524.71211593562
+"Yes",2011,"Undiagnosed (Base Case)  ",2511.04304757206
+"Yes",2011.25,"Undiagnosed (Base Case)  ",2498.13263570365
+"Yes",2011.5,"Undiagnosed (Base Case)  ",2500.8708148604
+"Yes",2011.75,"Undiagnosed (Base Case)  ",2497.56198220324
+"Yes",2012,"Undiagnosed (Base Case)  ",2479.63198367608
+"Yes",2012.25,"Undiagnosed (Base Case)  ",2454.23654306957
+"Yes",2012.5,"Undiagnosed (Base Case)  ",2436.04806370988
+"Yes",2012.75,"Undiagnosed (Base Case)  ",2431.97706095653
+"Yes",2013,"Undiagnosed (Base Case)  ",2425.40335908234
+"Yes",2013.25,"Undiagnosed (Base Case)  ",2414.21079379403
+"Yes",2013.5,"Undiagnosed (Base Case)  ",2410.74458739642
+"Yes",2013.75,"Undiagnosed (Base Case)  ",2411.50425971969
+"Yes",2005,"Undiagnosed (Upper Bound)  ",5217.12376415351
+"Yes",2005.25,"Undiagnosed (Upper Bound)  ",5201.43950644185
+"Yes",2005.5,"Undiagnosed (Upper Bound)  ",5197.61826432841
+"Yes",2005.75,"Undiagnosed (Upper Bound)  ",5186.02377491763
+"Yes",2006,"Undiagnosed (Upper Bound)  ",5175.7157595016
+"Yes",2006.25,"Undiagnosed (Upper Bound)  ",5160.50556901568
+"Yes",2006.5,"Undiagnosed (Upper Bound)  ",5148.70793938942
+"Yes",2006.75,"Undiagnosed (Upper Bound)  ",5145.94565883331
+"Yes",2007,"Undiagnosed (Upper Bound)  ",5121.79300838279
+"Yes",2007.25,"Undiagnosed (Upper Bound)  ",5090.38206709178
+"Yes",2007.5,"Undiagnosed (Upper Bound)  ",5063.31938383636
+"Yes",2007.75,"Undiagnosed (Upper Bound)  ",5049.12786432993
+"Yes",2008,"Undiagnosed (Upper Bound)  ",5048.87830682537
+"Yes",2008.25,"Undiagnosed (Upper Bound)  ",5026.84994854311
+"Yes",2008.5,"Undiagnosed (Upper Bound)  ",5001.88808575868
+"Yes",2008.75,"Undiagnosed (Upper Bound)  ",4995.56713605924
+"Yes",2009,"Undiagnosed (Upper Bound)  ",4981.66441205433
+"Yes",2009.25,"Undiagnosed (Upper Bound)  ",4959.2888036777
+"Yes",2009.5,"Undiagnosed (Upper Bound)  ",4945.66678163746
+"Yes",2009.75,"Undiagnosed (Upper Bound)  ",4935.45500813864
+"Yes",2010,"Undiagnosed (Upper Bound)  ",4906.99634287822
+"Yes",2010.25,"Undiagnosed (Upper Bound)  ",4878.64990800192
+"Yes",2010.5,"Undiagnosed (Upper Bound)  ",4858.45203983979
+"Yes",2010.75,"Undiagnosed (Upper Bound)  ",4841.71897227242
+"Yes",2011,"Undiagnosed (Upper Bound)  ",4823.21502375345
+"Yes",2011.25,"Undiagnosed (Upper Bound)  ",4808.61628239972
+"Yes",2011.5,"Undiagnosed (Upper Bound)  ",4809.68648390479
+"Yes",2011.75,"Undiagnosed (Upper Bound)  ",4802.36839321943
+"Yes",2012,"Undiagnosed (Upper Bound)  ",4779.8022840111
+"Yes",2012.25,"Undiagnosed (Upper Bound)  ",4750.30805226175
+"Yes",2012.5,"Undiagnosed (Upper Bound)  ",4730.59452161393
+"Yes",2012.75,"Undiagnosed (Upper Bound)  ",4725.36426984027
+"Yes",2013,"Undiagnosed (Upper Bound)  ",4716.67784078913
+"Yes",2013.25,"Undiagnosed (Upper Bound)  ",4704.16371578034
+"Yes",2013.5,"Undiagnosed (Upper Bound)  ",4700.47055675972
+"Yes",2013.75,"Undiagnosed (Upper Bound)  ",4700.13041488913
+"No",2005,"Undiagnosed (Base Case)  ",1490.17866288945
+"No",2005.25,"Undiagnosed (Base Case)  ",1482.76589806767
+"No",2005.5,"Undiagnosed (Base Case)  ",1489.09411693726
+"No",2005.75,"Undiagnosed (Base Case)  ",1490.82982316042
+"No",2006,"Undiagnosed (Base Case)  ",1491.82235208101
+"No",2006.25,"Undiagnosed (Base Case)  ",1490.89668634044
+"No",2006.5,"Undiagnosed (Base Case)  ",1488.48733173909
+"No",2006.75,"Undiagnosed (Base Case)  ",1500.53059284134
+"No",2007,"Undiagnosed (Base Case)  ",1495.87265407939
+"No",2007.25,"Undiagnosed (Base Case)  ",1479.34937888112
+"No",2007.5,"Undiagnosed (Base Case)  ",1466.05173623184
+"No",2007.75,"Undiagnosed (Base Case)  ",1460.8401875628
+"No",2008,"Undiagnosed (Base Case)  ",1472.04912717921
+"No",2008.25,"Undiagnosed (Base Case)  ",1466.86137141608
+"No",2008.5,"Undiagnosed (Base Case)  ",1451.772773091
+"No",2008.75,"Undiagnosed (Base Case)  ",1456.37678574788
+"No",2009,"Undiagnosed (Base Case)  ",1456.46060690168
+"No",2009.25,"Undiagnosed (Base Case)  ",1446.59797292661
+"No",2009.5,"Undiagnosed (Base Case)  ",1443.04810647359
+"No",2009.75,"Undiagnosed (Base Case)  ",1446.2662382549
+"No",2010,"Undiagnosed (Base Case)  ",1434.1011078931
+"No",2010.25,"Undiagnosed (Base Case)  ",1416.25401441989
+"No",2010.5,"Undiagnosed (Base Case)  ",1407.28812175469
+"No",2010.75,"Undiagnosed (Base Case)  ",1398.90197352093
+"No",2011,"Undiagnosed (Base Case)  ",1390.61199537403
+"No",2011.25,"Undiagnosed (Base Case)  ",1380.71922143568
+"No",2011.5,"Undiagnosed (Base Case)  ",1387.34918294477
+"No",2011.75,"Undiagnosed (Base Case)  ",1390.25214249996
+"No",2012,"Undiagnosed (Base Case)  ",1378.93301279949
+"No",2012.25,"Undiagnosed (Base Case)  ",1359.06797133734
+"No",2012.5,"Undiagnosed (Base Case)  ",1343.77306417021
+"No",2012.75,"Undiagnosed (Base Case)  ",1342.41981123987
+"No",2013,"Undiagnosed (Base Case)  ",1339.3877995362
+"No",2013.25,"Undiagnosed (Base Case)  ",1330.85820789025
+"No",2013.5,"Undiagnosed (Base Case)  ",1329.30311655011
+"No",2013.75,"Undiagnosed (Base Case)  ",1333.02336768675
+"No",2005,"Undiagnosed (Upper Bound)  ",2942.27079441719
+"No",2005.25,"Undiagnosed (Upper Bound)  ",2935.36258589697
+"No",2005.5,"Undiagnosed (Upper Bound)  ",2941.08050694224
+"No",2005.75,"Undiagnosed (Upper Bound)  ",2939.3179021444
+"No",2006,"Undiagnosed (Upper Bound)  ",2939.12356472911
+"No",2006.25,"Undiagnosed (Upper Bound)  ",2933.6624473379
+"No",2006.5,"Undiagnosed (Upper Bound)  ",2931.81114552774
+"No",2006.75,"Undiagnosed (Upper Bound)  ",2940.26946803568
+"No",2007,"Undiagnosed (Upper Bound)  ",2926.77313778726
+"No",2007.25,"Undiagnosed (Upper Bound)  ",2904.7547175134
+"No",2007.5,"Undiagnosed (Upper Bound)  ",2886.35669250125
+"No",2007.75,"Undiagnosed (Upper Bound)  ",2880.30569331303
+"No",2008,"Undiagnosed (Upper Bound)  ",2889.12684724165
+"No",2008.25,"Undiagnosed (Upper Bound)  ",2875.6225526011
+"No",2008.5,"Undiagnosed (Upper Bound)  ",2858.1153534819
+"No",2008.75,"Undiagnosed (Upper Bound)  ",2859.60898531338
+"No",2009,"Undiagnosed (Upper Bound)  ",2853.68759481677
+"No",2009.25,"Undiagnosed (Upper Bound)  ",2838.82032860836
+"No",2009.5,"Undiagnosed (Upper Bound)  ",2832.56342951791
+"No",2009.75,"Undiagnosed (Upper Bound)  ",2830.17887203853
+"No",2010,"Undiagnosed (Upper Bound)  ",2808.65832334674
+"No",2010.25,"Undiagnosed (Upper Bound)  ",2786.09324527205
+"No",2010.5,"Undiagnosed (Upper Bound)  ",2770.84634146445
+"No",2010.75,"Undiagnosed (Upper Bound)  ",2758.60462128584
+"No",2011,"Undiagnosed (Upper Bound)  ",2744.10825892854
+"No",2011.25,"Undiagnosed (Upper Bound)  ",2733.09438598665
+"No",2011.5,"Undiagnosed (Upper Bound)  ",2738.50379523846
+"No",2011.75,"Undiagnosed (Upper Bound)  ",2735.86293569386
+"No",2012,"Undiagnosed (Upper Bound)  ",2717.45607872029
+"No",2012.25,"Undiagnosed (Upper Bound)  ",2690.96460724692
+"No",2012.5,"Undiagnosed (Upper Bound)  ",2673.33188635056
+"No",2012.75,"Undiagnosed (Upper Bound)  ",2670.24936327033
+"No",2013,"Undiagnosed (Upper Bound)  ",2663.75745432109
+"No",2013.25,"Undiagnosed (Upper Bound)  ",2653.12687637302
+"No",2013.5,"Undiagnosed (Upper Bound)  ",2651.53523332952
+"No",2013.75,"Undiagnosed (Upper Bound)  ",2653.90120156903

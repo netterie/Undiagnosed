@@ -1,0 +1,16 @@
+{
+    "contents" : "msm <- read.csv(\"data/MSM_KingCounty_rev.csv\",na.string=\"\",stringsAsFactor=FALSE)\n\nmsm$yearDx <- as.numeric(substring(msm$HIVdxQTR,0,4))\nmsm$quarterDx <- as.numeric(substring(msm$HIVdxQTR,5,5))\nmsm$timeDx <- msm$yearDx + (msm$quarterDx-1)/4\nmsm$aidsAtDx <- msm$HIVdxQTR == msm$AIDSdxQTR\nmsm$aidsAtDx[is.na(msm$aidsAtDx)] <- FALSE\nmsm$yearAids <- as.numeric(substring(msm$AIDSdxQTR,0,4))\nmsm$quarterAids <- as.numeric(substring(msm$AIDSdxQTR,5,5))\nmsm$timeAids <- msm$yearAids + (msm$quarterAids-1)/4\n\n#was subject ever tested previously\nmsm$everTested <- msm$ungtst\nmsm$everTested <- ifelse(msm$everTested==\"Y\" | is.na(msm$EverTestedpcrs),\n                         msm$everTested, msm$EverTestedpcrs)\nmsm$everTested[msm$everTested==\"U\"] <- NA\nmsm$everTested[msm$everTested==\"R\"] <- NA\n\n#create last negative variable\nmsm$lagHIV_LastNegEhars[msm$lagHIV_LastNegEhars<0] <- NA\nmsm$lagHIV_HISNeg[msm$lagHIV_HISNeg<0] <- NA\nmsm$lagHIV_LastNegPCRSrpt[msm$lagHIV_LastNegPCRSrpt<0] <- NA\nmsm$lastNegMin <- with(msm,pmin(lagHIV_LastNegEhars, lagHIV_HISNeg, \n                             lagHIV_LastNegPCRSrpt,na.rm=TRUE))\nmsm$lastNeg <- with(msm,ifelse(is.na(lagHIV_LastNegEhars),lastNegMin,lagHIV_LastNegEhars))\nmsm$lastNeg <- msm$lastNeg/365\nmsm$lastNegMin <- msm$lastNegMin/365\n\nmsm$everTested[!is.na(msm$lastNeg)] <- \"Y\"\nmsm$everTested <- msm$everTested==\"Y\"\n\naidsUB <- qweibull(.95,shape=2.516,scale=1/0.086)\nmsm$infPeriod <- ifelse(!is.na(msm$everTested) & !msm$everTested,\n                      pmin(msm$hiv_age_yrs-16,aidsUB), msm$lastNeg)\nmsm$infPeriod <- pmin(msm$infPeriod,aidsUB)\n\n",
+    "created" : 1371163007300.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1156512978",
+    "id" : "4EC7A91",
+    "lastKnownWriteTime" : 1380661583,
+    "path" : "~/Consult/undiagnosed_hiv/analysis/data-cleaning.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
