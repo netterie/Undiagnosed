@@ -1,7 +1,12 @@
 
 ## Estimating Undiagnosed HIV using Testing Histories
 
-*Updated 1/12/15*
+*Updated 1/13/15*
+
+### Coding To-Do's
+
+* Embed non-proprietary datasets to use with tutorials, e.g. simulated KC data
+* Consider renaming some variables and functions, e.g. the "infPeriod" variable would be clearer as "tid" and the "fig1" function would be clearer as "tidSurvivorFxn" or something. But, this would require a lot of work to make all the previous code compatible.
 
 ### Overview of folders
 
