@@ -54,13 +54,41 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="estimating-undiagnosed-hiv-using-testing-histories" class="section level2">
 <h2>Estimating Undiagnosed HIV using Testing Histories</h2>
-<p><em>Updated 1/13/15</em></p>
+<p><em>Updated 1/16/15</em></p>
 <div id="coding-to-dos" class="section level3">
 <h3>Coding To-Do’s</h3>
+<div id="more-urgent" class="section level4">
+<h4>More urgent</h4>
 <ul>
+<li>Split files in HIVBackCalc/R by function, for helping developers. Use nice section headings within those .R files</li>
 <li>Embed non-proprietary datasets to use with tutorials, e.g. simulated KC data</li>
-<li>Consider renaming some variables and functions, e.g. the “infPeriod” variable would be clearer as “tid” and the “fig1” function would be clearer as “tidSurvivorFxn” or something. But, this would require a lot of work to make all the previous code compatible.</li>
+<li>Create vignette</li>
+<li>Release minimal package to accompany PLoS One paper</li>
+<li>Update Shiny to use this package</li>
 </ul>
+</div>
+<div id="less-urgent" class="section level4">
+<h4>Less urgent</h4>
+<ul>
+<li>Map out code terminology - in the “Index to functions” below</li>
+<li>Improve terminology
+<ul>
+<li>“infPeriod” variable -&gt; “tid”</li>
+<li>“fig1” function -&gt; “tidSurvivorFxn” ?</li>
+<li>“impute” -&gt; includeMiss vs excludeMiss ?</li>
+<li>Learn about search and replace across multiple files</li>
+<li>Test code and make sure it works with updated terminology</li>
+</ul></li>
+<li>Turn scripts (e.g., format_data.R) into functions that can be embedded in the package and essentially serve as a wrapper for running a sequence of functions?</li>
+<li>Get Sam’s input on
+<ul>
+<li>Function-ifying scripts</li>
+<li>When to use Markdown and HTMl vs Sweave and PDF formats</li>
+<li>Pros/cons of eventually migrating to using S2, S3 or S4 classes</li>
+</ul></li>
+<li>Add two modes to setup_hivbackcalc: package updated = TRUE (just load HIVBackCalc package) vs FALSE (need to source the package files and source the sim’d data) ?</li>
+</ul>
+</div>
 </div>
 <div id="overview-of-folders" class="section level3">
 <h3>Overview of folders</h3>
@@ -102,27 +130,134 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </tbody>
 </table>
 </div>
-<div id="code-structure-and-workflow" class="section level3">
-<h3>Code structure and workflow</h3>
-<p><em>These are notes to expand upon and organize</em></p>
-<ul>
-<li>Two modes: package updated = TRUE (just load HIVBackCalc package) vs FALSE (need to source other.R)</li>
-<li>.R files have knitr hooks</li>
-<li>.Rnw files execute code from .R files within a report</li>
-</ul>
+<div id="code-structure-workflow-and-replication-for-the-analysis_kc-folder" class="section level3">
+<h3>Code structure, workflow and replication for the analysis_KC folder</h3>
+<p>Structure is fairly obvious: the data formatting file is sourced by the run file, so the run file is self-contained.</p>
+<p>Source “run_JKB.R” or knit “replication_JKB.Rmd”. You should get the results reported in the submitted paper. Both these files are basically Ian’s code from run.R, but with section headers and comments to clarify the code.</p>
 </div>
-<div id="replicating-analyses" class="section level3">
-<h3>Replicating analyses</h3>
-<p><em>Steps to replicate each analysis that has been done so far</em></p>
-<ul>
-<li>KC MSM</li>
-<li>WA state - all and subgroups</li>
-<li>KC MSM using KC database vs KC MSM using WA state database</li>
-</ul>
+<div id="code-structure-and-workflow-for-the-analysis_wa-folder" class="section level3">
+<h3>Code structure and workflow for the analysis_WA folder</h3>
+<div id="guide-to-.r-code" class="section level4">
+<h4>Guide to .R code</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">R file</th>
+<th align="left">Description</th>
+<th align="left">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">format_data.R</td>
+<td align="left">Formats the WA state data for use with the method</td>
+<td align="left">Look in .pdf report for explanations/details</td>
+</tr>
+<tr class="even">
+<td align="left">describe_data.R</td>
+<td align="left">Does some EDA on the formatted WA state data</td>
+<td align="left">This was very preliminary and probably could be greatly improved</td>
+</tr>
+<tr class="odd">
+<td align="left">run_main.R</td>
+<td align="left">Runs the analysis for a single group, whether it is a subset of the data or the full data</td>
+<td align="left">If subsetting, assumes that object “subset_before_run” has been set to TRUE beforehand and the subgroup name is stored in the object “u”</td>
+</tr>
+<tr class="even">
+<td align="left">run_main_subgroups.R</td>
+<td align="left">Loops through subgroups and runs the analysis for each one</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note on knitr hooks and code chunks</em></p>
+<p>The .R files in this folder contain knitr “hooks” that define code “chunks”. These “chunks” are read in at the beginning of reports and then executed at subsequent points in the report.</p>
+<p>The advantage of this approach is that it makes it easy to to have R code that you can execute <em>by section</em> throughout a report, as opposed to executing it all at once by sourcing the whole .R file. But it’s really convenient that the code is also fully contained and maintainable through a standalone .R file that <em>can</em> be sourced all together, when desired.</p>
+<p>The process is:</p>
+<ol style="list-style-type: decimal">
+<li><p>Insert “hooks” into R code to define “chunks” of code. Hook syntax is</p>
+<pre class="{r}"><code>## ---- hookname ----</code></pre></li>
+<li><p>At the beginning of your .Rnw or .Rmd report file, after you load the knitr library, use the read_chunk() function to read in the R code, e.g.</p>
+<pre class="{r}"><code>read_chunk('path_to_file.R')</code></pre></li>
+<li><p>Throughout the report, execute code chunks using the hook name, e.g.</p>
+<pre class="{r}"><code>&lt;&lt;hookname, echo=FALSE&gt;&gt;=
+@</code></pre></li>
+</ol>
+</div>
+<div id="guide-to-analyses-stored-in-this-folder" class="section level4">
+<h4>Guide to analyses stored in this folder</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Analysis</th>
+<th align="left">Files are named…</th>
+<th align="left">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">WA state analysis of undiagnosed counts</td>
+<td align="left">HIVBackCalc_full_report</td>
+<td align="left">At the end, this report runs the analysis for a bunch of subgroups. That part takes a while.</td>
+</tr>
+<tr class="even">
+<td align="left">WA state analysis of undiagnosed fraction</td>
+<td align="left">true_prevalence_report</td>
+<td align="left">Requires that undiagnosed counts have already been obtained–just reads in the results file plus a denominator file</td>
+</tr>
+<tr class="odd">
+<td align="left">Comparison of KC MSM undiagnosed counts using data provided by KC versus data provided by WA state</td>
+<td align="left">compare_MSM_report</td>
+<td align="left">Relies on code within the report to set up and perform the comparison analysis</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="guide-to-file-types" class="section level4">
+<h4>Guide to file types</h4>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Extension</th>
+<th align="left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">.R</td>
+<td align="left">R code for that (part of) analysis. Expect knitr “hooks” that identify “chunks” of code</td>
+</tr>
+<tr class="even">
+<td align="left">.Rnw</td>
+<td align="left">R-noweb file, an alternative to .Rmd, that uses LaTeX instead of Markdown for the writing of text</td>
+</tr>
+<tr class="odd">
+<td align="left">.tex</td>
+<td align="left">Created by knit2pdf() - this is a standalone TeX file that can be compiled into a pdf</td>
+</tr>
+<tr class="even">
+<td align="left">.pdf</td>
+<td align="left">PDF report</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="replicating-analyses-in-analysis_wa" class="section level3">
+<h3>Replicating analyses in analysis_WA</h3>
+<div id="suggested-procedure" class="section level4">
+<h4>Suggested procedure</h4>
+<ol style="list-style-type: decimal">
+<li>Identify the .Rnw file for the appropriate analysis</li>
+<li>In the setup_hivbackcalc() function call(s) near the top of the report, change the working directory to reflect yours.</li>
+<li>Load the knitr library in R</li>
+<li>Use the purl() function from the knitr library to run only the R code without generating the report. I think that if you use the tangle=TRUE option, you will get an .R file of all the code in the report. You could then execute code from that .R file.</li>
+</ol>
+</div>
 </div>
 <div id="index-to-functions" class="section level3">
 <h3>Index to functions</h3>
-<p><em>Estimation Functions</em></p>
+<div id="estimation-functions" class="section level4">
+<h4>Estimation Functions</h4>
 <table>
 <thead>
 <tr class="header">
@@ -175,8 +310,12 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </tr>
 </tbody>
 </table>
-<p><em>Formatting Functions</em></p>
-<p><em>Plotting Functions</em></p>
+</div>
+<div id="formatting-functions" class="section level4">
+<h4>Formatting Functions</h4>
+</div>
+<div id="plotting-functions" class="section level4">
+<h4>Plotting Functions</h4>
 <table>
 <thead>
 <tr class="header">
@@ -197,6 +336,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 </div>
 
