@@ -100,10 +100,17 @@ Extension | Purpose
 
 #### Suggested procedure
 
-1. Identify the .Rnw file for the appropriate analysis
-2. In the setup_hivbackcalc() function call(s) near the top of the report, change the working directory to reflect yours.
-3. Load the knitr library in R
-4. Use the purl() function from the knitr library to run only the R code without generating the report. I think that if you use the tangle=TRUE option, you will get an .R file of all the code in the report. You could then execute code from that .R file.
+1. Download HIVBackCalc_1.01.tar.gz (Unix) or HIVBackCalc_1.01.zip (Windows) from this repository, and install the package using the following instructions:
+```{r}
+# Open R in/set the R workding directory to the folder containing the downloaded zip file and type:
+# (switch in .tar.gz for .zip if on Unix)
+install.packages('HIVBackCalc_1.01.zip', repos=NULL)
+library(HIVBackCalc)
+```
+2. Identify the .Rnw file for the appropriate analysis
+3. In the setup_hivbackcalc() function call(s) near the top of the report, change the working directory to reflect yours.
+4. Load the knitr library in R
+5. Use the purl() function from the knitr library to run only the R code without generating the report. I think that if you use the tangle=TRUE option, you will get an .R file of all the code in the report. You could then execute code from that .R file.
 
 ### Index to functions
 
