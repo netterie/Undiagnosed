@@ -1,7 +1,7 @@
 
 ## Estimating Undiagnosed HIV using Testing Histories
 
-*Updated 1/16/15*
+*Updated 1/19/15*
 
 ### Coding To-Do's
 
