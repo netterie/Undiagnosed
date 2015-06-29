@@ -237,11 +237,16 @@ incidence <- mean(y[obs])
 
 # Base case
 k <- 10000
-m <- max(ti)
+m <- max(ti) # Just 17.98, i.e. max(KCreal$infPeriod, na.rm=TRUE)
 s <- seq(from=0,to=m,length.out=k)
 l <- length(ti)
 v <- sum(sapply(s,function(x) (sum(1-qi(x)))))
+  # Ok. qi is the continuous density so he is getting TID=S(x) for 10,000 points
+  # between 0 and 17.98 and taking the integral as in eqn (1). 
 v * 4 * incidence / (k/m)
+  # Squares quarterly incidence with the TID in years
+  # 4*incidence = yearly incidence
+  # m/k = dt in years, since 17.98 years are divided into 10,000 time steps
 
 # Upper bound
 v <- sum(sapply(s,function(x) (sum(1-qUB(x)))))
