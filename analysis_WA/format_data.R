@@ -132,8 +132,8 @@ dataf$timeAids <- dataf$yearAids + (dataf$quarterAids-1)/4
 #############################################################
 # SUBSET THE DATA - INITIAL RESTRICTIONS
 #############################################################
-year_min <- 2005
-year_max <- 2013
+if (!'year_min'%in%ls()) year_min <- 2005
+if (!'year_max'%in%ls()) year_max <- 2013
 
 # Non-sequential look
 table(hst_included=dataf$hst=='WA', useNA='ifany')
