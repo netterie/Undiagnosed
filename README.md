@@ -1,7 +1,10 @@
+# README: Estimating Undiagnosed HIV using Testing Histories
 
-## Estimating Undiagnosed HIV using Testing Histories
+## START HERE: Use the Wiki to update the status of each folder/project - it's like having a README for anything that needs it
 
-*Updated 1/19/15*
+
+
+## OLD: 2015 - Can probably delete/ignore
 
 ### Coding To-Do's
 
