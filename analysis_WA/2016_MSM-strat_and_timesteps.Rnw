@@ -1,0 +1,589 @@
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201506.csv',
+                  source_these='analysis_WA/format_data.R',
+                  package_updated=TRUE,
+                  packagefile=NULL)
+
+library(xtable)
+library(gridExtra)
+
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+#read_chunk(file.path(workd,'analysis_WA/describe_data.R'))
+@
+
+\title{Impact of stratifying by MSM/non-MSM and using yearly time steps}
+\author{Jeanette Birnbaum}
+\maketitle
+
+\section{Overview}
+This report first compares the results for WA State when stratifying by MSM/non-MSM subgroups and, secondly, compares results for quarterly versus yearly time steps. These investigations will provide insights useful for assessing how to best generate estimates for subgroups with small sample sizes. 
+
+\section{Data by MSM strata}
+
+\subsection{Presence of testing histories}
+Stratifying the estimates by MSM/non-MSM should have a noticeable impact on estimates when testing history patterns are substantially different for the two subgroups.
+
+<<testhist, results='hide', echo=FALSE>>=
+# EverHadNegTest by the groups
+variables <- c(`Risk Group`='mode2')
+    list(c(`MSM`='mode2'))
+testhistTab <- tabTestHist(dataf,
+                                                      variables,
+                                                      supercolumn=TRUE,
+                                                      fullsample_row=TRUE)
+@
+<<testhist_print, results='asis', tidy=FALSE, echo=FALSE>>=
+# Marginal
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- '\\hline &&&& \\multicolumn{3}{c}{Ever Had a Negative Test}  \\\\'
+print(xtable(testhistTab,
+             caption='Composition of analytic sample by MSM vs non-MSM',
+             label='tab:sample',
+             digits=0),
+      table.placement='h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      size='small',
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+      })
+@
+
+\section{Stratified vs Unstratified Analysis}
+
+\subsection{Stratified TID}
+
+Figure \ref{fig:tid_plot} shows the Base Case (left) and Upper Bound (right) TIDs separately for MSM vs non-MSM. Time steps are quarters.
+
+<<tid, echo=FALSE, cache=TRUE>>=
+diagInterval = 0.25
+TIDs <- estimateTID(dataf$infPeriod, intLength=diagInterval)
+
+# Original 6
+theseGroups <- levels(dataf$mode2)
+TIDsExt <- vector(mode='list',length=length(theseGroups))
+for (i in 1:length(theseGroups)) {
+    group  <- theseGroups[i]
+    TIDsExt[[i]] <- estimateTID(subset(dataf,mode2==group)$infPeriod,
+                           intLength=diagInterval, 
+                           cases=c('base_case','upper_bound'))
+}
+
+BC1 <- list(TIDsExt[[1]][['base_case']], TIDsExt[[2]][['base_case']])
+UB1 <- list(TIDsExt[[1]][['upper_bound']], TIDsExt[[2]][['upper_bound']])
+names(BC1) <- names(UB1) <- theseGroups
+@
+
+<<tid_plot, echo=FALSE, fig.pos='h', fig.cap='Time from infection to diagnosis (TID) for Base Case and Upper Bound, MSM vs non-MSM, quarterly time steps'>>=
+grid.arrange(plot.TID(BC1, intLength=diagInterval)+ggtitle('Base Case') +
+                    theme(text=element_text(size=8)),
+             plot.TID(UB1, intLength=diagInterval)+ggtitle('Upper Bound') + 
+                    theme(text=element_text(size=8)),
+             nrow=1)
+@
+
+\clearpage
+
+\subsection{Results}
+
+Table \ref{tab:stratadiff} shows the impact of stratification on undiagnosed count estimates. Percent change is relative to the unstratified results. PLWH in 2014 was 12,671, so an additional 100 cases undiagnosed represents a change in the undiagnosed fraction from \Sexpr{round(100*(1251/(12671+1251)))}\% to \Sexpr{round(100*1351/(12671+1351))}\%.
+
+<<format_results, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagCounts = tabulateDiagnoses(dataf, intLength=diagInterval)
+  incidenceBase = estimateIncidence(y=diagCounts,
+                                    pid=TIDs[['base_case']]$pdffxn,
+                                    gamma=0.1,
+                                    verbose=FALSE)
+
+  incidenceUpper = estimateIncidence(y=diagCounts,
+                                    pid=TIDs[['upper_bound']]$pdffxn,
+                                    gamma=0.1,
+                                    verbose=FALSE)
+  undiagnosedBase <- estimateUndiagnosed(incidenceBase)
+  undiagnosedUpper <- estimateUndiagnosed(incidenceUpper)
+
+  results <- combineResults(list(`Base Case`=list(incidenceBase,
+                                              undiagnosedBase),
+                               `Upper Bound`=list(incidenceUpper,
+                                                undiagnosedUpper)))
+ @
+
+<<results_plot, echo=FALSE, fig.pos='h', out.width='5in', fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2014 in WA state'>>=
+#plot(results)
+@
+
+
+<<run_subgroups, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagInterval = 0.25
+  these_cases <- c('base_case', 'upper_bound') 
+  names(these_cases) <- c('Base Case', 'Upper Bound')
+  subgroups <- runSubgroups(dataf,
+                            subvar='mode2',
+                            intLength=diagInterval, 
+                            cases=these_cases)
+
+@
+
+<<process_subgroups, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  totRes <- subgroups[['Total-stratified']]$results
+
+  # Stratified
+  sumtableS <- subset(totRes$resultsSummary[order(totRes$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtableS2 <- subset(totRes$resultsSummaryYear[order(totRes$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases')
+  sumtableS$Year <- '2005-2014'
+  sumtableS <- rbind(sumtableS, sumtableS2)[,c('Year', colnames(sumtableS)[-ncol(sumtableS)])]
+  colnames(sumtableS)[2] <- 'Case'
+  sumtableS$Strata <- 'Stratified'
+
+  # Unstratified
+  sumtable2 <- subset(results$resultsSummary[order(results$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtable22 <- subset(results$resultsSummaryYear[order(results$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases')
+  sumtable2$Year <- '2005-2014'
+  sumtableA <- rbind(sumtable2, sumtable22)[,c('Year', colnames(sumtable2)[-ncol(sumtable2)])]
+  colnames(sumtableA)[2] <- 'Case'
+  sumtableA$Strata <- 'Unstratified'
+
+  # Combine
+  sumtable <- rbind(sumtableS, sumtableA)
+
+  m <- subset(melt(sumtable), variable=='Mean', select=-Estimate)
+  mwide <- dcast(m, Year+Case~Strata, value.var='value')
+  mwide$Difference <- mwide[,3]-mwide[,4]
+  mwide <- transform(mwide, `Percent Change`=round(100*Difference/`Unstratified`),
+                     check.names=FALSE)
+  mwide <- mwide[order(mwide$Case),]
+@
+
+
+<<results_plot2, echo=FALSE, fig.pos='h', fig.width=6, fig.height=5, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2014 in WA state, using stage-subgroup strata'>>=
+# plot(totRes)
+@
+
+<<results2, echo=FALSE, results='asis'>>=
+print(xtable(mwide,
+             caption='Impact of MSM/non-MSM stratification on mean undiagnosed estimates. Percent change is relative to unstratified results',
+             label='tab:stratadiff',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+\section{Quarterly vs Yearly Time Step Analysis}
+
+For the stratified results, we now look at the impact of using yearly time steps instead of quarter time steps.
+
+\subsection{Stratified TID, Yearly Time Steps}
+Figure \ref{fig:tidY_plot}  shows the MSM vs non-MSM TIDs for yearly time steps, instead of the quarter time steps in \ref{fig:tid_plot}. 
+
+<<tidY, echo=FALSE, cache=TRUE>>=
+diagIntervalY = 1
+TIDsY <- estimateTID(dataf$infPeriod, intLength=diagIntervalY)
+
+theseGroups <- levels(dataf$mode2)
+TIDsExtY <- vector(mode='list',length=length(theseGroups))
+for (i in 1:length(theseGroups)) {
+    group  <- theseGroups[i]
+    TIDsExtY[[i]] <- estimateTID(subset(dataf,mode2==group)$infPeriod,
+                           intLength=diagIntervalY,
+                           cases=c('base_case','upper_bound'))
+}
+
+BCY <- list(TIDsExtY[[1]][['base_case']], TIDsExtY[[2]][['base_case']])
+UBY <- list(TIDsExtY[[1]][['upper_bound']], TIDsExtY[[2]][['upper_bound']])
+names(BCY) <- names(UBY) <- theseGroups
+@
+
+<<tidY_plot, echo=FALSE, fig.pos='h', fig.cap='Time from infection to diagnosis (TID) for Base Case and Upper Bound, MSM vs non-MSM, yearly time steps'>>=
+grid.arrange(plot.TID(BCY, intLength=diagIntervalY)+ggtitle('Base Case') +
+                    theme(text=element_text(size=8)),
+             plot.TID(UBY, intLength=diagIntervalY)+ggtitle('Upper Bound') + 
+                    theme(text=element_text(size=8)),
+             nrow=1)
+@
+
+\clearpage
+
+\subsection{Results - Full Sample, Half-Year Aggregation}
+
+Table \ref{tab:halfyeardiff} shows the impact of aggregating to half-year time steps. Percent change is relative to quarterly estimates.
+
+
+<<run_subgroupsH, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagIntervalH = 0.5
+  these_cases <- c('base_case', 'upper_bound') 
+  names(these_cases) <- c('Base Case', 'Upper Bound')
+  subgroupsH <- runSubgroups(dataf,
+                            subvar='mode2',
+                            intLength=diagIntervalH,
+                            cases=these_cases)
+
+@
+
+<<process_subgroupsH, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  totResH <- subgroupsH[['Total-stratified']]$results
+
+  # Stratified, Year
+  sumtableH <- subset(totResH$resultsSummary[order(totResH$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtableH2 <- subset(totResH$resultsSummaryYear[order(totResH$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases')
+  sumtableH$Year <- '2005-2014'
+  sumtableH <- rbind(sumtableH, sumtableH2)[,c('Year', colnames(sumtableH)[-ncol(sumtableH)])]
+  colnames(sumtableH)[2] <- 'Case'
+  sumtableH$Strata <- 'MSM-nonMSM'
+  sumtableH$TimeStep <- 'Half-Year'
+
+  # Stratified, Quarter
+  sumtableS$TimeStep <- 'Quarter'
+
+  # Combine
+  sumtable <- rbind(sumtableS, sumtableH)
+
+  m <- subset(melt(sumtable), variable=='Mean', select=-Estimate)
+  mwide <- dcast(m, Year+Case~TimeStep, value.var='value')
+  mwide$Difference <- mwide[,3]-mwide[,4]
+  mwide <- transform(mwide, `Percent Change`=round(100*Difference/`Quarter`),
+                     check.names=FALSE)
+  mwide <- mwide[order(mwide$Case),]
+@
+
+
+<<results_plot4, echo=FALSE, fig.pos='h', fig.width=6, fig.height=5, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2014 in WA state, using stage-subgroup strata'>>=
+# plot(totRes)
+@
+
+
+<<results4, echo=FALSE, results='asis'>>=
+print(xtable(mwide,
+             caption='Impact of half-year vs quarter time steps on mean undiagnosed estimates. Percent change is relative to quarter estimates',
+             label='tab:halfyeardiff',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+\subsection{Results - Full Sample, Full-Year Aggregation}
+
+Table \ref{tab:yeardiff} shows the impact of aggregating to yearly time steps. Percent change is relative to quarterly estimates.
+
+The impact here is greater than the half-year aggregation, but in both cases, the aggregation results in lower undiagnosed estimates for earlier years but higher undiagnosed estimates for the last few years. 
+
+Lower undiagnosed estimates arise from the lengthened gap between infection and diagnosis that still constitutes being diagnosed at time=0, e.g., for quarterly estimates, infection in Q1 and diagnoses in Q2 means 1 quarter of undiagnosed time, but for yearly estimates, that case would contribute no undiagnosed time. 
+
+However, the aggregation treats all diagnoses made within the longer interval equally, which overestimates undiagnosis when there are many cases being diagnosed in shorter intervals. In these data, \Sexpr{round(100*(1-summary(TIDs, times=c(0), intLength=0.25)[1,'base_case S(x)']))}\% of cases are actually diagnosed within one quarter under the base case, but their time to diagnosis is considered to be 1 year. This makes the most difference for the most recent years of the estimates, when the undiagnosed cases arise only from recent infections. In older years, undiagnosed cases are a mix of recent and long-standing infections.
+
+<<run_subgroupsY, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagIntervalY = 1
+  these_cases <- c('base_case', 'upper_bound') 
+  names(these_cases) <- c('Base Case', 'Upper Bound')
+  subgroupsY <- runSubgroups(dataf,
+                            subvar='mode2',
+                            intLength=diagIntervalY,
+                            cases=these_cases)
+
+@
+
+<<process_subgroupsY, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  totResY <- subgroupsY[['Total-stratified']]$results
+
+  # Stratified, Year
+  sumtableY <- subset(totResY$resultsSummary[order(totResY$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtableY2 <- subset(totResY$resultsSummaryYear[order(totResY$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases')
+  sumtableY$Year <- '2005-2014'
+  sumtableY <- rbind(sumtableY, sumtableY2)[,c('Year', colnames(sumtableY)[-ncol(sumtableY)])]
+  colnames(sumtableY)[2] <- 'Case'
+  sumtableY$Strata <- 'MSM-nonMSM'
+  sumtableY$TimeStep <- 'Year'
+
+  # Stratified, Quarter
+  sumtableS$TimeStep <- 'Quarter'
+
+  # Combine
+  sumtable <- rbind(sumtableS, sumtableY)
+
+  m <- subset(melt(sumtable), variable=='Mean', select=-Estimate)
+  mwide <- dcast(m, Year+Case~TimeStep, value.var='value')
+  mwide$Difference <- mwide[,4]-mwide[,3]
+  mwide <- transform(mwide, `Percent Change`=round(100*Difference/`Quarter`),
+                     check.names=FALSE)
+  mwide <- mwide[order(mwide$Case),]
+@
+
+
+<<results_plot3, echo=FALSE, fig.pos='h', fig.width=6, fig.height=5, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2014 in WA state, using stage-subgroup strata'>>=
+# plot(totRes)
+@
+
+
+<<results3, echo=FALSE, results='asis'>>=
+mwideA <- mwide
+print(xtable(mwide,
+             caption='Impact of year vs quarter time steps on mean undiagnosed estimates. Percent change is relative to quarter estimates',
+             label='tab:yeardiff',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+\clearpage
+
+\subsection{Results - Racial Subgroups, Full-Year Aggregation}
+
+<<races, echo=FALSE, fig.pos='h', fig.cap='Quarterly diagnosis counts by race, stratified by MSM vs non-MSM'>>=
+    dxLong <- ddply(dataf, c('race', 'mode2', 'timeDx'), summarise, N=length(mode2))
+
+ggplot(dxLong, aes(x=timeDx, y=N, group=mode2)) + geom_line(aes(colour=mode2)) + geom_point(aes(colour=mode2)) + facet_grid(race~.)
+@
+
+\clearpage
+
+\subsubsection{Whites}
+
+<<run_subgroupsW, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagIntervalW = 0.25
+  these_cases <- c('base_case', 'upper_bound') 
+  names(these_cases) <- c('Base Case', 'Upper Bound')
+  subgroupsW <- runSubgroups(subset(dataf, race=='White'),
+                            subvar='mode2',
+                            intLength=diagIntervalW,
+                            cases=these_cases)
+
+@
+<<run_subgroupsYW, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagIntervalYW = 1
+  these_cases <- c('base_case', 'upper_bound') 
+  names(these_cases) <- c('Base Case', 'Upper Bound')
+  subgroupsYW <- runSubgroups(subset(dataf, race=='White'),
+                            subvar='mode2',
+                            intLength=diagIntervalYW,
+                            cases=these_cases)
+
+@
+
+<<process_subgroupsWY, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  totResW <- subgroupsW[['Total-stratified']]$results
+  totResYW <- subgroupsYW[['Total-stratified']]$results
+
+  # Stratified, Year
+  sumtableY <- subset(totResYW$resultsSummary[order(totResYW$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtableY2 <- subset(totResYW$resultsSummaryYear[order(totResYW$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases')
+  sumtableY$Year <- '2005-2014'
+  sumtableY <- rbind(sumtableY, sumtableY2)[,c('Year', colnames(sumtableY)[-ncol(sumtableY)])]
+  colnames(sumtableY)[2] <- 'Case'
+  sumtableY$Strata <- 'MSM-nonMSM'
+  sumtableY$TimeStep <- 'Year'
+
+  # Stratified, Quarter
+  sumtableSW <- subset(totResW$resultsSummary[order(totResW$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtableSW2 <- subset(totResW$resultsSummaryYear[order(totResW$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases')
+  sumtableSW$Year <- '2005-2014'
+  sumtableSW <- rbind(sumtableSW, sumtableSW2)[,c('Year', colnames(sumtableSW)[-ncol(sumtableSW)])]
+  colnames(sumtableSW)[2] <- 'Case'
+  sumtableSW$Strata <- 'MSM-nonMSM'
+  sumtableY$TimeStep <- 'Year'
+  sumtableSW$TimeStep <- 'Quarter'
+
+  # Combine
+  sumtable <- rbind(sumtableSW, sumtableY)
+
+  m <- subset(melt(sumtable), variable=='Mean', select=-Estimate)
+  mwide <- dcast(m, Year+Case~TimeStep, value.var='value')
+  mwide$Difference <- mwide[,4]-mwide[,3]
+  mwide <- transform(mwide, `Percent Change`=round(100*Difference/`Quarter`),
+                     check.names=FALSE)
+  mwide <- mwide[order(mwide$Case),]
+@
+
+
+<<results_plot5, echo=FALSE, fig.pos='h', fig.width=6, fig.height=5, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2014 in WA state, using stage-subgroup strata'>>=
+# plot(totRes)
+@
+
+
+<<results5, echo=FALSE, results='asis'>>=
+mwideW <- mwide
+print(xtable(mwideW,
+             caption='WHITES: Impact of year vs quarter time steps on mean undiagnosed estimates. Percent change is relative to quarter estimates',
+             label='tab:whitesyeardiff',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+\subsubsection{Blacks}
+
+<<run_subgroupsB, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagIntervalW = 0.25
+  these_cases <- c('base_case', 'upper_bound') 
+  names(these_cases) <- c('Base Case', 'Upper Bound')
+  subgroupsW <- runSubgroups(subset(dataf, race=='Black'),
+                            subvar='mode2',
+                            intLength=diagIntervalW,
+                            cases=these_cases)
+
+@
+<<run_subgroupsYB, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagIntervalYW = 1
+  these_cases <- c('base_case', 'upper_bound') 
+  names(these_cases) <- c('Base Case', 'Upper Bound')
+  subgroupsYW <- runSubgroups(subset(dataf, race=='Black'),
+                            subvar='mode2',
+                            intLength=diagIntervalYW,
+                            cases=these_cases)
+
+@
+
+<<process_subgroupsYB, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  totResW <- subgroupsW[['Total-stratified']]$results
+  totResYW <- subgroupsYW[['Total-stratified']]$results
+
+  # Stratified, Year
+  sumtableY <- subset(totResYW$resultsSummary[order(totResYW$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtableY2 <- subset(totResYW$resultsSummaryYear[order(totResYW$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases')
+  sumtableY$Year <- '2005-2014'
+  sumtableY <- rbind(sumtableY, sumtableY2)[,c('Year', colnames(sumtableY)[-ncol(sumtableY)])]
+  colnames(sumtableY)[2] <- 'Case'
+  sumtableY$Strata <- 'MSM-nonMSM'
+  sumtableY$TimeStep <- 'Year'
+
+  # Stratified, Quarter
+  sumtableSW <- subset(totResW$resultsSummary[order(totResW$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtableSW2 <- subset(totResW$resultsSummaryYear[order(totResW$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases')
+  sumtableSW$Year <- '2005-2014'
+  sumtableSW <- rbind(sumtableSW, sumtableSW2)[,c('Year', colnames(sumtableSW)[-ncol(sumtableSW)])]
+  colnames(sumtableSW)[2] <- 'Case'
+  sumtableSW$Strata <- 'MSM-nonMSM'
+  sumtableY$TimeStep <- 'Year'
+  sumtableSW$TimeStep <- 'Quarter'
+
+  # Combine
+  sumtable <- rbind(sumtableSW, sumtableY)
+
+  m <- subset(melt(sumtable), variable=='Mean', select=-Estimate)
+  mwide <- dcast(m, Year+Case~TimeStep, value.var='value')
+  mwide$Difference <- mwide[,4]-mwide[,3]
+  mwide <- transform(mwide, `Percent Change`=round(100*Difference/`Quarter`),
+                     check.names=FALSE)
+  mwide <- mwide[order(mwide$Case),]
+@
+
+
+<<results_plot6, echo=FALSE, fig.pos='h', fig.width=6, fig.height=5, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2014 in WA state, using stage-subgroup strata'>>=
+# plot(totRes)
+@
+
+
+<<results6, echo=FALSE, results='asis'>>=
+mwideB <- mwide
+print(xtable(mwideB,
+             caption='BLACKS: Impact of year vs quarter time steps on mean undiagnosed estimates. Percent change is relative to quarter estimates',
+             label='tab:blacksyeardiff',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+<<results7, echo=FALSE>>=
+
+# Add data on ratio of testing in 0-6mos versus 6-12 mos
+# Changed it to fraction of the first year's diagnosis probability that occurs in 
+# the first 6 mos
+testratio <- function(infPeriod) {
+    TID <- estimateTID(infPeriod, intLength=0.5, cases='base_case')
+    sumTID <- summary(TID, intLength=0.5, times=c(0,0.5), cases='base_case')
+    ratio <- sumTID[sumTID$Time==0.0,'base_case f(x)']/
+             (sumTID[sumTID$Time==0.5,'base_case f(x)'] + 
+              sumTID[sumTID$Time==0.0,'base_case f(x)'])
+    return(ratio)
+}
+mwideB$FracYin6mos <- testratio(subset(dataf,race=='Black')$infPeriod)
+mwideW$FracYin6mos <- testratio(subset(dataf,race=='White')$infPeriod)
+mwideA$FracYin6mos <- testratio(dataf$infPeriod)
+
+# Construct long data frame of percent changes; focus on Base Case
+mwideB$Subgroup <- 'Black'
+mwideW$Subgroup <- 'White'
+mwideA$Subgroup <- 'All'
+changeCols <- c('Subgroup', 'Year', 'Percent Change', 'FracYin6mos')
+change <- rbind(subset(mwideB, Case=='Base Case',
+                       select=changeCols),
+                subset(mwideW, Case=='Base Case', select=changeCols),
+                subset(mwideA, Case=='Base Case', select=changeCols))
+change <- subset(change, Year!='2005-2014')
+
+@
+<<results_plot7, cache=FALSE, echo=FALSE, fig.pos='h', fig.cap='Percent change between year vs quarterly Base Case estimates as a function of the fraction of diagnosis probability within the first year that falls within the first 6 mos'>>=
+ggplot(change, aes(x=FracYin6mos, y=`Percent Change`, group=Year)) +
+    geom_point(aes(colour=Year, shape=Subgroup)) + 
+ #   scale_colour_gradient(name='Year', low='blue', high='red') + 
+    scale_y_continuous('% undx change from quarter to year estimates') +
+    scale_x_continuous('Fraction of dx in 1st year of infection that are in 0-6mos')
+
+@
+
+
+\end{document}
+
+

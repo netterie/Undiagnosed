@@ -1,0 +1,306 @@
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\usepackage{color}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201602.csv',
+                  source_these='analysis_WA/format_data.R',
+                  packagefile='HIVBackCalc/R/internal_fxns.R')
+
+library(xtable)
+library(gridExtra)
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE,
+               purl=TRUE, warning=FALSE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+@
+
+
+\title{Impact of using CD4 to inform undiagnosed estimates}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Overview}
+We use a simple approach to incorporate CD4 data into our testing history method for estimating undiagnosed HIV, creating a ``CD4 Case" alternative to our Base Case. We compare the results and discuss implications.
+
+\section{Methods: Base Case versus CD4 Case} 
+%\label{sec:methods}
+In the Base Case, we uniformly distribute probability of infection across the infection window. 
+
+In the CD4 Case, we uniformly distribute 50\% of the probability within the median window defined by what the literature says about typical median times to CD4 bins. 
+
+However, in the CD4 Case, we prioritize testing history data over the CD4 data by defaulting to the Base Case when the testing history data indicate shorter times to infection. For example, if CD4 indicates that 50\% probability should occur in the 1st 2 years of the window but the window is only 3 years long, we will keep the Base Case assumption that 50\% probability of infection occurs within 1.5 years. 
+
+This is a very simplified way of reconciling conflicting assumptions. It seems reasonable given that the median times to CD4 count are pretty rough estimates--the data come from other cohorts, and there's population heterogeneity in set-point viral load and thus CD4 trends.  
+
+We could make some exceptions to the prioritization of testing history and the Base Case over CD4 data. Perhaps we should distribute probability further away from the time of diagnosis for those cases with low CD4s and long windows? I don't love this idea either. I wonder if we should be doing something for the cases with no testing history - using our CD4-based assumptions for them? The CD4 Case is pretty conservative...
+
+\section{Results: TIDs in WA}
+
+\subsection{Base Case versus Base Case Alt}
+I coded up an alternate version of the Base Case that is identical theoretically but uses a different computational approach, one that can be easily altered to accommodate the CD4 Case.
+
+So first let's check that Base Case Alt is the same as Base Case:
+
+<<bcAlt, echo=FALSE, results='asis'>>=
+    bcVbcalt <- estimateTID(dataf$infPeriod,
+                           intLength=0.25, 
+                           cases=c('base_case','base_case_alt'))
+    Sx_tab <- summary(bcVbcalt, times=c(0,0.25,0.5, 1,5,18), intLength=0.25)[,c(1,3,5)]
+    colnames(Sx_tab) <- c('Time', 'Original Base Case', 'Alternate Base Case')
+    print(xtable(Sx_tab,
+                 caption='Base Case TIDs using different computational approaches',
+                 label='tab:Sx_tab',
+                 digits=3),
+          caption.placement='top',
+          table.placement='ht',
+          size='small',
+          include.rownames=FALSE)
+@
+
+<<bcalt_plot, echo=FALSE, fig.pos='h', fig.height=6, fig.width=4, fig.cap='Base Case versus Base Case Alt TIDs'>>=
+plot(bcVbcalt, intLength=0.25)
+@
+
+\clearpage
+\subsection{CD4 Case versus Base Case Alt}
+
+\subsubsection{Confirm that code is correct}
+Here I use fake median windows of half the observed infection windows when computing the CD4 Case. If the code is correct, this fake CD4 Case should replicate the Base Case.
+<<cd4fake, echo=FALSE, results='asis'>>=
+    cd4fake <- estimateTID(dataf$infPeriod,
+                           intLength=0.25, 
+                           cases=c('base_case_alt','cd4_case'),
+                           medWindows=dataf$infPeriod/2,
+                           infPeriodOrig=dataf$infPeriod)
+    Sx_tab <- summary(cd4fake, times=c(0,0.25,0.5, 1,5,18), 
+                      intLength=0.25)[,c(1,3,5)]
+    colnames(Sx_tab) <- c('Time', 'Alternative Base Case', 'Fake CD4 Case')
+    print(xtable(Sx_tab,
+                 caption='Base Case versus Fake CD4 Case TIDs',
+                 label='tab:cd4fake_tab',
+                 digits=3),
+          caption.placement='top',
+          table.placement='ht',
+          size='small',
+          include.rownames=FALSE)
+@
+
+<<cd4fake_plot, echo=FALSE, fig.pos='h', fig.height=6, fig.width=4, fig.cap='Base Case Alt versus Fake CD4 Case TIDs'>>=
+plot(cd4fake, intLength=0.25)
+@
+
+\clearpage
+\subsubsection{Real CD4 Case}
+
+The code below assigns CD4-based medians to those cases for whom it is indicated (as discussed in Section 
+%\ref{sec:methods}. 
+
+<<cd4meds, echo=TRUE>>=
+#*********************
+# Define our literature-based median times to infection by CD4 bin
+(cd4meds <- data.frame(cd4lower=c(500,350,200),
+                      cd4upper=c(2000, 500, 350),
+                      medWindow=c(1.5, 4, 8))
+)
+
+#*********************
+# Define who should get a CD4-based median
+cd4breaks <- c(0,200,350,500,2000)
+windowbreaks <- c(0,3,8,16,18)
+
+dataf <- within(dataf, {
+            # Non-missing testing history
+            hasTestHist <- !is.na(everHadNegTest)
+            # CD4 measured within 30d
+            cd4within30 <- hasTestHist & !is.na(cd4_days) & cd4_days<=30 &
+                !is.na(firstcd4cnt)
+            # Categories
+            cd4cat=cut(firstcd4cnt, breaks=cd4breaks,
+                   include.lowest=TRUE, right=FALSE)
+          })
+with(dataf, table(hasTestHist))
+with(dataf, table(cd4within30))
+
+#*********************
+# Assign medians
+
+# Start with 1/2 of infPeriod, which is just the Base Case.
+# Update to CD4-based median if indicated by infPeriod (infection window)
+dataf <- transform(dataf, medWindows=infPeriod/2)
+
+for (i in 1:nrow(cd4meds)) {
+    dataf <- transform(dataf, temp=cd4within30 &
+                                   firstcd4cnt>=cd4meds[i,'cd4lower'] &
+                                   firstcd4cnt<cd4meds[i, 'cd4upper'] &
+                                   infPeriod>=2*cd4meds[i, 'medWindow'])
+    cat('Row',i,'\n')
+    print(summary(dataf$temp))
+
+    dataf <- within(dataf, {
+                        medWindows[hasTestHist & cd4within30 &
+                                   firstcd4cnt>=cd4meds[i,'cd4lower'] &
+                                   firstcd4cnt<cd4meds[i, 'cd4upper'] &
+                                   infPeriod>=2*cd4meds[i, 'medWindow']] <- 
+                                   cd4meds[i,'medWindow']
+              })
+}
+
+# 172+66+58 = 296 cases impacted; the other 6 may be 
+# right on the border and so they evaluate as == infPeriod/2
+with(dataf, sum(medWindows!=infPeriod/2, na.rm=TRUE))
+
+# Show old and new median windows
+ddply(dataf, .(cd4cat), summarise, 
+      N_impacted=sum(medWindows!=infPeriod/2, na.rm=TRUE),
+      avgOldMedian=round(mean(infPeriod/2, na.rm=TRUE),1),
+      avgNewMedian=round(mean(medWindows, na.rm=TRUE),1),
+      Difference=avgOldMedian-avgNewMedian)
+                    
+@
+
+Now, here are the results:
+<<cd4real, echo=FALSE, results='asis'>>=
+    cd4real <- estimateTID(dataf$infPeriod,
+                           intLength=0.25, 
+                           cases=c('base_case_alt','cd4_case'),
+                           medWindows=dataf$medWindows,
+                           infPeriodOrig=dataf$infPeriod)
+    cd4real.MSM <- estimateTID(subset(dataf, mode2=='MSM')$infPeriod,
+                           intLength=0.25, 
+                           cases=c('base_case_alt','cd4_case'),
+                           medWindows=subset(dataf, mode2=='MSM')$medWindows,
+                           infPeriodOrig=subset(dataf, mode2=='MSM')$infPeriod)
+    cd4real.nonMSM <- estimateTID(subset(dataf, mode2!='MSM')$infPeriod,
+                           intLength=0.25, 
+                           cases=c('base_case_alt','cd4_case'),
+                           medWindows=subset(dataf, mode2!='MSM')$medWindows,
+                           infPeriodOrig=subset(dataf, mode2!='MSM')$infPeriod)
+    Sx_tab <- summary(cd4real, times=c(0,0.25,0.5, 1,5,18), 
+                      intLength=0.25)[,c(1,3,5)]
+    Sx_tab2 <- summary(cd4real.MSM, times=c(0,0.25,0.5, 1,5,18), 
+                      intLength=0.25)[,c(1,3,5)]
+    Sx_tab3 <- summary(cd4real.nonMSM, times=c(0,0.25,0.5, 1,5,18), 
+                      intLength=0.25)[,c(1,3,5)]
+    Sx_tab <- data.frame(Pop=c('All', rep('', nrow(Sx_tab)-1),
+                               'MSM', rep('', nrow(Sx_tab)-1),
+                               'non-MSM', rep('', nrow(Sx_tab)-1)),
+                         rbind(Sx_tab, Sx_tab2, Sx_tab3))
+    colnames(Sx_tab) <- c('Population', 'Time', 
+                          'Alternative Base Case', 'CD4 Case')
+    print(xtable(Sx_tab,
+                 caption='Base Case versus CD4 Case TIDs',
+                 label='tab:cd4real_tab',
+                 digits=3),
+          caption.placement='top',
+          table.placement='ht',
+          size='small',
+          include.rownames=FALSE)
+@
+
+<<cd4real_plot, echo=FALSE, fig.pos='h', fig.height=6, fig.width=4, fig.cap='Base Case Alt versus CD4 Case TIDs'>>=
+plot(cd4real, intLength=0.25)
+@
+
+<<true_prevalence, include=FALSE, echo=FALSE>>=
+  trueprev_data = read.csv(file.path(workd,'data/Reported_prevalence_2010-2014.csv'),
+                           na.string="",
+                           stringsAsFactor=FALSE, 
+                           check.names=FALSE)
+@
+
+<<run_subgroups, include=FALSE, echo=FALSE, cache=FALSE>>=
+
+  these_cases <- c('base_case_alt', 'cd4_case')
+  names(these_cases) <- c('Base Case', 'CD4 Case')
+  subgroups <- runSubgroups(dataf,
+                            subvar='mode2',
+                            intLength=0.25,
+                            cases=these_cases,
+                            medWindowsVar='medWindows',
+                            prev=trueprev_data,
+                            save=file.path(workd, 'analysis_WA/results/2016_trueprev_StageOfInfection.csv'))
+
+@
+
+<<process_subgroups, include=FALSE, echo=FALSE>>=
+  totRes <- subgroups[['Total-stratified']]$results
+  totTP <- subgroups[['Total-stratified']]$trueprev
+
+  # Summary of summaries
+  sumtable <- subset(totRes$resultsSummary[order(totRes$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtable2 <- subset(totRes$resultsSummaryYear[order(totRes$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases' & Year==2014, select=-Year)
+  sumtable$Year <- '2005-2014'
+  sumtable2$Year <- '2014'
+  sumtable <- rbind(sumtable, sumtable2)[,c('Year', colnames(sumtable)[-ncol(sumtable)])]
+  colnames(sumtable)[2] <- 'Case'
+  m <- subset(melt(sumtable), variable=='Mean', select=-Estimate)
+  mwide <- dcast(m, Year~Case, value.var='value')
+  mwide$Difference <- mwide[,2]-mwide[,3]
+  mwide <- transform(mwide, `Percent Change`=round(100*Difference/`Base Case`,1),
+                     check.names=FALSE)
+@
+
+<<results2, echo=FALSE, results='asis'>>=
+print(xtable(sumtable,
+             caption='Observed diagnoses and estimated quarterly incidence and undiagnosed counts over 2005-2014 and just 2014 in WA state, using CD4 Case',
+             label='tab:res_main2',
+             digits=0),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+print(xtable(mwide,
+             caption='Impact of CD4 Case on mean undiagnosed estimates',
+             label='tab:stagediff',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+print(xtable(subset(totTP, Year==2014)[order(subset(totTP, Year==2014)$Estimate),],
+             caption='Estimated true prevalence and the undiagnosed fraction for 2014 in WA state, using CD4 Case',
+             label='tab:res_trueprev2',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+\end{document}
+

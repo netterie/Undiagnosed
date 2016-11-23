@@ -1,0 +1,66 @@
+"","Year","Diagnoses/Case","Estimate","Min.","1st Qu.","Median","Mean","3rd Qu.","Max."
+"1",2010,"PLWHA","PLWHA",NA,NA,NA,2189.7,NA,NA
+"6",2010,"Base Case","Undiagnosed Cases",157.5,165.2,169.9,168.3,172.9,175.8
+"26",2010,"Base Case","True Prevalence",2347.2,2354.9,2359.6,2358,2362.6,2365.5
+"46",2010,"Base Case","Undiagnosed Fraction (%)",6.7,7,7.2,7.1,7.3,7.4
+"7",2010,"Base Case using Stage","Undiagnosed Cases",157.5,165.2,169.9,168.3,172.9,175.8
+"27",2010,"Base Case using Stage","True Prevalence",2347.2,2354.9,2359.6,2358,2362.6,2365.5
+"47",2010,"Base Case using Stage","Undiagnosed Fraction (%)",6.7,7,7.2,7.1,7.3,7.4
+"9",2010,"Upper Bound","Undiagnosed Cases",324.7,335.1,343.9,342.2,351,356.3
+"29",2010,"Upper Bound","True Prevalence",2514.4,2524.8,2533.6,2531.9,2540.7,2546
+"49",2010,"Upper Bound","Undiagnosed Fraction (%)",12.9,13.3,13.6,13.5,13.8,14
+"8",2010,"Upper Bound using Stage","Undiagnosed Cases",324.7,335.1,343.9,342.2,351,356.3
+"28",2010,"Upper Bound using Stage","True Prevalence",2514.4,2524.8,2533.6,2531.9,2540.7,2546
+"48",2010,"Upper Bound using Stage","Undiagnosed Fraction (%)",12.9,13.3,13.6,13.5,13.8,14
+"2",2011,"PLWHA","PLWHA",NA,NA,NA,2189.7,NA,NA
+"10",2011,"Base Case","Undiagnosed Cases",139.9,140.8,143.4,144.6,147.2,151.8
+"30",2011,"Base Case","True Prevalence",2329.6,2330.5,2333.1,2334.3,2336.9,2341.5
+"50",2011,"Base Case","Undiagnosed Fraction (%)",6,6,6.1,6.2,6.3,6.5
+"11",2011,"Base Case using Stage","Undiagnosed Cases",139.9,140.8,143.4,144.6,147.2,151.8
+"31",2011,"Base Case using Stage","True Prevalence",2329.6,2330.5,2333.1,2334.3,2336.9,2341.5
+"51",2011,"Base Case using Stage","Undiagnosed Fraction (%)",6,6,6.1,6.2,6.3,6.5
+"12",2011,"Upper Bound","Undiagnosed Cases",301.5,302,304.8,306.7,309.5,315.7
+"32",2011,"Upper Bound","True Prevalence",2491.2,2491.7,2494.5,2496.4,2499.2,2505.4
+"52",2011,"Upper Bound","Undiagnosed Fraction (%)",12.1,12.1,12.2,12.3,12.4,12.6
+"13",2011,"Upper Bound using Stage","Undiagnosed Cases",301.5,302,304.8,306.7,309.5,315.7
+"33",2011,"Upper Bound using Stage","True Prevalence",2491.2,2491.7,2494.5,2496.4,2499.2,2505.4
+"53",2011,"Upper Bound using Stage","Undiagnosed Fraction (%)",12.1,12.1,12.2,12.3,12.4,12.6
+"3",2012,"PLWHA","PLWHA",NA,NA,NA,2218.2,NA,NA
+"15",2012,"Base Case","Undiagnosed Cases",136.1,137.2,138.7,138.7,140.2,141.4
+"35",2012,"Base Case","True Prevalence",2354.2,2355.3,2356.8,2356.8,2358.3,2359.6
+"55",2012,"Base Case","Undiagnosed Fraction (%)",5.8,5.8,5.9,5.9,5.9,6
+"16",2012,"Base Case using Stage","Undiagnosed Cases",136.1,137.2,138.7,138.7,140.2,141.4
+"36",2012,"Base Case using Stage","True Prevalence",2354.2,2355.3,2356.8,2356.8,2358.3,2359.6
+"56",2012,"Base Case using Stage","Undiagnosed Fraction (%)",5.8,5.8,5.9,5.9,5.9,6
+"14",2012,"Upper Bound","Undiagnosed Cases",298.2,300,301.5,301.2,302.7,303.3
+"34",2012,"Upper Bound","True Prevalence",2516.3,2518.2,2519.7,2519.3,2520.8,2521.5
+"54",2012,"Upper Bound","Undiagnosed Fraction (%)",11.9,11.9,12,12,12,12
+"17",2012,"Upper Bound using Stage","Undiagnosed Cases",298.2,300,301.5,301.2,302.7,303.3
+"37",2012,"Upper Bound using Stage","True Prevalence",2516.3,2518.2,2519.7,2519.3,2520.8,2521.5
+"57",2012,"Upper Bound using Stage","Undiagnosed Fraction (%)",11.9,11.9,12,12,12,12
+"4",2013,"PLWHA","PLWHA",NA,NA,NA,2256.3,NA,NA
+"20",2013,"Base Case","Undiagnosed Cases",142.2,146.2,150.6,152,156.3,164.5
+"40",2013,"Base Case","True Prevalence",2398.5,2402.5,2406.9,2408.3,2412.6,2420.8
+"60",2013,"Base Case","Undiagnosed Fraction (%)",5.9,6.1,6.3,6.3,6.5,6.8
+"18",2013,"Base Case using Stage","Undiagnosed Cases",142.2,146.2,150.6,152,156.3,164.5
+"38",2013,"Base Case using Stage","True Prevalence",2398.5,2402.5,2406.9,2408.3,2412.6,2420.8
+"58",2013,"Base Case using Stage","Undiagnosed Fraction (%)",5.9,6.1,6.3,6.3,6.5,6.8
+"19",2013,"Upper Bound","Undiagnosed Cases",310.9,317.1,325.3,327,335.3,346.6
+"39",2013,"Upper Bound","True Prevalence",2567.2,2573.4,2581.6,2583.3,2591.6,2602.9
+"59",2013,"Upper Bound","Undiagnosed Fraction (%)",12.1,12.3,12.6,12.7,12.9,13.3
+"21",2013,"Upper Bound using Stage","Undiagnosed Cases",310.9,317.1,325.3,327,335.3,346.6
+"41",2013,"Upper Bound using Stage","True Prevalence",2567.2,2573.4,2581.6,2583.3,2591.6,2602.9
+"61",2013,"Upper Bound using Stage","Undiagnosed Fraction (%)",12.1,12.3,12.6,12.7,12.9,13.3
+"5",2014,"PLWHA","PLWHA",NA,NA,NA,2306.2,NA,NA
+"22",2014,"Base Case","Undiagnosed Cases",174.9,181.9,187.1,185.6,190.9,193.4
+"42",2014,"Base Case","True Prevalence",2481.1,2488.1,2493.2,2491.8,2497.1,2499.6
+"62",2014,"Base Case","Undiagnosed Fraction (%)",7,7.3,7.5,7.4,7.6,7.7
+"23",2014,"Base Case using Stage","Undiagnosed Cases",174.9,181.9,187.1,185.6,190.9,193.4
+"43",2014,"Base Case using Stage","True Prevalence",2481.1,2488.1,2493.2,2491.8,2497.1,2499.6
+"63",2014,"Base Case using Stage","Undiagnosed Fraction (%)",7,7.3,7.5,7.4,7.6,7.7
+"24",2014,"Upper Bound","Undiagnosed Cases",362.3,364.3,370,370.3,376,378.8
+"44",2014,"Upper Bound","True Prevalence",2668.5,2670.5,2676.2,2676.5,2682.2,2685
+"64",2014,"Upper Bound","Undiagnosed Fraction (%)",13.6,13.6,13.8,13.8,14,14.1
+"25",2014,"Upper Bound using Stage","Undiagnosed Cases",362.3,364.3,370,370.3,376,378.8
+"45",2014,"Upper Bound using Stage","True Prevalence",2668.5,2670.5,2676.2,2676.5,2682.2,2685
+"65",2014,"Upper Bound using Stage","Undiagnosed Fraction (%)",13.6,13.6,13.8,13.8,14,14.1

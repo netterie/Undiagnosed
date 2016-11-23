@@ -1,0 +1,325 @@
+
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\usepackage{graphicx}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201602.csv',
+                  source_these='analysis_WA/format_data.R',
+                  packagefile='HIVBackCalc/R/internal_fxns.R')
+
+library(xtable)
+library(gridExtra)
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE,
+               purl=TRUE, warning=FALSE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/2016_CD4Case.R'))
+@
+
+
+<<sim, include=FALSE, echo=FALSE, cache=FALSE>>=
+
+####################
+# Sim example to illustrate back-calc
+####################
+
+# Incidence model for T yrs
+Nvec <- function(incidenceModel, N1, Tyr, riseFactor=1.1, riseN) {
+    switch(incidenceModel,
+               'constant' = {
+                   vec <- rep(N1,Tyr)
+               },
+               'rising' = {
+                   vec <- 0:(riseN-1)
+                   vec <- round(N1*riseFactor^vec)
+                   if (Tyr-riseN>0) vec <- c(vec, rep(vec[length(vec)], Tyr-riseN))
+               }
+           )
+    return(vec)
+}
+
+# Run simulation
+runSim <- function(EndYr, Tyr, tid, N) {
+
+    results <- matrix(0, nrow=0, ncol=3, 
+                      dimnames=list(NULL, c('YrInc', 'YrDx', 'Dx')))
+
+    StartYr <- EndYr-Tyr+1
+    names(N) <- StartYr:EndYr
+    tidL <- length(tid)
+
+    for (i in StartYr:EndYr) {
+        Ndx <- N[as.character(i)]*tid
+        results <- rbind(results, 
+                         cbind(rep(i,tidL),
+                               i:(i+tidL-1),
+                               Ndx))
+
+    }
+
+    results <- transform(results[results[,'YrDx']<=EndYr,], 
+                         TID=YrDx-YrInc,
+                         row.names=NULL)
+
+    obs <- ddply(results, .(YrDx), summarise, TotDx=sum(Dx))
+    obs <- rename(obs, replace=c('YrDx'='Yr'))
+    obs <- merge(obs, data.frame(Yr=as.numeric(names(N)),
+                                         Inc=N,
+                                       TruePrev=cumsum(N)))
+    obs <- transform(obs,
+                     CumDx=cumsum(TotDx))
+    obs <- transform(obs, 
+                     UnDx=TruePrev-CumDx)
+
+    dxUdx <- data.frame(Yr=c(obs$Yr,obs$Yr),
+                   N=c(obs$CumDx, obs$UnDx),
+                   Dx=c(rep('Diagnosed',nrow(obs)), 
+                        rep('Undiagnosed', nrow(obs))))
+
+    results_pretty <- merge(results, obs,
+                            by.x='YrInc', by.y='Yr')
+
+    results_cdc0 <- dcast(results, YrInc ~  YrDx, value.var='Dx')
+    obs_counts0 <- colSums(results_cdc0, na.rm=TRUE)[names(N)]
+    results_cdc <- transform(results_cdc0, 
+                             Undiagnosed=N-rowSums(subset(results_cdc0, select=-YrInc), 
+                                            na.rm=TRUE),
+                             TotalInc=N)
+    results_cdc <- results_cdc[,c('YrInc', 'TotalInc', paste0('X', names(N)),
+                                  'Undiagnosed')]
+    obs_counts <- c(NA, NA, obs_counts0, NA)
+    colnames(results_cdc) <- c('Year of Incidence', 'Incidence',
+                               names(N), paste('Undiagnosed in', EndYr))
+
+    # Clean results_cdc for plotting with tableGrob
+    results_cdc_2plot <- rbind(results_cdc, obs_counts)
+    results_cdc_2plot <- apply(results_cdc_2plot, 2, as.character)
+    results_cdc_2plot[is.na(results_cdc_2plot)]<-""
+    results_cdc_2plot<-as.data.frame(results_cdc_2plot)
+    resultsTableGrob <- tableGrob(results_cdc_2plot, rows=NULL)
+                                 # , 
+                                 # theme=theme.vertical())
+#                                  gpar.corefill=gpar(fill='white', col='white'))
+#    resultsTable <- grid.arrange(resultsTableGrob)
+                                  
+    # Another possiblity for the table - 2 tables
+    results2 <- results_cdc[,-1]
+    results2 <- rbind(results2, colSums(results2, na.rm=TRUE))
+    rownames(results2) <- c(names(N), 'Column Totals')
+
+    # Now show diagnosed and undiagnosed relationships
+    results3 <- rbind(obs_counts0, cumsum(obs_counts0), cumsum(N),
+                      cumsum(N)-cumsum(obs_counts0))
+    rownames(results3) <- c('Diagnoses per Year',
+                            'Diagnosed Prevalence',
+                            'True Prevalence',
+                            'Undiagnoses per Year')
+
+    # Function to clean up plots
+    clean_plots <- function(gplot) {
+
+        return(gplot + 
+          theme_bw() + 
+          theme(panel.grid.minor=element_blank(), 
+                panel.grid.major=element_blank(), 
+                panel.background=element_blank()))
+
+    }
+
+    # Figures
+    dxByInc <- ggplot(results, aes(x=YrDx, y=Dx, fill=as.factor(YrInc))) +
+          geom_bar(stat='identity') + 
+          scale_fill_brewer(palette='Set1', name='Year of \nIncidence') + 
+          scale_x_continuous(name='') +
+          scale_y_continuous(name='') + 
+          ggtitle('Diagnoses by Year')
+    dxByInc <- clean_plots(dxByInc)
+
+    incPlot <- ggplot(obs, aes(x=Yr, y=Inc, fill=as.factor(Yr))) + 
+        geom_bar(stat='identity') +
+        scale_fill_brewer(palette='Set1', name='') +
+        scale_x_continuous(name='') +
+        scale_y_continuous(name='') + 
+        ggtitle('Incidence by Year')
+    incPlot <- clean_plots(incPlot)
+
+    dxUdxPlot <- ggplot(dxUdx, aes(x=Yr, y=N, fill=Dx)) +
+        geom_bar(stat='identity') + 
+          scale_fill_brewer(palette='Set2', name='Dx Status') + 
+          scale_x_continuous(name='') +
+          scale_y_continuous(name='') + 
+          ggtitle('Diagnosed and Undiagnosed Prevalence')
+    dxUdxPlot <- clean_plots(dxUdxPlot)
+
+    return(list(incPlot=incPlot, dxByInc=dxByInc, dxUdxPlot=dxUdxPlot, 
+                table=resultsTableGrob,
+                results2=results2,
+                results3=results3))
+}
+
+# Last yr of dx and length of sim
+EndYr <- 2015
+Tyr <- 5
+StartYr <- EndYr-Tyr+1
+
+# Simple TID pdf and diagnosis years
+N1 <- 60
+N2 <- 40
+tidA <- c(0.5,0.3,0.2)
+tidB <- c(0.6,0.3,0.1)
+tidC <- c(0.5,0.4,0.1)
+
+# Incidence
+Nconst1 <- Nvec('constant', N1, Tyr)
+Nconst2 <- Nvec('constant', N2, Tyr)
+Nrise <- Nvec('rising', N1, Tyr, riseFactor=1.2, riseN=3)
+
+inc1 <- list(
+simDF1A <- runSim(EndYr, Tyr, tidA, Nconst1),
+simDF1B <- runSim(EndYr, Tyr, tidB, Nconst1),
+simDF1C <- runSim(EndYr, Tyr, tidC, Nconst1))
+inc2 <- list(
+simDF2A <- runSim(EndYr, Tyr, tidA, Nconst2),
+simDF2B <- runSim(EndYr, Tyr, tidB, Nconst2),
+simDF2C <- runSim(EndYr, Tyr, tidC, Nconst2))
+
+# Try again with longer TIDs that are qualitatively different
+tidA1 <- c(0.5,0.3,0.1,0.1)
+tidA2 <- c(0.6,0.2,0.1,0.1)
+tidB1 <- c(0.3,0.3,0.2,0.2)
+tidB2 <- c(0.33,0.331,0.21,0.129)
+
+tids <- cbind(tidA1,tidA2,tidB1,tidB2)
+
+incA <- list(
+ runSim(EndYr, Tyr, tidA1, Nconst2),
+ runSim(EndYr, Tyr, tidA2, Nconst2))
+incB <- list(
+ runSim(EndYr, Tyr, tidB1, Nconst2),
+ runSim(EndYr, Tyr, tidB2, Nconst2))
+incA60 <- list(
+ runSim(EndYr, Tyr, tidA1, Nconst1),
+ runSim(EndYr, Tyr, tidA2, Nconst1))
+@
+
+
+\title{Exploring the Incidence-TID-Undx Relationship}
+\author{Jeanette Birnbaum}
+\maketitle
+
+\section{Overview}
+% What is the goal of this document
+This is an attempt to use a simple constant-incidence simulation to explore the impact of a change in TID on undiagnosed estimates. 
+
+\section{Two different incidences with the same TID}
+
+<<simDisplay, echo=TRUE>>=
+
+# TID pdfs: B has a 0.1 shift into year 1, whereas C has a 0.1 shift into year 2
+cbind(tidA, tidB, tidC)
+# Higher incidence
+lapply(inc1, "[[", 6)
+# Lower incidence
+lapply(inc2, "[[", 6)
+
+@
+
+When incidence is higher, absolute shifts in undiagnosed cases due to TID changes will be greater than when incidence is lower: 42 to 30 or 36, versus 28 to 20 or 24. Proportional changes are the same: 30/42 = 20/28, and 36/42 = 24/28. 
+
+TIDs B and C have the same amount of probability shifted away from year 3. When that 0.1 is shifted into year 1 instead of year 2, the drop in undiagnosed counts doubles. This demonstrates the time-significance of where probability is shifted. Let's look at the PDFs of the CD4 Case. Maybe the CDFs are not the best transformation to investigate. Or, maybe this will not explain the results, either.
+
+\section{MSM versus non-MSM pdfs}
+<<source, echo=FALSE, include=FALSE>>=
+standalone <- TRUE
+runEstimation <- FALSE
+source(file.path(workd,'analysis_WA/2016_CD4Case.R'))
+@
+<<cd4caseTIDpdfs, echo=FALSE, results='asis'>>=
+@
+
+So this is not the story, since the pdfs show greater changes in non-MSM than in the MSM.
+
+\section{Shifts in two different types of TIDs}
+
+The idea is to explore how shifts in a TID with shorter times to diagnosis compare with shifts in a flatter TID, one with longer times to diagnosis. 
+
+<<TIDstats, echo=FALSE>>=
+# Function to return mean and quartiles of the TID (Survivor curve)
+TIDstats <- function(tidSx, intLength=0.25){
+    times <- seq(0,length(tidSx)-1,by=intLength)
+    mean <- sum(tidSx)*intLength
+    quartiles <- sapply(c(0.75,0.5,0.25),
+                        function(x,S=tidSx,t=times) {
+                            approx(S,t,xout=x,method='linear',rule=2)$y
+                        })
+    return(matrix(c(mean, quartiles),nrow=1,
+                  dimnames=list(NULL, c('Mean', 'p25', 'p50', 'p75'))))
+}
+@
+
+<<simDisplay2, echo=TRUE>>=
+# TIDs
+tids
+
+# The curve stats
+Sx <- apply(tids, 2, function(x){1-cumsum(x)})
+(means <- apply(Sx,2,TIDstats,intLength=1)[1,])
+
+# Ratios and differences: TID A2 vs A1
+means['tidA2']/means['tidA1']
+means['tidA2']-means['tidA1']
+# Ratios and differences: TID B2 vs B1
+means['tidB2']/means['tidB1']
+means['tidB2']-means['tidB1']
+
+# The undiagnosed counts for each TID when incidence is constant at 40
+
+# TIDs A1 and A2
+lapply(incA, "[[", 6)
+# TIDs B1 and B2
+lapply(incB, "[[", 6)
+
+
+
+# Scenario A: shorter times to diagnosis
+28/32
+28-32
+
+# Scenario B: flatter TID
+45.52/52
+45.52-52
+@
+
+\section{Shifts in two different types of TIDs, declining incidence}
+
+\end{document}
+
+

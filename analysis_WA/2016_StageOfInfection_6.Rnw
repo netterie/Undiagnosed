@@ -1,0 +1,331 @@
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\usepackage{color}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201602.csv',
+                  source_these='analysis_WA/format_data.R',
+                  package_updated=TRUE,
+                  packagefile='HIVBackCalc/R/internal_fxns.R')
+
+library(xtable)
+library(gridExtra)
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE,
+               purl=TRUE, warning=FALSE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+@
+
+
+\title{Adding Stage of Infection to HIV Back-Calculation in WA State, 2005-2014}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Overview}
+This version of the report investigates the potential for CD4 count and viral load to inform our assumptions regarding infection windows. Total N=\Sexpr{nrow(dataf)}.
+
+\section{Infection window lengths}
+Those with long infection windows (time between LNT and diagnosis) have the greatest potential for narrowing the window using CD4 and/or VL data, given that so many of them did not have a BED+ result. Table \ref{tab:allLNT} shows the median window lengths for those with an LNT and those with no LNT, for two time periods. The No LNT group is split up into those who get the 18-yr window and those who get the age minus 16 window. 
+
+Windows for those with observed LNT are all quite short regardless of the subgroup. They are greater for non-MSM than MSM, but the difference is smaller for inside vs outside KC. The median window lengths for those with the age minus 16 assumption are substantially longer, and of course the 18-yr groups has median window lengths of 18 years. 
+
+The last row shows the distribution of cases across the LNT and the two No LNT groups for each time period. The percent of cases who have an observed LNT is high, at 78\%, by 2012-2014. It is important to note that this is a percent among those with either an LNT or reported no LNT, however. We do not know a lot about how reporting is evolving over time and whether the characteristics of the missing LNT population are changing. In both WA and Philadelphia, trends show rising reports of missing LNT and declining reports of no LNT.
+
+<<tab1, results='asis', tidy=FALSE, echo=FALSE>>=
+
+# Use ddply to get some summary statistics
+dataf <- transform(dataf,
+                   Post2012=yearDx>=2012,
+                   king=ifelse(dx_in_king=='Y', 'Inside KC', 'Outside KC'),
+                   everHad2=ifelse(is.na(everHadNegTest), NA,
+                                   ifelse(everHadNegTest, 'LNT',
+                                   ifelse(infPeriod>=17.98, 'No LNT - 18yrs',
+                                          'No LNT - Age minus 16'))))
+
+allLNT1 <- ddply(dataf, c('Post2012', 'mode2', 'everHad2'), summarise,
+                 N=length(infPeriod),
+                 Median=median(infPeriod),
+                 Perc18=round(100*sum(infPeriod>=17.98)/nrow(dataf),2))
+
+    # Two diff tables for medians and %18
+    allLNTmed <- dcast(allLNT1, mode2 ~ Post2012 + everHad2, value.var='Median')
+    allLNTperc18 <- dcast(allLNT1, mode2 ~ Post2012 + everHad2, value.var='Perc18')
+
+    # Strip everHadNegTest = NA
+    allLNTmed <- allLNTmed[,!grepl('NA',colnames(allLNTmed))]
+    allLNTperc18 <- allLNTperc18[,!grepl('NA',colnames(allLNTperc18))]
+
+    # Remember the order: No LNT-Yes LNT, Then Before 2012-After 2012
+    colnames(allLNTmed) <- colnames(allLNTperc18) <- 
+        gsub('FALSE_', '', colnames(allLNTmed))
+    colnames(allLNTmed) <- colnames(allLNTperc18) <- 
+        gsub('TRUE_', '', colnames(allLNTmed))
+
+# Save anew 
+allLNTmed2 <- allLNTmed
+allLNTperc182 <- allLNTperc18
+
+# Inside-outside KC
+allLNT1 <- ddply(dataf, c('Post2012', 'king', 'everHad2'), summarise,
+                 N=length(infPeriod),
+                 Median=median(infPeriod),
+                 Perc18=round(100*sum(infPeriod>=17.98)/nrow(dataf),2))
+
+    # Two diff tables for medians and %18
+    allLNTmed <- dcast(allLNT1, king ~ Post2012 + everHad2, value.var='Median')
+    allLNTperc18 <- dcast(allLNT1, king ~ Post2012 + everHad2, value.var='Perc18')
+
+    # Strip everHad2 = NA
+    allLNTmed <- allLNTmed[,!grepl('NA',colnames(allLNTmed))]
+    allLNTperc18 <- allLNTperc18[,!grepl('NA',colnames(allLNTperc18))]
+
+    # Remember the order: No LNT-Yes LNT, Then Before 2012-After 2012
+    colnames(allLNTmed) <- colnames(allLNTperc18) <- 
+        gsub('FALSE_', '', colnames(allLNTmed))
+    colnames(allLNTmed) <- colnames(allLNTperc18) <- 
+        gsub('TRUE_', '', colnames(allLNTmed))
+
+
+# Fix first column
+colnames(allLNTmed2)[1] <- colnames(allLNTmed)[1] <- 
+    colnames(allLNTperc182) <- colnames(allLNTperc18) <- ''
+
+# Forget the perc18, but instead give perc of population in each column of the 
+# combined table
+perc <- with(dataf, table(everHad2, Post2012))
+perc <- 100*perc/t(replicate(3,colSums(perc)))
+
+tabf <- rbind(allLNTmed2,allLNTmed, c(NA, c(perc)))
+tabf[,1] <- as.character(tabf[,1])
+tabf[5,1] <- 'Percent of Population'
+
+
+
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- '\\hline & \\multicolumn{3}{c|}{Before 2012} & \\multicolumn{3}{c}{2012-2014} \\\\'
+print(xtable(tabf,
+             caption='Median window lengths, in years, among the 3016 cases with non-missing LNT. For pre-2012 and 2012-2014 separately, columns define three groups: those with a recorded LNT, those who reported no LNT and received the 18-yr assumption, and those who reported no LNT and received the age-16 assumption. The final row shows the distribution of the cases across these three groups as percents within the two time periods.',
+             label='tab:allLNT',
+             align=c('l','l', rep('c',3), '|c', 'c','c'),
+             digits=1),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,2,4,5),
+      size='small'
+      )
+@
+
+Table \ref{tab:windowDistr} shows how the window lengths, both the observed ones and the assumed ones for those with no testing history, distribution across several interval lengths: 0-1 year, 1-2 years, 2-5 years, 5-17 years, and 17-18 years. Of those with non-missing testing history, about 50\% have a window length that is greater than 2 years. 
+
+<<tab2, results='asis', tidy=FALSE, echo=FALSE>>=
+
+# Categorize window lengths
+dataf <- transform(dataf, 
+                   infPeriodLength=cut(infPeriod, breaks=c(0,1,2,5,17,18)))
+
+# It worked correctly
+# with(dataf, table(everHadNegTest, infPeriodLength, useNA='ifany'), useNA='ifany')
+
+# Table
+windowDistr <- with(dataf, table(mode2, infPeriodLength))
+percCond <- 100*windowDistr/rowSums(windowDistr)
+percMarg <- 100*windowDistr/nrow(subset(dataf, !is.na(everHadNegTest)))
+percMarg <- rbind(percMarg, colSums(percMarg))
+rownames(percMarg)[3] <- 'Total'
+
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- '\\hline & \\multicolumn{5}{c}{Window Lengths (Years)}  \\\\'
+print(xtable(percMarg,
+             caption='Distribution of sample with non-missing testing history. Values are percents of the total population. MSM and non-MSM rows add to the Total percents in the final row.',
+             label='tab:windowDistr',
+             align=c('l',rep('r', 5)),
+             digits=1),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=TRUE,
+      hline.after=c(-1,0,2,3),
+      size='small'
+      )
+@
+\section{CD4 and Viral Load}
+
+\subsection{Time of measurement}
+CD4 counts and viral loads are measured within 6 months of diagnosis for more than 75\% of cases (Figure \ref{fig:cd4vldays}). Almost all cases have non-missing CD4 and VL measurements (Figure \ref{fig:nonmiss}). The distributions of these measurements are shown in Figures \ref{fig:vldens} and \ref{fig:cd4dens}, stratified by LNT status: observed, No LNT with the 18-yr window, No LNT with the age-16 window, and missing LNT. 
+
+<<cd4vldays, echo=FALSE, fig.height=4, fig.width=6, fig.pos='ht', fig.cap=' days after diagnosis that CD4 or VL was measured'>>=
+
+    # Molten dataframe
+    cd4vl <- data.frame(Measure=c(rep('CD4',nrow(dataf)),
+                                  rep('VL',nrow(dataf))),
+                        Year=rep(dataf$yearDx, 2),
+                        `Days After Diagnosis`=c(dataf$cd4_days,
+                                                 dataf$vl_days),
+                        stringsAsFactors=FALSE,
+                        check.names=FALSE)
+
+    cd4vl[,3][cd4vl[,3]==0]<-1
+    
+    # Plot
+    cd4vl1 <- ggplot(cd4vl, aes(factor(Year), `Days After Diagnosis`))
+    cd4vlplot  <- cd4vl1 + geom_boxplot(aes(fill=Measure)) + 
+        scale_y_log10(breaks=c(10,30,180,1000), name='Days after diagnosis') + 
+        scale_x_discrete(name='Year of Diagnosis') + theme_bw() +
+        ggtitle('# days after diagnosis \nCD4/VL was measured') + 
+        theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+
+    suppressWarnings(cd4vlplot)
+@
+<<nonmiss, echo=FALSE, fig.pos='ht', fig.cap='Percent of cases who have a non-missing result, by year', fig.height=3, fig.width=5>>=
+
+    tab1 <- ddply(cd4vl, c('Year', 'Measure'), function(x, TN=nrow(dataf)) {
+      n <- nrow(x)
+        `Percent Non-Missing`=round(100*sum(!is.na(x[,'Days After Diagnosis']))/n,0)
+    })
+
+    nonmiss <- ggplot(tab1, aes(Year, V1, group=Measure)) + 
+        stat_smooth(method='loess', aes(color=Measure)) + geom_point(aes(color=Measure)) +
+        theme_bw() + scale_x_continuous(name='', breaks=2005:2014) + 
+        scale_y_continuous(limits=c(0,100), name='') +
+        theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5)) + 
+        ggtitle('% with a CD4/VL result')
+    suppressWarnings(nonmiss)
+@
+
+\subsection{Values for those with known recent infections}
+
+Figures \ref{fig:vlrecent} and \ref{fig:cd4recent} display the distribution of viral loads and CD4 counts for individuals who had an LNT within 6 mos of diagnosis and had their measurements taken the same day they were diagnosed. 
+
+<<vlrecent, echo=FALSE, fig.height=3, fig.width=5, fig.pos='ht', fig.cap='Distribution of first VL values among those with an LNT within 6 mos of diagnosis and measurements on their diagnosis day'>>=
+
+# Data frame of those with LNT 6 mos or more recent, and vl measured
+# at time of diagnosis
+
+vlrecent <- subset(dataf, !is.na(everHadNegTest) & infPeriod<=0.5 &
+                          vl_days<=0)
+vlrecentPlot <- ggplot(vlrecent, aes(x=firstvl)) +
+                geom_density() + theme_bw() +
+            scale_x_continuous(name='') + 
+            scale_y_continuous(name='') + 
+            ggtitle('Distribution of viral loads\namong those diagnosed within 6 mos of infection') 
+    suppressWarnings(vlrecentPlot)
+@
+<<cd4recent, echo=FALSE, fig.height=3, fig.width=5, fig.pos='ht', fig.cap='Distribution of first CD4 values among those with an LNT within 6 mos of diagnosis and measurements on their diagnosis day'>>=
+
+# Data frame of those with LNT 6 mos or more recent, and vl measured
+# at time of diagnosis
+
+cd4recent <- subset(dataf, !is.na(everHadNegTest) & infPeriod<=0.5 &
+                          cd4_days<=0)
+cd4recentPlot <- ggplot(cd4recent, aes(x=firstcd4cnt)) +
+                geom_density() + theme_bw() +
+            scale_x_continuous(name='') + 
+            scale_y_continuous(name='') + 
+            ggtitle('Distribution of CD4 counts\namong those diagnosed within 6 mos of infection') 
+    suppressWarnings(cd4recentPlot)
+@
+
+\subsection{Values by LNT subgroups}
+
+Figures \ref{fig:vldens} and \ref{fig:cd4dens} show the distribution of VL and CD4 counts (regardless of time of measurement) for the LNT subgroups: those with an observed LNT, those with missing LNT, those with no LNT who get the 18yr assumption, and those with no LNT who get the age-16 assumption.
+
+\subsection{Using CD4 and VL to identify recent infections}
+Viral load peaks at very low and very high loads, to varying degrees for the four different groups. CD4 count is strongly skewed towards very low counts in the No LNT-18 yr window group in particular. 
+
+To use some combination of very low or very high viral load plus a high CD4 count could be as an indicator of recent infection, we would need to consider:
+
+\begin{itemize}
+    \item Was the CD4/VL measured close enough to diagnosis that treatment has probably not started/affected the measurements? How many days is ``close"?
+    \item Concurrent diagnosis - if AIDS was diagnosed soon after, was that late presentation or fast progression?
+    \item What cutoffs for CD4 count could suggest recent infection for an untreated case?
+    \item What cutoffs for viral load could suggest recent infection for an untreated case? Figures \ref{fig:fraser} and \ref{fig:suthar} provide some data regarding the distribution of set point viral load. Perhaps VL's that are so low or high that they are unlikely to be set points could indicate recent infection.
+    \item It seems there is much potential for error, given the diversity in immune response and measurement time. Would we need to validate a prediction model for recent infection and determine an acceptable probability-of-recent-infection cutoff for classifying cases as recent infections based on CD4 count, viral load and concurrent diagnosis? Is this in the literature already? I've seen these measures used in conjunction with an incidence assay like BED, but not alone. Although I haven't done a thorough search, yet.
+    \item Thinking along the lines of a prediction model, one thing we could explore is imputing broad LNT categories for those with missing data rather than assuming MAR. This might inform us as to whether our MAR assumption is pushing our results towards greater or fewer undiagnosed.
+
+\end{itemize}
+
+It may also be worth considering a simulation study to determine the potential magnitude of impact on the undiagnosed results. For example, if about 50\% of those with non-missing testing history have a window $>$2 years, and we were able to shorten 50\% of those windows to $<$1 year, what impact would that have on the estimates? What if we can only shorten 10\% of those long windows?
+
+<<vldens, echo=FALSE, fig.height=3, fig.width=5, fig.pos='ht', fig.cap='Distribution of first VL values'>>=
+
+    # Molten dataframe
+    cd4vlval <- data.frame(Measure=c(rep('CD4',nrow(dataf)),
+                                  rep('logVL',nrow(dataf))),
+                        Year=rep(dataf$yearDx, 2),
+                        Value=c(dataf$firstcd4, log(dataf$firstvl)),
+                        stringsAsFactors=FALSE,
+                        check.names=FALSE)
+    
+    # Densities
+    vldf <- transform(dataf, logVL=log(firstvl),
+                      everHad2=ifelse(is.na(everHad2),
+                                      'Missing',
+                                      as.character(everHad2)))
+    vl2 <- ggplot(vldf, aes(x=firstvl, group=everHad2, 
+                             colour=everHad2, fill=everHad2)) + 
+#            geom_histogram(aes(y=..density..), position='dodge') + 
+            stat_density(position='dodge', fill=NA) + theme_bw() + 
+            scale_x_continuous(name='') + 
+            scale_y_continuous(name='') + 
+            ggtitle('Distribution of viral loads') + 
+            theme(legend.title=element_blank(),
+                  legend.position='bottom')
+    cd42 <- vl2 + aes(x=firstcd4cnt) + ggtitle('Distribution of CD4 counts')
+
+    suppressWarnings(vl2)
+@
+<<cd4dens, echo=FALSE, fig.height=3, fig.width=5, fig.pos='ht', fig.cap='Distribution of first CD4 counts'>>=
+    suppressWarnings(cd42)
+@
+
+\begin{figure}[h]
+  \centering
+    \includegraphics[width=5in]{2016_StageOfInfection_fraser2007_setpointviral}
+    \caption{``The distribution of viral loads (copies per milliliter of peripheral blood) is plotted for untreated individuals in the Amsterdam Seroconverters Cohort (black bars) and the Zambian Transmission Study (7) (gray bars). The bars represent bins 0.5 log10 wide and are labeled by their midpoint viral load." From Fraser 2007, PNAS, Variation in HIV-1 set-point viral load: Epidemiological analysis and an evolutionary hypothesis}
+    \label{fig:fraser}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=7in]{2016_StageOfInfection_6_Suthar2015}
+  \caption{From Suthar 2015}
+  \label{fig:suthar}
+\end{figure}
+
+
+\end{document}

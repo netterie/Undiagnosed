@@ -1,0 +1,41 @@
+
+########################
+# Folders that should not be public/included in this repo
+########################
+HIVBackCalc.Rcheck/
+HIVBackCalc_App
+updates
+data
+public
+grants
+nme
+literature
+archive
+presentations
+analysis_WA/cache
+analysis_WA/cache
+cdc
+wa/cache
+
+
+########################
+# Files that should not be public 
+########################
+
+########################
+# OS files 
+########################
+*.Rapp*
+*.Rhistory
+*.swp
+.Rproj.user
+
+########################
+# Tex files
+########################
+*.aux
+*.fls
+*.synctex.gz
+*.tex
+*.fdb_latexmk
+*.log

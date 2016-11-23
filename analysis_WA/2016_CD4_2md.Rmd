@@ -1,0 +1,97 @@
+---
+title: Integrating CD4 data into undiagnosed estimates
+author: "Jeanette Birnbaum"
+date: "October 3, 2016"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE, echo=FALSE, cache=FALSE}
+# Reminder: slide types are alert, prompt, section and sub-section
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201602.csv',
+                  source_these='analysis_WA/format_data.R',
+                  load_package=TRUE,
+                  packagefile='HIVBackCalc/R/internal_fxns.R')
+
+    library(xtable)
+    library(gridExtra)
+    library(plyr)
+    library(reshape2)
+    library(ggplot2)
+    library(vcd)
+
+
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/2016_CD4Case.R'))
+```
+
+```{r cd4meds, include=FALSE, echo=FALSE}
+```
+
+```{r transformations, include=TRUE, echo=FALSE}
+# Note that this MUST come after cd4meds, because dataf is 
+# redefined more completely. cd4meds is preserved as-is so 
+# I don't break the CD4Case report (v2 I believe)
+```
+
+
+## Project Goal
+
+**To use CD4 data to _increase the precision_ of undiagnosed estimates from the testing history model** 
+
+*Why* 
+- Negative tests that are many years prior to diagnosis, i.e. "long infection windows", are not very informative regarding time of infection
+- CD4 at diagnosis can indicate recency of infection
+
+*How*
+- From literature, identify typical times to infection for various CD4 counts
+- Use this to update the probability of infection within long infection windows
+
+*Impact in WA*
+- Our pre-analysis of CD4 measurements in WA indicates that using CD4 will increase the precision of our undiagnosed estimates but will not significantly change the estimated number of undiagnosed cases
+- The main impact of integrating CD4 will be to increase our confidence in the estimates 
+
+## Reminder: the testing history method
+
+## Base Case distributes probability uniformly across the infection window
+
+_The hazard (instantaneous rate) of infection at any point within the window is 1/(window length), shown by the red line for two different window lengths. Time=0 refers to time of diagnosis._ 
+
+```{r plotProbModel, include=TRUE, echo=FALSE}
+```
+
+```{r, include=TRUE, echo=FALSE, fig.width=8, fig.height=3.5, dpi=300}
+par(mfrow=c(1,2))
+plot.BC(2,xmax=4,ymax=2,t='Window=2 years')
+plot.BC(4,xmax=4,ymax=2,t='Window=4 years')
+```
+The red line is lower when the window is longer, since the probability of infection is spread out over a longer time period.

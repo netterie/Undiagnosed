@@ -1,0 +1,691 @@
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\usepackage{color}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201506.csv',
+                  source_these='analysis_WA/format_data.R',
+                  package_updated=TRUE,
+                  packagefile='HIVBackCalc/R/internal_fxns.R')
+
+library(xtable)
+library(gridExtra)
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+#read_chunk(file.path(workd,'analysis_WA/describe_data.R'))
+
+#############################################################
+# ADDITIONAL FORMATTING FOR EXPLORING BED + DUAL DIAGNOSES
+#############################################################
+BEDlabels <- c('Long-standing infection', 'Recent infection',
+            'Other/unknown')
+BED.DD <- c(sapply(c('BED+', 'BED-', 'BEDm'), 
+                   FUN=function(x) {paste0(x, c('DD+', 'DD-'))}))
+           
+dataf <- within(dataf, {
+                est_infect_period=factor(est_infect_period,
+                                         levels=1:3,
+                                         labels=BEDlabels)
+                BED=factor(est_infect_period,
+                           levels=BEDlabels,
+                           labels=c('-','+','Miss'))
+                BED2=paste('BED', BED)
+                BED2fac=factor(BED2, levels=c('BED +', 'BED -', 'BED Miss'),
+                               labels=c('BED +', 'BED -', 'BED Miss'))
+                AidsMinusHIVDx=timeAids-timeDx
+                dualDiag=ifelse(AidsMinusHIVDx<1,TRUE,FALSE)
+                dualDiag[is.na(timeAids)] <- FALSE
+                dualDiagChar=ifelse(dualDiag, 'AIDS w/in 1yr of HIV',
+                                    'no AIDS or not w/in 1yr of HIV')
+                DD2=ifelse(dualDiag, 'DD +', 'DD -')
+                DD2fac=factor(DD2, levels=c('DD +', 'DD -'),
+                              labels=c('DD +', 'DD -'))
+                stageGroup=NA
+                stageGroup[BED=='+' & dualDiag] <- BED.DD[1]
+                stageGroup[BED=='+' & !dualDiag] <- BED.DD[2]
+                stageGroup[BED=='-' & dualDiag] <- BED.DD[3]
+                stageGroup[BED=='-' & !dualDiag] <- BED.DD[4]
+                stageGroup[BED=='Miss' & dualDiag] <- BED.DD[5]
+                stageGroup[BED=='Miss' & !dualDiag] <- BED.DD[6]
+                stageGroup=factor(stageGroup,
+                                levels=BED.DD, labels=BED.DD)
+            })
+
+# Function to get the empirical cdf of LNT windows and compare 
+# to the BED window
+
+LNTcdf <- function(df, thisgroup='all', BEDw=162/365) {
+    # Subset?
+    if (thisgroup!='all') df <- subset(df, stageGroup==thisgroup)
+    # Empirical cdf (the next line removes NAs)
+    cdf <- ecdf(df$infPeriod)
+    infs <- unique(sort(df$infPeriod))
+    # Plot the survivor fxn
+    cdfdf <- data.frame(infPeriod=infs,
+                        cdf=cdf(infs),
+                        surv=1-cdf(infs))
+
+    BEDpoint <- data.frame(x=BEDw,y=1-cdf(BEDw))
+    BEDlabel <- paste0(round(100*BEDpoint$y),'% have \nwindows>BED window')
+    g <- ggplot(cdfdf, aes(x=infPeriod, y=surv)) + 
+        geom_line() + 
+        theme_bw() + 
+        scale_x_continuous(name='Infection window length') + 
+        scale_y_continuous(name='S(x)') +
+        geom_text(data=BEDpoint, aes(x=x+4,y=y),label=BEDlabel) +
+        geom_point(data=BEDpoint, aes(x=x,y=y), size=3) + 
+        ggtitle(paste0('S(x) of infection windows\nfor ', thisgroup, ' cases'))
+    
+    return(list(g=g, BEDsurv=round(100*BEDpoint$y)))
+}
+
+@
+
+
+\title{Adding Stage of Infection to HIV Back-Calculation in WA State, 2005-2014}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Overview}
+This report contains the initial results comparing the standard testing history model results for WA State undiagnosed estimates to an extended model incorporating stage of infection data. This version of the report focuses on the impact of BED results rather than dual diagnosis, in order to understand why the BED data have only a minor impact.
+
+\section{Understanding the Data}
+\subsection{Construction of analytic sample}
+Data from the advanced HIV/AIDS reporting system (eHARS) and the CDC treatment and testing history questionnaire (HIS) provided records for \Sexpr{Nobs0} HIV cases in WA state.\footnote{Provided by Jason Carr, Washington State Department of Health, June 2015}
+
+Figure \ref{fig:exclusion} diagrams the construction of the analytic sample. We first restricted to cases diagnosed in WA state in the years 2005-2014. We further excluded cases diagnosed at age 16 or younger if their date of last negative test was missing, because the assumptions we use when date of last negative test is missing are not applicable to this age group.
+
+The final sample includes \Sexpr{Nobs2} cases. In the 2014 report there were 4744 cases in the final sample across diagnosis years 2005-2013. Of the additional 447 diagnoses reported in 2014 eligible for this anaylsis, 432 met all our inclusion criteria.  
+
+% \begin{wrapfigure}{r}{0.5\textwidth}
+%\begin{center}
+%    \includegraphics[width=0.48\textwidth]{exclusion_diagram}
+%      \end{center}
+%        \caption{A gull}
+%    \end{wrapfigure}
+    
+\begin{figure}[h]
+  \centering
+    \includegraphics[width=3in]{2015_exclusion_diagram}
+    \caption{Construction of analytic sample}
+    \label{fig:exclusion}
+\end{figure}
+
+\subsection{Frequencies of and trends in BED and dual diagnosis}
+
+% Basic info on BED-DD
+<<BED_DD, echo=FALSE, results='hide'>>=
+
+
+# Proportions: total, and conditional on rows or columns
+percTab <- function(proptab) { round(100*proptab) }
+
+ctab <- with(dataf, table(BEDResult=BED2fac, dualDiagChar, useNA='ifany'))
+ptab <- percTab(prop.table(ctab))
+
+tabMain <- function(df) {
+    # Crosstab
+    ctab <- with(df, table(BEDResult=BED2fac, dualDiagChar, useNA='ifany'))
+
+    # Not using all, right now
+    ptab <- percTab(prop.table(ctab))
+    ptab1 <- percTab(prop.table(ctab, margin=1))
+    ptab2 <- percTab(prop.table(ctab, margin=2))
+
+    # Margins
+    m1 <- table(df$dualDiagChar)
+    m2 <- table(df$BED2fac)
+    pm1 <- percTab(prop.table(m1))
+    pm2 <- percTab(prop.table(m2))
+
+    # Combine N and row percents and margins
+    cptab1 <- data.frame(ctab[,1], ptab1[,1], ctab[,2], ptab1[,2], 
+                         c(m2), c(pm2),
+                         stringsAsFactors=FALSE)
+    cptab1 <- rbind(cptab1, c(m1[1], pm1[1], m1[2], pm1[2], sum(m2), 100))
+    rownames(cptab1)[4] <- 'Total'
+    colnames(cptab1) <- c('N', 'Row %', 'N', 'Row %', 'N', 'Col %')
+
+    return(cptab1)
+}
+
+cptab <- tabMain(dataf)
+cptab2014 <- tabMain(subset(dataf,yearDx==2014))
+cptabMSM <- tabMain(subset(dataf,mode2=='MSM'))
+
+# EverHadNegTest by the groups
+variables <- 
+    c(`BED Result`='BED2fac')
+variables2 <- 
+    list(c(`Transmission Mode`='mode2',`BED Result`='BED2fac'))
+testhistTab <- tabTestHist(dataf,
+                                                      variables,
+                                                      supercolumn=TRUE,
+                                                      fullsample_row=TRUE)
+testhistTab2 <- tabTestHist(dataf,
+                                                      variables2,
+                                                      supercolumn=TRUE,
+                                                      fullsample_row=TRUE)
+# rownames(testhistTab) <- testhistTab$stageGroup
+@
+
+Table \ref{tab:cptab} shows the sample breakdown by BED status and dual diagnosis (DD) status over 2005-2014, where a dual diagnosis is defined as AIDS within 1 year of the HIV diagnosis. From the ``Total" column we see that the BED+ population is \Sexpr{cptab['BED +', 'Col %']}\% of the sample. In 2014, the BED+ drop to \Sexpr{cptab2014['BED +', 'Col %']}\% of the sample (Table \ref{tab:cptab2014}). 
+
+Within the BED+, 11\% are DD+ (Table \ref{tab:cptab}). We are assuming these are true recent infections of individuals who have a fast disease progression, although this is a matter for further research. The current assumption maximizes the impact of the BED information.
+
+Of those with a missing BED result, \Sexpr{cptab['BED Miss', 2]}\% have a dual diagnosis, which is substantially higher than the percentages among those with a BED+ or BED- result (Table \ref{tab:cptab}). This suggests those with a BED result do not well-represent those with missing BED.
+
+\textcolor{red}{1. Who gets a BED test, and why? 2. What is the reporting delay on BED results? On AIDS diagnoses?}
+
+<<tab_print, results='asis', tidy=FALSE, echo=FALSE>>=
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- '\\hline & \\multicolumn{2}{c}{DD+} & \\multicolumn{2}{c}{DD-} & \\multicolumn{2}{|c}{Total} \\\\'
+print(xtable(cptab,
+             caption='Cross-tabulation of BED and dual diagnoses, 2005-2014. Row percents show the percent of dual diagnoses (DD) within each BED group or the total sample (last row)',
+             label='tab:cptab',
+             align=c('l', rep('r',4), '|r', 'r'),
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=TRUE,
+      hline.after=c(-1,0,3,4),
+      size='small'
+      )
+print(xtable(cptab2014,
+             caption='Cross-tabulation of BED and dual diagnoses, 2014 only',
+             label='tab:cptab2014',
+             align=c('l', rep('r',4), '|r', 'r'),
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=TRUE,
+      hline.after=c(-1,0,3,4),
+      size='small'
+      )
+if (1==0) {
+print(xtable(ptab,
+             caption='Cross-tabulation of BED and dual diagnoses, \\%',
+             label='tab:ptab',
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=TRUE,
+      size='small'
+      )
+print(xtable(ptab1,
+             caption='Dual diagnoses \\%, conditional on BED',
+             label='tab:ptab1',
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=TRUE,
+      size='small'
+      )
+print(xtable(ptab2,
+             caption='BED \\%, conditional on dual diagnosis',
+             label='tab:ptab2',
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=TRUE,
+      size='small'
+      )
+}
+@
+
+\subsection{Time trends}
+
+<<BEDmisstime, echo=FALSE, fig.pos='h', fig.cap='Percent of cases who have a missing BED result, by year', fig.height=3, fig.width=5>>=
+
+    stageTab <- ddply(dataf, c('yearDx'), function(x, TN=nrow(dataf)) {
+      n <- nrow(x)
+      c(N=n,
+        `Column Percent`=round(100*n/TN,0),
+        `Percent BED+`=round(100*sum(x$BED2fac=='BED +', na.rm=TRUE)/n,0),
+        `Percent BED-`=round(100*sum(!x$BED2fac=='BED -', na.rm=TRUE)/n,0),
+        `Percent BED Miss`=round(100*sum(x$BED2fac=='BED Miss')/n,0),
+        `Percent DD+`=round(100*sum(x$DD2=='DD +')/n,0))
+    })
+
+    sg <- ggplot(stageTab, aes(yearDx, `Percent BED Miss`)) + 
+        stat_smooth(method='loess') + geom_point() +
+        theme_bw() + scale_x_continuous(name='Year')
+
+    plot(sg)
+@
+<<DDtime, echo=FALSE, fig.pos='h', fig.cap='Percent of cases who have a dual diagnoses, by year', fig.height=3, fig.width=5>>=
+
+    dg <- ggplot(stageTab, aes(yearDx, `Percent DD+`)) + 
+        stat_smooth(method='loess') + geom_point() +
+        theme_bw() + scale_x_continuous(name='Year')
+
+    plot(dg)
+@
+
+\subsection{Relationship between BED and testing histories}
+
+Tables \ref{tab:sample} and \ref{tab:sampleMSM} show the breakdown of testing histories within BED groups, overall and for MSM vs non-MSM transmission groups, respectively. Individuals who have a BED+ result are much more likely to also have reported a LNT (\Sexpr{subset(testhistTab, Subgroup=='BED +')[,'Percent Yes']}\%) than those with a BED- result (\Sexpr{subset(testhistTab, Subgroup=='BED -')[,'Percent Yes']}\%) or those with missing BED (\Sexpr{subset(testhistTab, Subgroup=='BED Miss')[,'Percent Yes']}\%).
+
+<<everHadNegTest_print, results='asis', tidy=FALSE, echo=FALSE>>=
+# Marginal
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- '\\hline &&&& \\multicolumn{3}{c}{Ever Had a Negative Test}  \\\\'
+print(xtable(testhistTab,
+             caption='Testing history responses by BED status. Column \\% sums to 100 across all rows. Availability of testing history data within each subgroup level is shown as row percents',
+             label='tab:sample',
+             digits=0),
+      table.placement='h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      size='small',
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+      })
+addtorow$command <- '\\hline &&&& \\multicolumn{3}{c}{Ever Had a Negative Test}  \\\\'
+print(xtable(testhistTab2,
+             caption='Testing history responses by BED status, separately for MSM and non-MSM. Column \\% sums to 100 across all rows. Availability of testing history data within each subgroup level is shown as row percents',
+             label='tab:sampleMSM',
+             digits=0),
+      table.placement='h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      size='small',
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+      })
+@
+
+We see this correlation in the MSM/non-MSM subgroups as well (Table \ref{tab:sampleMSM}). It is not ideal, since having a BED+ result would be most useful for those who reported never having an LNT.  Among non-MSM, however, there are relatively more BED+ with no LNT than among MSM, so the BED+ information will be more influential for them. The BED+ non-MSM only comprise \Sexpr{subset(testhistTab2, `BED Result`=='BED +' & `Transmission Mode`=='non-MSM')[,'Column Percent']}\% of the population, however, so the impact of this group on the total estimates will be small.
+
+\section{Stage of infection impact on infection window}
+
+\subsection{Numbers of cases affected by a BED+ result}
+
+There are two types of BED+ cases whose BED+ result influences our model: those who report having no LNT, and those who report a LNT that is greater than the BED window (162 days). In both cases, we shorten the infection window to the BED window. 
+
+Table \ref{tab:changesummary} summarizes the distribution of cases by type of change. Those ``Changed by being BED+" who have a LNT are not only BED+ but also have a reported infection window that is greater than the BED window of 162 days.
+
+<<changesummary, echo=FALSE, results='asis'>>=
+dataf <- within(dataf, {
+                LNT=factor(as.character(everHadNegTest),
+                           levels=c('TRUE', 'FALSE', NA),
+                           labels=c('LNT', 'no LNT'))
+                ChangeBED=(BED=='+' & infPeriod>162/365)
+      })
+cBED <- table(changeBED=dataf$ChangeBED, 
+                   everHadNegTest=dataf$everHadNegTest, useNA='ifany')
+
+cBED <- by(dataf, factor(dataf$everHadNegTest), 
+                FUN=function(x){
+                    table(changeBED=x$ChangeBED, 
+                       DD=x$dualDiag, useNA='ifany')
+                })
+cBEDdf <- data.frame( `No Change`=sapply(cBED, function(x) x['FALSE', 'FALSE']),
+                         `BED+ only`=sapply(cBED, function(x) x['TRUE', 'FALSE']),
+                         `DD+ only`=sapply(cBED, function(x) x['FALSE', 'TRUE']),
+                         `BED+ and DD+`=sapply(cBED, function(x) x['TRUE', 'TRUE']),
+                         check.names=FALSE)
+cBEDdf <- rbind(cBEDdf[2,], cBEDdf[1,])
+cBEDdf <- cbind(`No Change`=cBEDdf[,'No Change'] + cBEDdf[,'DD+ only'], 
+                `Changed by BED+`=cBEDdf[,'BED+ only'] + cBEDdf[,'BED+ and DD+'])
+cBEDdf <- rbind(cBEDdf,colSums(cBEDdf)) 
+rownames(cBEDdf) <- c('LNT', 'no LNT', 'Total')
+cBEDdfp <- cbind(round(100*prop.table(as.matrix(cBEDdf),1),1),Total=rowSums(cBEDdf))
+cBEDdfall <- cbind(cBEDdf[,'No Change'], cBEDdfp[,'No Change'],
+                   cBEDdf[,'Changed by BED+'], cBEDdfp[,'Changed by BED+'],
+                   cBEDdfp[,'Total'])
+colnames(cBEDdfall) <- c(rep(c('N', 'Row %'),2), 'Total')
+
+# Print it
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- '\\hline & \\multicolumn{2}{c}{No Change} & \\multicolumn{2}{c}{Changed by BED+} & \\\\'
+print(xtable(cBEDdfall,
+             caption='For the 3013 cases with non-missing testing history, N and row percents of each LNT/no LNT group not impacted by stage of infection data (No Change) or impacted by being BED+ and having an infection window greater than 162 days (Changed by BED+)',
+             label='tab:changesummary',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      add.to.row=addtorow,
+      hline.after=c(-1,0,2,3),
+      size='small',
+      include.rownames=TRUE)
+@
+
+\subsection{Degree of impact of the BED+ result}
+
+We saw above that \Sexpr{cBEDdfall['LNT', 4]}\% of cases with an LNT will be affected by the BED+ result. When we look at the infection windows of the BED+ before and after modification, we see that the long tail of infection windows is reigned in (Table \ref{tab:sumTable}). However, the 1st quartile remains unchanged and the median drops only slightly when the BED+ information is used.
+
+<<infImpact, echo=FALSE, results='asis'>>=
+    dataf <- transform(dataf,
+                       infPeriodBED1=ifelse(BED2fac=='BED +' & (is.na(infPeriod) |
+                                           infPeriod>(162/365)), 
+                                           162/365,
+                                           infPeriod))
+                       infPeriodBED=ifelse(BED2fac=='BED +' & !is.na(infPeriod) &
+                                           infPeriod>(162/365), 
+                                           162/365,
+                                           infPeriod))
+
+    sumTable <- rbind(summary(subset(dataf, BED2fac=='BED +')$infPeriod), 
+                      summary(subset(dataf, BED2fac=='BED +')$infPeriodBED))
+    rownames(sumTable) <- c('Original BED+ infection windows', 'After modifying windows for BED+')
+
+    print(xtable(sumTable,
+                 caption='Among the BED+, summary of infection windows pre- and post- modification by BED+, in years',
+                 label='tab:sumTable',
+                 digits=3),
+          caption.placement='top',
+          table.placement='ht',
+          size='small',
+          include.rownames=TRUE)
+@
+
+Table \ref{tab:Sx_tab} shows how this translates into the various cases for the TID estimates.
+
+<<infImpactTID, echo=FALSE, results='asis'>>=
+    datafBED <- subset(dataf, BED2fac=='BED +')
+    BEDpTID <- estimateTID(datafBED$infPeriod,
+                           intLength=0.25, 
+                           stageGroup='BED+',
+                           cases=c('base_case','base_case_withStage'))
+    BEDpTIDu <- estimateTID(datafBED$infPeriod,
+                           intLength=0.25, 
+                           stageGroup='BED+',
+                           cases=c('upper_bound','upper_bound_withStage'))
+    Sx_tab <- cbind(summary(BEDpTID, times=c(0,0.25,0.5, 1), intLength=0.25)[,c(1,3,5)],
+                    summary(BEDpTIDu, times=c(0,0.25,0.5, 1), intLength=0.25)[,c(3,5)])
+    colnames(Sx_tab) <- c('Time', 'Original Base Case', 'Modified Base Case', 
+                          'Original Upper Bound', 'Modified Upper Bound')
+    print(xtable(Sx_tab,
+                 caption='Among the BED+, the fraction remaining undiagnosed at quarter-year time steps, using the different cases. Time indicates the left/lower bound of the time interval',
+                 label='tab:Sx_tab',
+                 digits=3),
+          caption.placement='top',
+          table.placement='ht',
+          size='small',
+          include.rownames=FALSE)
+@
+
+Figure \ref{fig:infImpactDens} 
+
+<<infImpactDens, echo=FALSE, fig.pos='h', fig.cap=''>>=
+# Abandoned this because the original distribution has such a long tail, so the table is much easier to interpret
+    datafBED <- subset(dataf, BED2fac=='BED +')
+    datafBEDlong <- rbind(datafBED, datafBED)
+    datafBEDlong <- transform(datafBEDlong,
+                              WindowType=c(rep('Original', nrow(datafBED)),
+                                             rep('BED-Modified', nrow(datafBED))),
+                              infWindow=c(datafBED$infPeriod, 
+                                          datafBED$infPeriodBED))
+    v = ggplot(datafBEDlong, aes(mode2, infWindow))
+    v + geom_violin(aes(fill=LNT))
+#    ggplot(datafBEDlong, aes(y=Window, x=Type)) + geom_boxplot()
+@
+
+\section{Four stage-of-infection groups}
+
+We originally wanted to stratify our estimation by all six subgroups defined by the three BED categories and two dual diagnosis categories. However, due to small samples of BED+/- DD+ (Table \ref{tab:sample}), we aggregated into four subgroups: BED+, BED-, BED missing DD+ (BEDmDD+), and BED missing DD- (BEDmDD-). 
+
+<<aggregateBED, include=FALSE, echo=TRUE>>=
+    BED.DD4 <- c('BED+', 'BED-', 'BEDmDD+', 'BEDmDD-')
+               
+    dataf2 <- within(dataf, {
+                    stageGroup <- as.character(stageGroup)
+                    stageGroup[BED=='+'] <- BED.DD4[1]
+                    stageGroup[BED=='-'] <- BED.DD4[2]
+                    stageGroup[BED=='Miss' & dualDiag] <- BED.DD4[3]
+                    stageGroup[BED=='Miss' & !dualDiag] <- BED.DD4[4]
+                    stageGroup=factor(stageGroup,
+                                    levels=BED.DD4, labels=BED.DD4)
+                })
+
+    table(dataf2$stageGroup, dataf2$BED)
+    table(dataf2$stageGroup, dataf2$dualDiag)
+@
+\section{Undiagnosed Results}
+
+\subsection{Time from infection to diagnosis (TID)}
+
+Figure \ref{fig:bc_stage4} shows the original and modified base case TIDs for each of the four stage-subgroups.
+
+% Here, estimate TID with the extended method as well
+<<smoothsurv_combined, echo=FALSE, cache=TRUE>>=
+diagInterval = 0.25
+TIDs <- estimateTID(dataf$infPeriod, intLength=diagInterval)
+
+# Original 6
+theseGroups <- levels(dataf$stageGroup)
+TIDsExt <- vector(mode='list',length=length(theseGroups))
+for (i in 1:length(theseGroups)) {
+    group  <- theseGroups[i]
+    TIDsExt[[i]] <- plot(estimateTID(subset(dataf,stageGroup==group)$infPeriod,
+                           intLength=diagInterval, 
+                           stageGroup=group,
+                           cases=c('base_case','base_case_withStage')),
+                         intLength=0.25) + 
+                    ggtitle(group) + 
+                    theme(text=element_text(size=8))
+                          
+}
+# New 4
+theseGroups2 <- levels(dataf2$stageGroup)
+TIDsExt2 <- vector(mode='list',length=length(theseGroups2))
+for (i in 1:length(theseGroups2)) {
+    group  <- theseGroups2[i]
+    TIDsExt2[[i]] <- plot(estimateTID(subset(dataf2,stageGroup==group)$infPeriod,
+                           intLength=diagInterval, 
+                           stageGroup=group,
+                           cases=c('base_case','base_case_withStage')),
+                         intLength=0.25) + 
+                    ggtitle(group) + 
+                    theme(text=element_text(size=8))
+}
+# UB                          
+group <- 'BED+'
+    TIDsU <- plot(estimateTID(subset(dataf2,stageGroup==group)$infPeriod,
+                           intLength=diagInterval, 
+                           stageGroup=group,
+                           cases=c('upper_bound','upper_bound_withStage')),
+                         intLength=0.25) + 
+                    ggtitle('BED+, Upper Bound') + 
+                    theme(text=element_text(size=8))
+@
+<<bc_stage4, echo=FALSE, fig.pos='h', out.width='7in', fig.cap='Time from infection to diagnosis (TID) for base case without and with stage, 4 groups'>>=
+#plot(baseVbase, intLength=diagInterval, 
+#     cases = c('Original BC', 'Extended BC'))
+#plot(TIDs, intLength=diagInterval, 
+#     cases = c('Base Case', 'Upper Bound'))
+grid.arrange(TIDsExt2[[1]],TIDsExt2[[2]],TIDsExt2[[3]],TIDsExt2[[4]],
+             nrow=2)
+
+@
+<<ub_stage, echo=FALSE, fig.pos='h', out.width='5in', fig.cap='Time from infection to diagnosis (TID) for upper bound without and with stage, BED+'>>=
+TIDsU
+@
+
+\subsection{Unstratified, Without-Stage Results}
+
+<<format_results, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  diagCounts = tabulateDiagnoses(dataf, intLength=diagInterval)
+  incidenceBase = estimateIncidence(y=diagCounts,
+                                    pid=TIDs[['base_case']]$pdffxn,
+                                    gamma=0.1,
+                                    verbose=FALSE)
+# Here, do incidenceExt
+  incidenceUpper = estimateIncidence(y=diagCounts,
+                                    pid=TIDs[['upper_bound']]$pdffxn,
+                                    gamma=0.1,
+                                    verbose=FALSE)
+  undiagnosedBase <- estimateUndiagnosed(incidenceBase)
+  undiagnosedUpper <- estimateUndiagnosed(incidenceUpper)
+# Here, do undiagnosedExt. Then,
+# Here, combine results from the two base cases
+#  results <- combineResults(list(`Original BC`=list(incidenceBase, 
+#                                                    undiagnosedBase),
+#                                 `Extended BC`=list(incidenceBaseExt,
+#                                                    undiagnosedBaseExt))
+  results <- combineResults(list(`Base Case`=list(incidenceBase,
+                                              undiagnosedBase),
+                               `Upper Bound`=list(incidenceUpper,
+                                                undiagnosedUpper)))
+ @
+
+<<results_plot, echo=FALSE, fig.pos='h', out.width='5in', fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2014 in WA state'>>=
+plot(results)
+@
+
+The estimated incidence and undiagnosed counts for each scenario are shown as quarterly counts in Figure \ref{fig:results_plot} and summarized over all quarters in Table \ref{tab:res_main}. These results are not stratified by any group, although we do have a version of the total results that reflects stratification by MSM and non-MSM.
+
+<<format_results_print, echo=FALSE, results='asis'>>=
+print(xtable(results$resultsSummary,
+             caption='Observed diagnoses and estimated quarterly incidence and undiagnosed counts over 2005-2014 in WA state',
+             label='tab:res_main',
+             digits=0),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+<<true_prevalence, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  trueprev_data = read.csv(file.path(workd,'data/Reported_prevalence_2010-2014.csv'),
+                           na.string="",stringsAsFactor=FALSE, check.names=FALSE)
+  trueprev <- calcTruePrev(results, subset(trueprev_data, select=c('Year', 'Total')))
+ @
+
+<<true_prevalence_results, echo=FALSE, results='asis'>>=
+print(xtable(subset(trueprev, Year==2014),
+             caption='Estimated true prevalence and the undiagnosed fraction in WA state, limited to just 2014',
+             label='tab:res_trueprev',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+
+\subsection{Stratified, Without- and With-Stage Results}
+
+When we run the model allowing stage (so far, just BED) to impact the TID, we also stratify by stage subgroups in order for the missing testing histories to be missing conditional on stage subgroup. 
+
+
+<<run_subgroups, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+
+  these_cases <- c('base_case', 'base_case_withStage', 
+                   'upper_bound', 'upper_bound_withStage')
+  names(these_cases) <- c('Base Case', 'Base Case using Stage',
+                          'Upper Bound', 'Upper Bound using Stage')
+  subgroups <- runSubgroups(dataf2,
+                            subvar='stageGroup',
+                            intLength=diagInterval, 
+                            cases=these_cases,
+                            prev=trueprev_data,
+                            save=file.path(workd, 'analysis_WA/results/2016_trueprev_StageOfInfection.csv'))
+
+@
+
+<<process_subgroups, include=FALSE, echo=FALSE, cache=TRUE, results='asis'>>=
+  totRes <- subgroups[['Total-stratified']]$results
+  totTP <- subgroups[['Total-stratified']]$trueprev
+
+  # Summary of summaries
+  sumtable <- subset(totRes$resultsSummary[order(totRes$resultsSummary$Estimate),],
+                     Estimate=='Undiagnosed Cases')
+  sumtable2 <- subset(totRes$resultsSummaryYear[order(totRes$resultsSummaryYear$Estimate),],
+                      Estimate=='Undiagnosed Cases' & Year==2014, select=-Year)
+  sumtable$Year <- '2005-2014'
+  sumtable2$Year <- '2014'
+  sumtable <- rbind(sumtable, sumtable2)[,c('Year', colnames(sumtable)[-ncol(sumtable)])]
+  colnames(sumtable)[2] <- 'Case'
+  m <- subset(melt(sumtable), variable=='Mean', select=-Estimate)
+  m <- transform(m,
+                 variable=NULL,
+                 Stage=rep(c('Without Stage', 'With Stage'),4),
+                 Case=gsub(' using Stage', '', Case))
+  mwide <- dcast(m, Year+Case~Stage, value.var='value')
+  mwide$Difference <- mwide[,3]-mwide[,4]
+  mwide <- transform(mwide, `Percent Change`=round(100*Difference/`Without Stage`),
+                     check.names=FALSE)
+@
+
+
+<<results_plot2, echo=FALSE, fig.pos='h', fig.width=6, fig.height=5, fig.cap='Observed diagnoses and estimated quarterly and undiagnosed counts over 2005-2014 in WA state, using stage-subgroup strata'>>=
+plot(totRes)
+@
+
+Quarterly incidence and undiagnosed counts are plotted in Figure \ref{fig:results_plot2}. The summary results over 2005-2015 and for 2014 alone are given in Table \ref{tab:res_main2}. The mean without- and with-stage undiagnosed estimates for those two time periods are compared in Table \ref{tab:stagediff}. Table \ref{tab:res_trueprev2} shows the 2014 undiagnosed fraction results as well. 
+
+Regarding the impact on uncertainty, from Table \ref{tab:stagediff} we can additionally calculate that the undiagnosed range in 2014 was \Sexpr{mwide[3,'Without Stage']}-\Sexpr{mwide[4,'Without Stage']} and adding stage decreased that to \Sexpr{mwide[3,'With Stage']}-\Sexpr{mwide[4,'With Stage']}, which amounts to a difference of \Sexpr{((mwide[4,'Without Stage']-mwide[3,'Without Stage'])-(mwide[4,'With Stage']-mwide[3,'With Stage']))} cases. From Table \ref{tab:res_trueprev2} that amounts to a decrease from 7.2\% to 6.9\% for the range of the mean undiagnosed fraction.
+
+
+<<results2, echo=FALSE, results='asis'>>=
+print(xtable(sumtable,
+             caption='Observed diagnoses and estimated quarterly incidence and undiagnosed counts over 2005-2014 and just 2014 in WA state, using stage-subgroup strata',
+             label='tab:res_main2',
+             digits=0),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+print(xtable(mwide,
+             caption='Impact of using BED result to modify the TID on mean undiagnosed estimates',
+             label='tab:stagediff',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+print(xtable(subset(totTP, Year==2014)[order(subset(totTP, Year==2014)$Estimate),],
+             caption='Estimated true prevalence and the undiagnosed fraction for 2014 in WA state, using stage-subgroup strata',
+             label='tab:res_trueprev2',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+
+\end{document}
+
+

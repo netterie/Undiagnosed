@@ -1,0 +1,240 @@
+
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+
+    ############################################################
+    # Exploring the Philly data
+    ############################################################
+
+    #############################################################
+    # KNITR
+    #############################################################
+    rm(list=ls())
+
+    library(knitr)
+    if (1==0) {
+    knit_hooks$set(inline = function(x) {
+                        prettyNum(round(x,2), big.mark=",")
+                      })
+    }
+    # set global chunk options
+    opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+                   fig.show='hold', concordance=TRUE, external=TRUE,
+                   tidy=TRUE, size='footnotesize', verbose=TRUE)
+    options(formatR.arrow=TRUE,width=80,digits=7)
+
+    #read_chunk(file.path(workd,'analysis_WA/describe_data.R'))
+@
+
+<<setup, incldue=FALSE, echo=FALSE>>=
+
+    ####################
+    # Setup
+    ####################
+
+    dir <- '~/Dropbox/School/PhD/HIV_WA'
+    library(reshape)
+    library(HIVBackCalc)
+    source(file.path(dir, 'HIVBackCalc_App/development/other.R'))
+    source(file.path(dir, 'public/package1.0/HIVBackCalc/R/tid.R'))
+
+@
+
+<<data, include=FALSE, echo=FALSE, cache=TRUE>>=
+    ####################
+    # Import & format data
+    ####################
+
+    dataFile <- file.path(dir, 'data/philly_ehars.csv')
+    dataList <- format_data(dataFile, eHARS=TRUE)
+    dataf <- dataList$data
+
+@
+
+\title{Philadelphia Testing Histories}
+\author{Jeanette Birnbaum}
+\maketitle
+
+\section{Data Basics}
+
+\subsection{Initial dataset}
+<<basic, echo=TRUE>>=
+    # Size of formatted data
+    nrow(dataf)
+    # Years of data
+    table(dataf$yearDx)
+@
+\subsection{Diagnoses over time}
+
+\subsubsection{All time periods}
+
+<<plotAllDx, fig.width=7, fig.height=4>>=
+    plotDiagnoses(dataf)
+@
+
+\subsubsection{Only 2007-2014}
+
+<<plotSubDx, fig.width=7, fig.height=4>>=
+    plotDiagnoses(subset(dataf, yearDx>=2007 & yearDx<=2014))
+@
+
+\subsubsection{Subset decision}
+Let's limit to 2008-2013, assuming stable reporting by 2008 and no reporting delay affecting 2013 data.
+
+<<subset, echo=TRUE>>=
+    dataS <- subset(dataf, yearDx>=2008 & yearDx<=2013)
+@
+
+\section{Impact of missing date info}
+
+\subsection{Identifying cases with missing date info}
+<<missCases, echo=TRUE>>=
+
+    # Identify cases with some missing date info, using
+    # the "flag" variable that the formatting script creates
+    (flags <- unique(dataS$flag))
+    missFlags <- flags[grepl("Missing", flags)]
+    missCases <- dataS$flag%in%missFlags
+
+    # Tabulate those cases with some missing date info (missDate)
+    # against everHadNegTest. There will be values in all cells
+    # because people can have missing date info in either their
+    # dx date, lneg date, or both
+    (missTable <- table(missDate=missCases, 
+                       everHadNegTest=dataS$everHadNegTest, useNA='ifany'))
+
+    # Marginal values for everHadNegTest
+    (missColSum <- colSums(missTable))
+
+    # Marginal values for missDate, missing date info
+    (missRowSum <- rowSums(missTable))
+@
+
+Of the \Sexpr{missColSum["TRUE"]} people who have had a prior negative test, \Sexpr{round(100*missTable['TRUE', 'TRUE']/missColSum['TRUE'],2)}\% of them have some missing date information in either their diagnosis date or their last negative test date. 
+
+This means that when records with missing date information are not used to estimate the TID, \Sexpr{round(100*missColSum['FALSE']/sum(missColSum['FALSE']+missTable['FALSE','TRUE']),2)}\% of the records used to estimate the TID are those with no prior negative test. 
+
+If we make some assumptions (e.g., impute day=15th when day is missing) to allow the use of the records with missing date info, the percentage of records used to estimate the TID who have no prior negative test goes down to \Sexpr{round(100*missColSum['FALSE']/sum(missColSum['FALSE']+missColSum['TRUE']),2)}\%. 
+
+\subsection{TID including vs excluding records with missing date info}
+<<TIDs, echo=TRUE>>=
+    
+    # TID excluding records having missing date info: just remove
+    # those cases who are everHadNegTest=TRUE but have missing
+    # date info
+    excludeInf <- dataS$infPeriod[!(missCases & 
+                                    !is.na(dataS$everHadNegTest) &
+                                    dataS$everHadNegTest)]
+    excludeMissTID <- estimateTID(excludeInf, intLength=0.25)
+
+    # TID including records having missing date info
+    includeMissTID <- estimateTID(dataS$infPeriod, intLength=0.25)
+
+
+    # Combine both base cases and look at them
+    bothBC <- list(includeMiss_BC=includeMissTID[['base_case']],
+                   excludeMiss_BC=excludeMissTID[['base_case']])
+    class(bothBC) <- append(class(bothBC), 'TID')
+@
+<<TIDplot, fig.height=4.5, fig.width=4.5>>=
+    plot(bothBC, intLength=0.25)
+@
+
+\section{Impact of time trends on TID}
+
+\subsection{Trends in everHadNegTest}
+<<plotEverHad, fig.width=5, fig.height=3>>=
+    plotTestHist(dataS)
+@
+No's are being replaced by Missings. This will impact the TID via the assumption we make for the No's.
+
+\subsection{TID by year}
+\subsubsection{Trend by year among all non-missing everHadNegTest}
+<<TIDtime1, echo=TRUE>>=
+    
+    ####################
+    # First look at the infPeriod vector
+    ####################
+
+    # InfPeriod over time
+    by(dataS$infPeriod,dataS$yearDx,function(a)mean(a,na.rm=T))
+    mean(dataS$infPeriod,na.rm=T)
+    oneway.test(infPeriod ~ yearDx,data=dataS)
+        # Significant difference over time
+@
+There is a significant difference over time. However, this could be driven by the decrease in No's over time.
+
+\subsection{Trend by year among everHadNegTest=TRUE, i.e. those with an observed infPeriod}
+
+<<TIDtime2,echo=TRUE>>=
+
+    # Repeat the test for trend over time, but only use records
+    # where everHadNegTest=TRUE
+    dataS <- transform(dataS,
+                       infPeriodYES=ifelse(!is.na(everHadNegTest) &
+                                               everHadNegTest,
+                                               infPeriod, NA)) 
+    by(dataS$infPeriodYES, dataS$everHadNegTest, summary)
+    by(dataS$infPeriodYES,dataS$yearDx,function(a)mean(a,na.rm=T)) 
+    mean(dataS$infPeriodYES,na.rm=T) 
+    oneway.test(infPeriodYES ~ yearDx,data=dataS) 
+        #  No longer a significant difference over time
+@
+Now there is no longer a significant trend by year.
+
+\subsection{Impact on TID of trend in No's}
+
+If we estimate the TID by year using all non-missing everHadNegTest records, then we would expect to estimate faster times from infection to diagnosis as No's are replaced by Missings.
+
+<<TIDtime3, echo=TRUE>>=
+
+    ####################
+    # Translate this to the TID over time
+    ####################
+
+    # Estimate TID by year and aggregate the Base Cases
+    yearlyTIDs <- lapply(unique(dataS$yearDx),
+                         function(yr) {
+                             dataY <- subset(dataS, yearDx==yr)
+                             #print(unique(dataY$timeDx))
+                             TID <- estimateTID(dataY$infPeriod,
+                                         intLength=0.25)
+                             return(TID[['base_case']])
+                         })
+    names(yearlyTIDs) <- unique(dataS$yearDx)
+    class(yearlyTIDs) <- append(class(yearlyTIDs), 'TID')
+@
+<<TIDyearlyplot, fig.height=4.5, fig.width=4.5>>=
+    plot(yearlyTIDs, intLength=0.25)
+@
+
+The trend is as expected, that in later years when there are more Missings than No's, the TID is shifted towards shorter times from infection to diagnosis. 
+
+\section{Distribution of infPeriod for No's}
+
+<<infPeriodNos, fig.height=5, fig.width=5>>=
+    # Summary
+    summary(subset(dataS, !is.na(everHadNegTest) & !everHadNegTest)$infPeriod)
+
+    # Histogram
+    hist(subset(dataS, !is.na(everHadNegTest) & !everHadNegTest)$infPeriod, 
+         probability=TRUE, 
+         main='Probability distribution of infPeriod among Nos')
+@
+
+\section{Conclusions}
+
+\subsection{Missing Dates}
+It seems reasonable to make some assumptions in order to not throw away dates that have missing day or month information. Otherwise, the TID will be overly influenced by the everHadNegTest=No records for whom we impute a LNT date.
+
+\subsection{TID over time}
+It is not possible to determine from the data whether the trend towards fewer No's and more Missing's is real, or whether it is a survey instrument issue. The testing history method currently pools records over all years in order to estimate a single TID that is then applied to each quarterly diagnosis count, regardless of what year. This actually seems reasonable given that we don't know whether the yearly differences in the data are real or artifical. Pooling the data gives us a sort of average over the years.
+
+
+\end{document}
+

@@ -1,0 +1,209 @@
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201506.csv',
+                  source_these='analysis_WA/format_data.R',
+                  package_updated=TRUE, 
+                  packagefile='HIVBackCalc/R/internal_fxns.R')
+
+library(xtable)
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+if (1==0) {
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+}
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+#read_chunk(file.path(workd,'analysis_WA/describe_data.R'))
+
+
+#############################################################
+# ADDITIONAL FORMATTING FOR EXPLORING BED + DUAL DIAGNOSES
+#############################################################
+BEDlabels <- c('Long-standing infection', 'Recent infection',
+            'Other/unknown')
+           
+dataf <- within(dataf, {
+                est_infect_period=factor(est_infect_period,
+                                         levels=1:3,
+                                         labels=BEDlabels)
+                AidsMinusHIVDx=timeAids-timeDx
+                lateDiag=ifelse(AidsMinusHIVDx<1,TRUE,FALSE)
+                lateDiag[is.na(timeAids)] <- FALSE
+                lateDiagChar=ifelse(lateDiag, 'AIDS w/in 1yr of HIV',
+                                    'no AIDS or not w/in 1yr of HIV')
+            })
+
+@
+
+
+\title{Late diagnoses in WA State, 2005-2014}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Overview}
+
+Sample size: \Sexpr{nrow(dataf)}. This is the formatted dataset used for analysis.
+
+<<everHadNegTest_subgroups, echo=FALSE, results='hide'>>=
+variables <- c(`Late Diagnosis`='lateDiagChar')
+everHadNegTest_subgrouptab <- tabTestHist(dataf, 
+                                          variables, 
+                                          supercolumn=TRUE, 
+                                          fullsample_row=TRUE)
+tab1 <- ddply(dataf, .(lateDiagChar),
+              summarise, 
+              minInfPeriod=min(infPeriod, na.rm=TRUE), 
+              meanInfPeriod=mean(infPeriod, na.rm=TRUE), 
+              maxInfPeriod=max(infPeriod, na.rm=TRUE), 
+              percMissingInfPeriod=100*round(sum(is.na(infPeriod))/length(infPeriod),2))
+
+colnames(tab1) <- c('Late Diag', 'Min', 'Mean', 'Max', 'Perc Missing')
+
+tab <- with(dataf, table(lateDiagChar, everHadNeg=everHadNegTest, useNA='ifany'))
+tabdf <- data.frame(Late=c('Yes', 'No', 'Total'), 
+                    Yes=c(tab[,'TRUE'], sum(tab[,'TRUE'])),
+                    No=c(tab[,'FALSE'], sum(tab[,'FALSE'])),
+                    Missing=c(tab[,3], sum(tab[,3])),
+                    Total=c(rowSums(tab), sum(tab)))
+
+# Changed my mind
+tabdf2 <- transform(tabdf, NonMissing=Yes+No)
+tabdf2$Late <- NULL
+rownames(tabdf2)[3] <- 'Total'
+tabdf2 <- tabdf2[,c('Yes', 'No', 'Missing', 'NonMissing', 'Total')]
+
+tabTotPerc <- round(100*tabdf2/sum(tab),0)
+
+tabRowPerc <- round(100*tabdf2/replicate(4, tabdf2$Total),0)
+
+tabColPerc <- round(100*tabdf2/rbind(tabdf2[3,], tabdf2[3,], tabdf2[3,]),0)
+
+# TID
+all <- estimateTID(dataf$infPeriod, 0.25)
+late <- estimateTID(subset(dataf,lateDiag==TRUE)$infPeriod, 0.25)
+allVlate <- list(all=all[['base_case']], 
+                 lateDiag=late[['base_case']])
+class(allVlate) <- append(class(allVlate), 'TID')
+
+# TID, no No's
+dataf.no <- subset(dataf, everHadNegTest | is.na(everHadNegTest))
+all.no <- estimateTID(dataf.no$infPeriod, 0.25)
+late.no <- estimateTID(subset(dataf.no,lateDiag==TRUE)$infPeriod, 0.25)
+allVlate.no <- list(all=all.no[['base_case']], 
+                    lateDiag=late.no[['base_case']])
+class(allVlate.no) <- append(class(allVlate), 'TID')
+@
+
+\section{Testing history by late diagnosis}
+
+In the tables below, the rows show late diagnosis vs other diagnoses, and the columns give the testing history responses to ``Ever had a negative test?". The NonMissing column is the sum of of Yes+No, so the Yes+No+Missing columns sum to the Total column \emph{and} the Missing+NonMissing columns sum to the Total column.
+<<everHadNegTest_print, results='asis', tidy=FALSE, echo=FALSE>>=
+
+print(xtable(tabdf2,
+             caption='Testing history responses (columns) by late diagnosis status (rows)',
+             label='tab:sample',
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=TRUE,
+      size='small',
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+          #gsub('<=', '', str)
+      })
+
+print(xtable(tabRowPerc,
+             caption='As row percentages',
+             label='tab:rowperc',
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=TRUE,
+      size='small',
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+          #gsub('<=', '', str)
+      })
+
+print(xtable(tabColPerc,
+             caption='As column percentages',
+             label='tab:colperc',
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=TRUE,
+      size='small',
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+          #gsub('<=', '', str)
+      })
+@
+
+Our MAR assumption for testing histories implies that the breakdown of Yes vs No among the observed data apply to the missing data. When we stratify by late diagnosis status, however, we see very different ratios of Yes:No in the observed data. From Table \ref{tab:sample}, the ratio of Yes:No in late diagnoses is 567:320 or \Sexpr{round(567/320,1)}. In other diagnoses, it is 1827:299 or \Sexpr{round(1827/299,1)}. The marginal ratio, not stratified by late diagnosis status, is 2394:619 or \Sexpr{round(2394/619,1)}. 
+
+I think the key group here is the 834 late diagnoses with missing testing histories (\Sexpr{round(100*834/5176,1)}\%). For them, we are effectively assuming a \Sexpr{round(2394/619,1)} ratio of Yes:No but that is probably too high.
+
+\section{TID in late diagnoses versus all diagnoses}
+
+<<infPeriod_print, results='asis', tidy=FALSE, echo=FALSE>>=
+
+print(xtable(tab1,
+             caption='infPeriod by late diagnosis',
+             label='tab:infPeriod',
+             digits=3),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=TRUE,
+      size='small',
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+          #gsub('<=', '', str)
+      })
+@
+
+When we translate the data into the TID, there is a substantial difference between all diagnoses and late diagnoses. Median undiagnosed time is around 1 yr versus 2.5 yrs. Remember this is WITH the assumption for No's being applied. 
+
+<<plotTID, echo=FALSE>>=
+    plot(allVlate, 0.25)
+@
+
+Now looking at the TIDs excluding the No's, so just the Yes's, we see there is still a substantial difference.
+
+<<plotTIDno, echo=FALSE>>=
+    plot(allVlate.no, 0.25)
+@
+
+\end{document}
+
+

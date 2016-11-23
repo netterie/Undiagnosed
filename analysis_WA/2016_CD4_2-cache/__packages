@@ -1,0 +1,15 @@
+base
+knitr
+reshape2
+plyr
+ggplot2
+scales
+lattice
+survival
+Formula
+Hmisc
+rootSolve
+HIVBackCalc
+xtable
+gridExtra
+vcd

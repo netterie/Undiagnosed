@@ -34,7 +34,9 @@ standalone <- FALSE
 if (standalone) {
     rm(list=ls())
     workd <- '/Users/jeanette/Dropbox/School/PhD/HIV_WA'
-    dataf <- read.csv(file.path(workd,'data','WA_BACKCALC_DATA_v2.csv'), 
+    #filename <- 'WA_BACKCALC_DATA_v2.csv'
+    filename <- 'wa_backcalc_data_201506.csv'
+    dataf <- read.csv(file.path(workd,'data', filename), 
                       stringsAsFactors=FALSE, na.strings="")
     library(plyr)
 }
@@ -135,6 +137,9 @@ dataf$timeAids <- dataf$yearAids + (dataf$quarterAids-1)/4
 if (!'year_min'%in%ls()) year_min <- 2005
 if (!'year_max'%in%ls()) year_max <- 2013
 
+# Year min and max for this run
+c(year_min, year_max)
+
 # Non-sequential look
 table(hst_included=dataf$hst=='WA', useNA='ifany')
 table(yearDx_included=dataf$yearDx>=year_min & dataf$yearDx<=year_max, 
@@ -161,10 +166,14 @@ set.seed(98103)
 dataf$quarterDx[impute_qtr] <- sample(4, size=sum(impute_qtr), 
                                       replace=TRUE)
 dataf$timeDx <- dataf$yearDx + (dataf$quarterDx-1)/4
-summary(dataf$timeDx)
+summary(dataf$timeDx, digits=6)
 
 time_min <- min(dataf$timeDx)
 time_max <- max(dataf$timeDx)
+
+# Time min and max for this run
+c(time_min, time_max)
+
 ## ---- collapse ----
 #############################################################
 # COLLAPSE RACE AND MODE OF DIAGNOSIS
@@ -195,9 +204,11 @@ dataf <- within(dataf, {
 # CREATE everHadNegTest
 #############################################################
 # Define everHadNegTest based on tth_ever_neg
+# 2015 data update: this variable was coded numerically, so I have
+# added that option in. 
 dataf <- transform(dataf, 
-                  everHadNegTest=ifelse(tth_ever_neg=='Y', TRUE, 
-                                        ifelse(tth_ever_neg=='N', FALSE, NA)))
+                  everHadNegTest=ifelse(tth_ever_neg=='Y' | tth_ever_neg==1, TRUE, 
+                                        ifelse(tth_ever_neg=='N' | tth_ever_neg==2, FALSE, NA)))
 with(dataf,table(everHadNegTest, tth_ever_neg, useNA='always'))
 
 # Now cross-check it with the lag_lneg_hdx_dt, which actually has the 
@@ -295,6 +306,8 @@ summary(dataf$infPeriod, digits=3)
 ## ---- fix16cases ----
 # This is no longer needed because these 16 cases were fixed in the 
 # 'fix_everHadNegTest_toTRUE' section
+# CAREFUL because running this after the "infPeriod_investigate_zero" section below
+# will overwrite the changes to those zeroes
 these_cases <- with(dataf, is.na(everHadNegTest) & !is.na(lastNeg_yrs))
 sum(these_cases)
 dataf$everHadNegTest[these_cases] <- TRUE 
@@ -302,6 +315,15 @@ dataf$infPeriod[these_cases] <- dataf$lastNeg_yrs[these_cases]
 with(subset(dataf, is.na(everHadNegTest)), table(original_over_aidsUB=lastNeg_yrs>aidsUB,
                  infPeriod_over_aidsUB=infPeriod>aidsUB,
                  useNA='ifany'))
+
+## ---- infPeriod_investigate_zero ----
+# Cases who still have a zero infPeriod - treat like missing
+zeroinf <- dataf$infPeriod==0 & !is.na(dataf$infPeriod)
+(table(dataf$everHadNegTest[zeroinf], useNA='ifany'))
+# Change their everHadNeg flag to NA and their infPeriod to NA,
+# since TID=0 does not make sense
+dataf$everHadNegTest[zeroinf] <- NA
+dataf$infPeriod[zeroinf] <- NA
 
 ## ---- imputeinfPeriod ----
 #############################################################

@@ -1,0 +1,139 @@
+"Subgroup","Year","Diagnoses/Case","PLWHA","Undiagnosed Cases","True Prevalence","Undiagnosed Fraction (%)"
+"MSM Inside KC",2010,"Base Case",,386.5,,
+"MSM Inside KC",2010,"Upper Bound",,751.2,,
+"non-MSM Inside KC",2010,"Base Case",,352.3,,
+"non-MSM Inside KC",2010,"Upper Bound",,682.3,,
+"Inside KC",2010,"Base Case",,738.7,7192.7,10.3
+"Inside KC",2010,"PLWHA",6454,,,
+"Inside KC",2010,"Upper Bound",,1434,7888,18.2
+"MSM Outside KC",2010,"Base Case",,365.5,,
+"MSM Outside KC",2010,"Upper Bound",,712.7,,
+"non-MSM Outside KC",2010,"Base Case",,428.5,,
+"non-MSM Outside KC",2010,"Upper Bound",,789.4,,
+"Outside KC",2010,"Base Case",,794,5223,15.2
+"Outside KC",2010,"PLWHA",4429,,,
+"Outside KC",2010,"Upper Bound",,1502,5931,25.3
+"MSM",2010,"Base Case",,752,8966,8.4
+"MSM",2010,"PLWHA",8214,,,
+"MSM",2010,"Upper Bound",,1464,9678,15.1
+"non-MSM",2010,"Base Case",,780.8,3449.8,22.6
+"non-MSM",2010,"PLWHA",2669,,,
+"non-MSM",2010,"Upper Bound",,1472,4141,35.5
+"Total-stratified",2010,"Base Case",,1533,12416,12.3
+"Total-stratified",2010,"PLWHA",10883,,,
+"Total-stratified",2010,"Upper Bound",,2936,13819,21.2
+"MSM Inside KC",2011,"Base Case",,370.8,,
+"MSM Inside KC",2011,"Upper Bound",,725.1,,
+"non-MSM Inside KC",2011,"Base Case",,348.7,,
+"non-MSM Inside KC",2011,"Upper Bound",,680.9,,
+"Inside KC",2011,"Base Case",,719.4,7055.4,10.2
+"Inside KC",2011,"PLWHA",6336,,,
+"Inside KC",2011,"Upper Bound",,1406,7742,18.2
+"MSM Outside KC",2011,"Base Case",,358.3,,
+"MSM Outside KC",2011,"Upper Bound",,696.3,,
+"non-MSM Outside KC",2011,"Base Case",,417.7,,
+"non-MSM Outside KC",2011,"Upper Bound",,771.9,,
+"Outside KC",2011,"Base Case",,775.9,5470.9,14.2
+"Outside KC",2011,"PLWHA",4695,,,
+"Outside KC",2011,"Upper Bound",,1468,6163,23.8
+"MSM",2011,"Base Case",,729.1,9059.1,8
+"MSM",2011,"PLWHA",8330,,,
+"MSM",2011,"Upper Bound",,1421,9751,14.6
+"non-MSM",2011,"Base Case",,766.3,3467.3,22.1
+"non-MSM",2011,"PLWHA",2701,,,
+"non-MSM",2011,"Upper Bound",,1453,4154,35
+"Total-stratified",2011,"Base Case",,1495,12526,11.9
+"Total-stratified",2011,"PLWHA",11031,,,
+"Total-stratified",2011,"Upper Bound",,2874,13905,20.7
+"MSM Inside KC",2012,"Base Case",,356.4,,
+"MSM Inside KC",2012,"Upper Bound",,699.4,,
+"non-MSM Inside KC",2012,"Base Case",,348.8,,
+"non-MSM Inside KC",2012,"Upper Bound",,676.2,,
+"Inside KC",2012,"Base Case",,705.2,7038.2,10
+"Inside KC",2012,"PLWHA",6333,,,
+"Inside KC",2012,"Upper Bound",,1376,7709,17.8
+"MSM Outside KC",2012,"Base Case",,343.3,,
+"MSM Outside KC",2012,"Upper Bound",,671,,
+"non-MSM Outside KC",2012,"Base Case",,397,,
+"non-MSM Outside KC",2012,"Upper Bound",,744.2,,
+"Outside KC",2012,"Base Case",,740.3,5606.3,13.2
+"Outside KC",2012,"PLWHA",4866,,,
+"Outside KC",2012,"Upper Bound",,1415,6281,22.5
+"MSM",2012,"Base Case",,699.7,9160.7,7.6
+"MSM",2012,"PLWHA",8461,,,
+"MSM",2012,"Upper Bound",,1370,9831,13.9
+"non-MSM",2012,"Base Case",,745.8,3483.8,21.4
+"non-MSM",2012,"PLWHA",2738,,,
+"non-MSM",2012,"Upper Bound",,1420,4158,34.2
+"Total-stratified",2012,"Base Case",,1446,12645,11.4
+"Total-stratified",2012,"PLWHA",11199,,,
+"Total-stratified",2012,"Upper Bound",,2791,13990,19.9
+"MSM Inside KC",2013,"Base Case",,339.6,,
+"MSM Inside KC",2013,"Upper Bound",,672.9,,
+"non-MSM Inside KC",2013,"Base Case",,345.1,,
+"non-MSM Inside KC",2013,"Upper Bound",,665.5,,
+"Inside KC",2013,"Base Case",,684.8,7135.8,9.6
+"Inside KC",2013,"PLWHA",6451,,,
+"Inside KC",2013,"Upper Bound",,1338,7789,17.2
+"MSM Outside KC",2013,"Base Case",,329.7,,
+"MSM Outside KC",2013,"Upper Bound",,651.6,,
+"non-MSM Outside KC",2013,"Base Case",,381.3,,
+"non-MSM Outside KC",2013,"Upper Bound",,725.3,,
+"Outside KC",2013,"Base Case",,711,5797,12.3
+"Outside KC",2013,"PLWHA",5086,,,
+"Outside KC",2013,"Upper Bound",,1377,6463,21.3
+"MSM",2013,"Base Case",,669.3,9409.3,7.1
+"MSM",2013,"PLWHA",8740,,,
+"MSM",2013,"Upper Bound",,1325,10065,13.2
+"non-MSM",2013,"Base Case",,726.4,3523.4,20.6
+"non-MSM",2013,"PLWHA",2797,,,
+"non-MSM",2013,"Upper Bound",,1391,4188,33.2
+"Total-stratified",2013,"Base Case",,1396,12933,10.8
+"Total-stratified",2013,"PLWHA",11537,,,
+"Total-stratified",2013,"Upper Bound",,2715,14252,19
+"MSM Inside KC",2014,"Base Case",,330.7,,
+"MSM Inside KC",2014,"Upper Bound",,653.9,,
+"non-MSM Inside KC",2014,"Base Case",,347.8,,
+"non-MSM Inside KC",2014,"Upper Bound",,659.8,,
+"Inside KC",2014,"Base Case",,678.5,7245.5,9.4
+"Inside KC",2014,"PLWHA",6567,,,
+"Inside KC",2014,"Upper Bound",,1314,7881,16.7
+"MSM Outside KC",2014,"Base Case",,319.8,,
+"MSM Outside KC",2014,"Upper Bound",,642.8,,
+"non-MSM Outside KC",2014,"Base Case",,371.2,,
+"non-MSM Outside KC",2014,"Upper Bound",,712.5,,
+"Outside KC",2014,"Base Case",,691,5761,12
+"Outside KC",2014,"PLWHA",5070,,,
+"Outside KC",2014,"Upper Bound",,1355,6425,21.1
+"MSM",2014,"Base Case",,650.5,9453.5,6.9
+"MSM",2014,"PLWHA",8803,,,
+"MSM",2014,"Upper Bound",,1297,10100,12.8
+"non-MSM",2014,"Base Case",,718.9,3552.9,20.2
+"non-MSM",2014,"PLWHA",2834,,,
+"non-MSM",2014,"Upper Bound",,1372,4206,32.6
+"Total-stratified",2014,"Base Case",,1369,13006,10.5
+"Total-stratified",2014,"PLWHA",11637,,,
+"Total-stratified",2014,"Upper Bound",,2669,14306,18.7
+"MSM Inside KC",2015,"Base Case",,314.8,,
+"MSM Inside KC",2015,"Upper Bound",,629.2,,
+"non-MSM Inside KC",2015,"Base Case",,341.7,,
+"non-MSM Inside KC",2015,"Upper Bound",,647.4,,
+"Inside KC",2015,"Base Case",,656.5,7317.5,9
+"Inside KC",2015,"PLWHA",6661,,,
+"Inside KC",2015,"Upper Bound",,1277,7938,16.1
+"MSM Outside KC",2015,"Base Case",,333.4,,
+"MSM Outside KC",2015,"Upper Bound",,655.4,,
+"non-MSM Outside KC",2015,"Base Case",,370,,
+"non-MSM Outside KC",2015,"Upper Bound",,705.8,,
+"Outside KC",2015,"Base Case",,703.4,6027.4,11.7
+"Outside KC",2015,"PLWHA",5324,,,
+"Outside KC",2015,"Upper Bound",,1361,6685,20.4
+"MSM",2015,"Base Case",,648.2,9719.2,6.7
+"MSM",2015,"PLWHA",9071,,,
+"MSM",2015,"Upper Bound",,1285,10356,12.4
+"non-MSM",2015,"Base Case",,711.7,3625.7,19.6
+"non-MSM",2015,"PLWHA",2914,,,
+"non-MSM",2015,"Upper Bound",,1353,4267,31.7
+"Total-stratified",2015,"Base Case",,1360,13345,10.2
+"Total-stratified",2015,"PLWHA",11985,,,
+"Total-stratified",2015,"Upper Bound",,2638,14623,18

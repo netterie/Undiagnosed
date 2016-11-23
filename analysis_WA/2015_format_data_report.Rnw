@@ -1,0 +1,224 @@
+\documentclass{article}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+
+<<begin, include=FALSE, cache=FALSE, echo=FALSE>>=
+
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201506.csv',
+                  source_these='')
+
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+# Set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='normalsize')
+options(replace.assign=TRUE,width=60,digits=7) 
+#replace.assign is deprecated?
+#options(formatR.arrow=TRUE,width=60,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/format_data.R'))
+
+# Set different year_max than we used last year
+year_min <- 2005
+year_max <- 2014
+
+@
+
+
+\title{WA State HIV Testing Histories - Data Exploration and Formatting}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Data Structure}
+
+<<printSummaries, echo=FALSE, include=FALSE>>=
+@
+<<str, echo=TRUE>>=
+    str(dataf)
+@
+
+\section{Overview}
+
+<<overview, echo=FALSE>>=
+@
+
+\begin{itemize}
+    \item N = \Sexpr{Nobs0}
+\end{itemize}
+
+\section{Raw Variable Summaries}
+
+<<summarize, echo=FALSE>>=
+@
+
+\section{Variable Transformations}
+
+\subsection{Split the combined year-quarter of diagnosis and AIDS variables}
+
+<<split_yr_qtr, include=TRUE>>=
+@
+
+\subsection{Now subset the data based on essentials}
+
+<<subset_initial, echo=TRUE>>=
+@
+Excluded \Sexpr{Nobs0-Nobs1} cases based on year and hst restrictions and missingness in age and year of diagnosis.
+
+\subsubsection{Diagnosis}
+Years of initial diagnosis represented:
+<<yearDx, echo=FALSE>>=
+    table(dataf$yearDx, useNA='ifany')
+@
+
+Quarters of initial diagnosis represented:
+<<quarterDx, echo=FALSE>>=
+    table(dataf$quarterDx, useNA='ifany')
+@
+
+\subsection{Split the combined year-quarter of diagnosis and AIDS variables}
+
+\paragraph{Editing} For those cases when we don't know the quarter, when should the diagnosis fall? Should we evenly distribute them throughout the 4 quarters? I will do that for now:
+
+<<impute_qtr, echo=TRUE>>=
+@
+
+\subsection{Tabulate and collapse race and mode of diagnosis variables}
+
+Investigating counts of race by year and mode by year:
+<<investigate_race_mode, echo=TRUE>>=
+    table(dataf$new_race, dataf$yearDx, useNA='ifany')
+    table(dataf$new_mode, dataf$yearDx, useNA='ifany')
+@
+<<collapse, echo=TRUE>>=
+@
+
+<<investigate_race_mode_again, echo=TRUE>>=
+    table(dataf$race, dataf$yearDx, useNA='ifany')
+    table(dataf$mode, dataf$yearDx, useNA='ifany')
+@
+
+\subsubsection{AIDS at diagnosis}
+
+AIDS at initial diagnosis?
+<<aidsAtDx, echo=FALSE>>=
+    table(dataf$aidsAtDx, useNA='ifany')
+@
+
+Years of AIDS diagnosis represented:
+<<yearAids, echo=FALSE>>=
+    table(dataf$yearAids, useNA='ifany')
+@
+
+Quarters of AIDS diagnosis represented:
+<<quarterAids, echo=FALSE>>=
+    table(dataf$quarterAids, useNA='ifany')
+@
+
+\subsection{Make a flag for everHadNegTest}
+
+This variable will be coded as Yes=TRUE, No=FALSE, and Don't Know/Refused/Missing=NA
+
+<<everHadNegTest, echo=TRUE>>=
+@
+
+\paragraph{Editing} We have \Sexpr{checkEver[1,1]} cases with everHadNegTest=FALSE and \Sexpr{checkEver[3,1]} with everHadNegTest=NA but have a time since last negative test. Change their everHadNegTest flag.
+
+<<fix_everHadNegTest_toTRUE, echo=TRUE>>=
+@
+
+\paragraph{More editing} We have \Sexpr{checkEver[2,2]} cases who have everHadNegTest=TRUE but have NO time since last negative test. Change their everHadNegTest flag.
+
+<<fix_everHadNegTest_toFALSE, echo=TRUE>>=
+@
+
+\paragraph{Better?} 
+
+<<check_everHadNegTest, echo=TRUE>>=
+@
+
+\subsection{Define TID, aka infPeriod}
+
+Define aidsUB=17.98 years, and lastNeg\_yrs as lag\_lneg\_hdx\_dt/365, and infPeriod as follows:
+\\
+
+\begin{tabular}{ll}
+    everHadNegTest & infPeriod \\
+    \hline
+    TRUE & min(lastNeg\_yrs, aidsUB) \\
+    FALSE & min(age-16, aidsUB) \\
+    NA & NA \\
+\end{tabular}
+
+<<infPeriod>>=
+@
+
+<<<>>=
+summary(dataf$infPeriod,digits=3)
+@
+
+\paragraph{Diagnoses younger than age 16} 
+
+<<infPeriod_investigate_neg>>=
+@
+
+There are \Sexpr{sum(a1['TRUE',c(1,3)])} cases who do not have a date of last negative test and may not fit the assumption of TID=age-16. Of those, \Sexpr{sum(a1['TRUE',c(1,3)])-sum(a2['TRUE',c(1,3)])} are age 16 at diagnosis and will have TID=0 using this assumption. Primary mode of transmission is Ped ('Perinatal or pediatric').
+
+<<infPeriod_cap_neg>>=
+@
+Excluded \Sexpr{Nobs1-Nobs2} cases due to age$\leq$16 and no observed infPeriod data.
+
+\subsection{TID is still zero}
+
+<<infPeriod_investigate_zero>>=
+@
+A remaining \Sexpr{sum(zeroinf)} cases had infPeriod=0 for some reason. Since this doesn't make much sense, we treat these as if they had missing responses for everHadNegTest and infPeriod.
+
+\subsection{Check effect of TID definition}
+
+<<infPeriod_cap_tested>>=
+@
+Among those with everHadNegTest=TRUE, we capped \Sexpr{check_cap1[2,1]} cases at aidsUB.
+
+<<infPeriod_cap_nottested>>=
+@
+Among those with everHadNegTest=FALSE, no one had an original TID value.
+
+<<infPeriod_cap_NAtested>>=
+@
+Among those with everHadNegTest=NA, no one had an original TID value.
+
+\section{Analysis Subset}
+
+Final subset is 
+\begin{itemize}
+    \item 2005 onwards
+    \item Diagnosis made in WA state
+    \item If missing age, must have recorded time of last negative test
+    \item If age<=16, must have recorded time of last negative test
+    \item Non-missing year of diagnosis
+\end{itemize}
+
+Final look at data:
+<<final_summary, echo=TRUE>>=
+@
+
+\end{document}
+

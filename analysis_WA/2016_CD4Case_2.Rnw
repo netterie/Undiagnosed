@@ -1,0 +1,152 @@
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\usepackage{color}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm}
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201602.csv',
+                  source_these='analysis_WA/format_data.R',
+                  packagefile='HIVBackCalc/R/internal_fxns.R')
+
+library(xtable)
+library(gridExtra)
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE,
+               purl=TRUE, warning=FALSE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/2016_CD4Case.R'))
+@
+
+
+\title{Impact of using CD4 to inform undiagnosed estimates}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Overview}
+This version of the report is for internal use only. 
+
+
+\section{Methods: Proofs of Equivalence}
+
+\subsection{Base Case versus Base Case Continuous}
+I coded up an alternate version of the Base Case that is identical theoretically but uses a different computational approach, one that can be easily altered to accommodate the CD4 Case. In addition, this approach treats the Base Case TID as a continuous function that has a unique value at every time point, rather than a step function in which the steps are determined by the observed infection windows.
+
+So first let's check that Base Case Alt is the same as Base Case (Table \ref{tab:Sx_bcAlt} and Figure \ref{fig:bcAltPlot}).
+
+<<bcAltTID, echo=FALSE, results='asis'>>=
+@
+
+<<bcAltTIDPlot, echo=FALSE, fig.pos='h', fig.height=4, fig.width=6, fig.cap='Base Case versus Base Case Continuous TIDs'>>=
+@
+
+\subsection{Fake CD4 Case versus Base Case Continuous}
+
+<<cd4caseTID, echo=FALSE, results='asis'>>=
+@
+
+<<cd4caseTIDPlot, echo=FALSE, fig.pos='h', fig.height=4, fig.width=6, fig.cap='Fake CD4 Case versus Base Case Continuous TIDs'>>=
+@
+
+\clearpage
+\section{Methods: setting up real CD4-based medians}
+
+<<cd4meds, echo=TRUE>>=
+@
+
+\section{Results: Reminder of testing histories in MSM versus non-MSM}
+<<plotTestHist, echo=FALSE, fig.pos='h', fig.height=3, fig.width=6>>=
+plotTestHist(dataf, panel='mode2')
+@
+
+\section{Results: Total percent of probability re-assigned}
+Looking within mode subgroups, the total percent of probability re-assigned confirms that the relative impact on TID probability is greater for non-MSM.
+<<percProbReassigned>>=
+@
+
+\section{Results: TIDs in MSM versus non-MSM}
+
+\subsection{TID values at select times}
+<<cd4caseTIDReal, echo=FALSE, results='asis'>>=
+@
+
+\subsection{Full TID curves}
+
+<<cd4caseTIDRealPlotMSM, echo=FALSE, fig.pos='h', fig.height=4, fig.width=6, fig.cap='MSM: Real CD4 Case versus Base Case Continuous TIDs'>>=
+<<cd4caseTIDRealPlotnonMSM, echo=FALSE, fig.pos='h', fig.height=4, fig.width=6, fig.cap='non-MSM: Real CD4 Case versus Base Case Continuous TIDs'>>=
+@
+
+\clearpage
+\subsection{Median time undiagnosed}
+This is a little annoying to get, I don't think we need it to tell the story
+
+\subsection{Mean time undiagnosed}
+Here's where it gets interesting. Our eyes see the absolute difference, but the relative difference tells a different story.
+
+<<meanTID, echo=FALSE>>=
+@
+
+
+\clearpage
+
+\section{Results: Incidence and undiagnosed cases}
+<<true_prevalence, include=FALSE, echo=FALSE>>=
+@
+
+<<run_subgroups, include=FALSE, echo=FALSE, cache=FALSE>>=
+@
+
+<<process_subgroups, include=FALSE, echo=FALSE>>=
+@
+
+<<incidence, include=FALSE, echo=FALSE>>=
+@
+
+<<plotInc, echo=FALSE, fig.pos='h', fig.height=5, fig.width=6, fig.cap='Diagnoses, incidence and undiagnosed counts for MSM and non-MSM'>>=
+plot.results(resForInc, panel='Subgroup')
+@
+
+\section{Results: Undiagnosed cases and undiagnosed fractions}
+<<results2, echo=FALSE, results='asis'>>=
+print(xtable(compareAll,
+             caption='Impact of CD4 Case on mean undiagnosed estimates and fractions',
+             label='tab:diff',
+             digits=1),
+      caption.placement='top',
+      table.placement='ht',
+      size='small',
+      include.rownames=FALSE)
+@
+
+
+\end{document}
+

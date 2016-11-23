@@ -1,0 +1,778 @@
+Integrating CD4 data into undiagnosed estimates
+======================================================== 
+author: Martina Morris & Jeanette Birnbaum
+date: 
+autosize: true
+transition: fade
+width: 1920
+height: 1080
+
+<style type = "text/css">
+table { border: 1px solid #ccc; }
+th {    background-color: #dcdcdc;
+        border-bottom: 1px solid #ddd;}
+td {    background-color: #ffffff;
+        border-bottom: 1px solid #ddd;}
+tr:hover {background-color: #f5f5f5}
+</style>
+
+<style>
+.reveal h1, .reveal h2, .reveal h3 {
+  word-wrap: normal;
+  -moz-hyphens: none;
+}
+</style>
+
+<style type = "text/css">
+.reveal table th[align = left], .reveal table td[align = left] {text-align:left}
+.reveal table th[align = center], .reveal table td[align = center] {text-align:center}
+.reveal table th[align = right], .reveal table td[align = right] {text-align:right}
+</style>
+
+```{r setup, include = FALSE, echo = FALSE, cache = FALSE}
+# Reminder: slide types are alert, prompt, section and sub-section
+#############################################################
+# SETUP
+#############################################################
+rm(list = ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd = '/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile = 'data/wa_backcalc_data_201602.csv',
+                  source_these = 'analysis_WA/format_data.R',
+                  load_package = TRUE,
+                  packagefile = 'HIVBackCalc/R/internal_fxns.R')
+
+    library(xtable)
+    library(gridExtra)
+    library(plyr)
+    library(reshape2)
+    library(ggplot2)
+    library(vcd)
+
+
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+knit_hooks$set(inline  =  function(x) {
+                    prettyNum(round(x,2), big.mark = ",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path = 'figure/minimal-', fig.align = 'center', 
+               fig.show = 'hold', concordance = TRUE, external = TRUE,
+               tidy = TRUE, size = 'footnotesize', verbose = TRUE)
+options(formatR.arrow = TRUE,width = 80,digits = 7)
+
+read_chunk(file.path(workd,'analysis_WA/2016_CD4Case.R'))
+```
+
+```{r cd4meds, include = FALSE, echo = FALSE}
+```
+
+```{r transformations, include = TRUE, echo = FALSE}
+# Note that this MUST come after cd4meds, because dataf is 
+# redefined more completely. cd4meds is preserved as-is so 
+# I don't break the CD4Case report (v2 I believe)
+```
+
+
+Project Goal
+======================================================== 
+
+**Use CD4 at diagnosis to _increase the precision_ of undiagnosed HIV estimates from the testing history model** 
+
+*Why* 
+
+- The testing history model relies heavily on the inter-test interval.  For cases diagnosed on their first test, or with negative tests that are far in the past, this creates a long window of possible infection.  These cases are not very informative regarding time of infection, and they reduce the precision of our overall estimates.
+
+- High CD4 measured at diagnosis is an indicator of recent infection, so it can be used to identify cases with long windows who are likely to have been infected recently.
+
+*How*
+
+- Identify typical times from infection associated with CD4 counts from the research literature;
+
+- Use this to reallocate the probability of infection within long infection windows.
+
+- *NOTE:* we are only reallocating from a uniform distribution towards more recent infection when indicated by higher CD4.  We are not reallocating towards a less recent infection when indicated by low CD4.  So the potential impact on the undiagnosed estimate is only possible in one direction:  to reduce the time spent undiagnosed, and the undiagnosed cases at any specific time.
+
+Project Goal
+======================================================== 
+
+*Impact in WA*
+
+- Modest reduction in estimates of undiagnosed cases (about 10%)
+
+- Consistent with the findings from the previous analysis incorporating the BED for recent infection, but with more confidence because the level of missing data is much lower for CD4 (25% vs. 70% for the BED)
+
+Reminder: the Testing History (TH) method
+======================================================== 
+type:sub-section
+
+Base Case TH
+======================================================== 
+Distributes probability of infection uniformly across the possible infection window
+```{r plotProbModel, include=TRUE, echo=FALSE}
+```
+
+<center>
+_Longer windows have less probability assigned to the recent period_
+```{r, include = TRUE, echo = FALSE, fig.width = 8, fig.height = 3.5, dpi = 300, out.width = '1500px'}
+par(mfrow = c(1,2))
+
+plot.BC(2,xmax = 5,ymax = 1.5,t = 'Window  =  2 years',shading = 1,extra.ticks = 1:5)
+plot.BC(5,xmax = 5,ymax = 1.5,t = 'Window  =  5 years',shading = 1,extra.ticks = 1:5)
+
+```
+</center>
+
+<p style="font-size:30px">
+The hazard (instantaneous rate) of infection at any point within the window is 1/(window length), shown by the red line for each window lengths. Time = 0 refers to time of diagnosis.</p>
+<p style="font-size:30px">
+The cumulative probability of diagnosis is the area under the curve. The 2-year window assigns greater probability of infection within the last year than the 5-year window, shown by the grey shaded region.</p>
+
+TH Never-tester assumption:  A window of min(age-16 or 18 years)
+======================================================== 
+
+The age distribution of never-testers will influence the window lengths they contribute to the analysis.
+
+<center>
+_Effect of age on windows for never-testers_
+```{r, include = TRUE, echo = FALSE, fig.width = 8, fig.height = 3.5, dpi = 300, out.width = '1500px'}
+par(mfrow = c(1,2))
+plot.BC(4,xmax = 18,ymax = 2,t = 'Never-tester, aged 20', extra.ticks = 4)
+plot.BC(18,xmax = 18,ymax = 2,t = 'Never-tester, aged 40', extra.ticks = 4)
+```
+</center>
+
+Reminder: Testing history data patterns in WA, 2005-2014
+======================================================== 
+type:sub-section
+
+59% of cases have testing history
+======================================================== 
+
+**Testing histories  =  Tested + Never Tested**
+
+
+```{r everHadDistr, include = TRUE, echo = FALSE}
+```
+
+<center>
+_Breakdown of testing histories in WA HIV cases 2005-2014._
+```{r, include = TRUE, echo = FALSE, fig.width = 8, fig.height = 2.5, dpi = 300, out.width = '1920px'}
+everHadPlot
+```
+</center>
+
+Total N = 5148 <br>
+With testing history N = 3016.
+
+MSM are more likely to have tested before, and less likely to be missing
+======================================================== 
+
+66% of MSM versus 43% of non-MSM have testing histories
+<center>
+_Testing history by group (Percents are within group)_
+```{r everHadbyMSM, echo = FALSE, fig.width = 8, fig.height = 3, dpi = 300, out.width = '1920px'}
+everHadPlotMSM
+```
+</center>
+
+* MSM comprise about 2/3 of cases.<br>
+
+* What is driving differential response rates?
+
+
+Half of all windows are 2 years or less
+======================================================== 
+
+```{r windowDistr, include = TRUE, echo = FALSE}
+```
+<center>
+_Distribution of infection window lengths in years (N = 3016)_
+```{r wd, echo = FALSE, fig.width = 8, fig.height = 2.5, dpi = 300, out.width = '1920px'}
+wdPlot
+```
+</center>
+
+Labels indicate bounds, e.g. (0,1] includes windows >0 and <= 1. The 18-year windows are never-testers (NT).
+
+* 50% have windows between 0 and 2 years (red + gold).
+
+* These cases can not be modified much by CD4 counts
+
+
+About 1/3 of all windows are 5 years or longer (blue + purple)
+======================================================== 
+<center>
+_Distribution of infection window lengths in years (N = 3016)_
+```{r wd2, echo = FALSE, fig.width = 8, fig.height = 2.5, dpi = 300, out.width = '1920px'}
+wdPlotBox
+```
+</center>
+
+* These are the cases that the CD4 data may modify, but only if their CD4 counts at diagnosis are high.
+
+* Less than half of these cases are never-testers (13/31 = 42%).
+
+
+Median window lengths: about 1 year for MSM versus 5 years for non-MSM
+======================================================== 
+<center>
+_Distribution of infection window lengths by group (Percents are within group)_
+```{r wd-MSM, echo = FALSE, fig.width = 8, fig.height = 3, dpi = 300, out.width = '1920px'}
+wdPlotMSM
+```
+</center>
+
+* 58% of non-MSM have windows 5 years or longer, and about half of these are never testers.
+
+* But note that the raw number of cases with 5+ year windows is about the same for both groups.
+
+
+More concurrent HIV/AIDS Dx among non-MSM
+======================================================== 
+<center>
+
+```{r concurrentDx, include = TRUE, echo = FALSE}
+```
+
+_Percent of cases with a concurrent HIV/AIDS diagnosis by group._
+```{r , echo = FALSE, fig.width = 8, fig.height = 3, dpi = 300, out.width = '1920px'}
+concurrentDxPlot
+```
+</center>
+
+* Consistent with the longer window lengths for non-MSM
+
+
+
+MSM Never-testers are younger
+======================================================== 
+<center>
+_Age distribution of never-testers by group_
+```{r meanAge, include = TRUE, echo = FALSE}
+```
+
+
+```{r , echo = FALSE, fig.width = 8, fig.height = 3, dpi = 300, out.width = '1920px'}
+meanAgePlot
+```
+</center>
+
+* Mean age at diagnosis among never-testers is 36 in MSM vs. 42 in non-MSM <br>
+
+* This will also lead to longer windows for non-MSM.
+
+
+Summary: non-MSM have greater potential for modified estimates
+======================================================== 
+
+**Whether it's using BED, CD4, or concurrent AIDS Dx, etc**
+- Longer windows of possible infection for non-MSM = more uncertainty regarging time of infection, more opportunity to reallocate when these measures indicate recent infection and to improve the precision of our estimates.
+
+- Short testing intervals in MSM = low uncertainty regarding time of infection, less potential impact of additional information
+
+**Increasing precision will not necessarily decrease undiagnosed estimates**
+- Modified estimates will deviate from the Base Case only to the extent that these added biomarkers indicate recent infection
+
+- But, for example, if cases with long windows tested due to risky exposure, CD4 should help pick up on that
+
+**Overall estimates may not change much, but our confidence in them will increase**
+
+
+
+Methods: Integrating CD4 into the testing history method
+======================================================== 
+type: sub-section
+
+
+
+CD4 levels by time since infection
+======================================================== 
+
+**We expect individual CD4 trajectory after HIV infection is something like this:**
+
+<center><img src="2016_CD4_CD4vsTime_ideal.png" height="500px" width="700px" /></center>
+
+With CD4 steadily falling over time in the absence of treatment.
+
+
+CD4 levels by time since infection
+======================================================== 
+
+
+**The real picture is more like this:**
+
+<center><img src="2016_CD4_CD4vsTime_variability.png" height="500px" width="1400px" /></center>
+
+CD4 progressions are highly variable across individuals.
+
+* There is still a broad trend that can be summarized
+* But it is summarized in coarse categories, rather than continuous measures
+
+
+Estimated CD4 levels by time since infection (from the research literature)
+======================================================== 
+
+**The standard measure is the number of years it takes for 50% of untreated cases to reach a CD4 level threshold:**
+
+CD4 Threshold | Lodi 2011 | Cori 2015 | We use^* 
+-------------|:------------:|:-------:|:--------:
+500+ | 1.3 | 2.3 | 1.5
+350 | 4.3 | 4.2 | 4.0
+200 | 7.9 | 8.0 | 8.0
+< 200 | | 11.5 | 9.0^** 
+
+<p style = "font-size:30px">
+* Nearest rounded median times that are consistent with both sources. 
+
+** For CD4 < 200, we retain our maximum-window assumption of 18 years, which implies a median time of 9 years.
+</p>
+
+**Interpretation**: 50% of infection probability should occur within the median time. <br><br>
+**Implication**: If a case has CD4 > 500 at diagnosis, for example, we allocate 50% of the infection probability to the 1.5 years prior to Dx, and the remaining 50% to the rest of the window.
+
+<p style = "font-size:20px">Lodi S, Phillips A, Touloumi G, Geskus R, Meyer L, Thiébaut R, et al. Time from human immunodeficiency virus seroconversion to reaching CD4+ cell count thresholds <200, <350, and <500 Cells/mm3: assessment of need following changes in treatment guidelines. Clin Infect Dis Off Publ Infect Dis Soc Am. 2011 Oct;53(8):817–25
+<br><br>
+Cori A, Pickles M, van Sighem A, Gras L, Bezemer D, Reiss P, et al. CD4+ cell dynamics in untreated HIV-1 infection: overall rates, and effects of age, viral load, sex and calendar time. AIDS Lond Engl. 2015 Nov 28;29(18):2435–46.
+</p>
+
+
+How we incorporate CD4 into the TH method
+======================================================== 
+
+**Example:** re-allocating infection probability for an 18 year window
+
+* Base Case: Uniform distribution, so 50% is in each half of the window (0-9] and (9-18]
+
+<center>
+_Allocation of the probability of infection_
+```{r, echo = FALSE, fig.height = 3.5, fig.width = 8, dpi = 300, include = TRUE, out.width = '1920px'}
+par(mfrow = c(1,4))
+plot.BC(18,xmax = 18,ymax = 0.4,t = 'Window = 18 years',shading = 9,extra.ticks = 9)
+```
+</center>
+
+How we incorporate CD4 into the TH method
+======================================================== 
+
+**Example:** re-allocating infection probability for an 18 year window
+
+* Base Case: Uniform distribution, so 50% is in each half of the window (0-9] and (9-18]
+
+* CD4 Case: 50% of infection probability is reallocated to the CD4-based median window
+
+<center>
+_Allocation of the probability of infection_
+```{r, include = TRUE, echo = FALSE, fig.width = 8, fig.height = 3.5, dpi = 300, out.width = '1920px'}
+par(mfrow = c(1,4))
+plot.BC(18,xmax = 18,ymax = 0.4,t = 'Window = 18 years',shading = 9,extra.ticks = 9)
+plot.CD4(maxWindow = 18,xmax = 18,ymax = 0.4,t = 'CD4>500 \n(median = 1.5 yrs)',extra.ticks = 1.5,median = 1.5,shading.median = TRUE,turnoffredline = TRUE)
+plot.CD4(maxWindow = 18,xmax = 18,ymax = 0.4,t = 'CD4 350-500 \n(median = 4 yrs)',extra.ticks = 4,median = 4,shading.median = TRUE,turnoffredline = TRUE)
+plot.CD4(maxWindow = 18,xmax = 18,ymax = 0.4,t = 'CD4 200-350 \n(median = 8 yrs)',extra.ticks = 8,median = 8,shading.median = TRUE,turnoffredline = TRUE)
+```
+</center>
+Base Case (red) versus CD4 Cases (blue) for the three new CD4 threshold values. Shading indicates the new placement of the initial 50% of infection probability.
+
+Note that for cases with CD4 < 200, there is no change from the Base Case.
+
+
+Impact will come from people with "long" windows and high CD4s
+======================================================== 
+
+
+CD4 Category | CD4 Median | Impacts windows longer than 
+-------------| :---------: | :---------:
+>500 | 1.5 | 3.0
+350-500 | 4.0 | 8.0
+200-350 | 8.0 | 16.0
+
+**Actual impact will depend on how much longer windows are than 2x the CD4-based median** 
+* 18-year windows among individuals with CD4>500 will provide much greater impact than 4-year windows, for example
+* Even 18-year windows will have minimal impact among CD4 200-350, since the Base Case median for 18-year windows is 9 years and the CD4-based median is 8 years (not much difference)
+
+Results 1: CD4 data patterns in WA
+======================================================== 
+type: sub-section
+
+28% of cases with testing history do not have useable CD4 data
+======================================================== 
+
+```{r cd4not30, include = TRUE, echo = FALSE}
+```
+
+**Why:  We exclude cases when their first CD4 count is not within 30 days of HIV Dx, or if it's missing**<br>
+Treatment is likely to begin soon after diagnosis, altering CD4 counts
+
+<center>
+_CD4 counts among excluded cases by length of delay or missingness_
+```{r, include = TRUE, echo = FALSE, fig.width = 10, fig.height = 3.5, dpi = 300, out.width = '1920px'}
+cd4not30Plot2
+```
+</center>
+
+* Note the longer the delay, the higher the CD4 count, which is consistent with initiation of treatment.
+
+* It may be possible to refine this exclusion by using info on treatment initiation & viral load.
+
+
+Long windows are weakly correlated with low CD4
+======================================================== 
+```{r cd4scatter, include = TRUE, echo = FALSE}
+```
+For those with a valid first CD4 measure (N=2178)
+
+<center>
+_CD4 count vs infection window length, by testing status (columns) and group (rows)._ 
+```{r, echo = FALSE, fig.width = 10, fig.height = 4, dpi = 300, out.width = '1700px', cache = FALSE}
+cd4scatter2 + geom_smooth()
+``` 
+</center>
+
+* Recall that Never Testers get a window length of min(age-16, 18) years.
+
+* Note how much variability there is, even for the short-window cases!
+
+* Confirms CD4 is a very noisy (i.e., non-informative) measure of recency
+
+
+Low CD4 is more common in never-testers
+======================================================== 
+
+<center>
+_CD4 distribution by testing history (colors) and group (panels)._
+```{r cd4veverHad, echo = FALSE, fig.width = 10, fig.height = 4, dpi = 300, out.width = '1800px', }
+cd4densUnder500 + geom_vline(xintercept = 500, colour = 'black') 
+```
+</center>
+
+* Shaded area indicates CD4 < 500 in never-testers.
+
+* Suggests some testing in response to HIV illness-related symptoms?
+
+* Implies the CD4 data will not modify the estimates for most of these long-window cases.
+
+
+However, some never-testers do have high CD4
+======================================================== 
+
+<center>
+_CD4 distribution by testing history (colors) and group (panels)._
+```{r cd4veverHad500, echo = FALSE, fig.width = 10, fig.height = 4, dpi = 300, out.width = '1800px', cache = FALSE}
+cd4densOver500 + geom_vline(xintercept = 500, colour = 'black')
+```
+</center>
+
+* Shaded area indicates CD4 > 500 in never-testers
+
+* This is where the CD4 case will have greatest impact
+
+Impact:  10% of cases are modified by the CD4 data
+======================================================== 
+
+Recall the impact thresholds:
+
+
+CD4 Category | CD4 Median | Impacts windows longer than
+-------------| :---------: | :---------------------------:
+>500 | 1.5 | 3.0
+350-500 | 4.0 | 8.0
+200-350 | 8.0 | 16.0
+
+
+
+Impact:  10% of cases are modified by the CD4 data
+======================================================== 
+
+```{r cd4vinf, include = TRUE, echo = FALSE}
+```
+
+**Cases are modified if their observed window is at least 2x longer than the CD4-based median window**
+
+<center>
+_Cross-tabulation of window length by CD4 bin.  Green = modified by the CD4 Case_
+```{r, echo = FALSE, fig.width = 8, fig.height = 4, dpi = 300, out.width = '1200'}
+cd4vinfPlot
+``` 
+</center>
+
+* Percents are of the total N with testing histories(N = 3016).  Dot sizes proportional to percent.
+
+
+
+
+CD4 case modifies 7% of MSM versus 17% of non-MSM
+======================================================== 
+
+<center>
+_Cross-tabulation of window length by CD4 bin, by group_
+```{r, echo = FALSE, fig.width = 11, fig.height = 4.5, dpi = 300, out.width = '1700px', cache = FALSE}
+cd4vinfPlotMSM
+``` 
+</center>
+**The group with the smallest impact is CD4 = 250-300 and window > 16**
+
+* more common among non-MSM: 5%, or 5/17  =  29% of modified cases
+
+* than MSM: 1%, or 1/7  =  14% of modified cases
+
+
+Results 2: CD4 impact on estimated median time since infection 
+======================================================== 
+type: sub-section
+
+Estimated median time since infection declines slightly
+======================================================== 
+**Median time since infection  =   time by which 50% of infection probability has occurred**
+
+```{r medDiff, echo = FALSE, include = FALSE}
+```
+
+```{r medDiff2, echo = FALSE, include = FALSE}
+```
+
+<center>
+_Estimated median time since infection under the Base Case (blue) and CD4 Case (orange) by CD4 bin._
+```{r, echo = FALSE, fig.width = 11, fig.height = 5, dpi = 300, out.width = '1800px', cache = FALSE}
+medDiffPlot
+``` 
+</center>
+* Among all cases with testing history (N = 3016)
+
+* Declines are greater among the groups with higher CD4 levels.
+
+
+Absolute decreases in the median time since infection are smaller for MSM
+======================================================== 
+This is what we expected, that the CD4 information would have less impact on MSM.
+
+<center>
+_Average median time since infection under the Base Case (blue) and CD4 Case (orange), by group_
+```{r, echo = FALSE, fig.width = 5, fig.height = 3, dpi = 300, out.width = '1000px', cache = FALSE}
+medDiffPlotMarg
+``` 
+
+</center>
+
+Absolute decreases in the median time since infection are smaller for MSM
+======================================================== 
+
+**This result is a simple product of the proportion of cases modified, and the average change, for each group**
+
+_Contributions to the absolute difference in median time since infection by group._
+
+Population| % Impacted | Average Change | Abs. Difference
+----------| :------------: | :--------------:| :----------:
+MSM | 0.07 | -3.10 | -0.22
+non-MSM | 0.17 | -3.01 | -0.51
+
+Among all cases with testing history (N = 3016)
+
+
+But the relative decline is the same for both groups: about 11%
+======================================================== 
+**This was a bit surprising**
+
+**Why are they the same?**
+* Because the relative decline also depends on the starting values (Base Case estimate)*
+
+_Contributions to the relative difference in median time since infection by group._
+
+Population| Base Case | Abs. Difference | Rel. Difference
+----------| :---------: | :------------: | :--------------:
+MSM | 1.94 | -0.22 | -11.3
+non-MSM | 4.50 | -0.51 | -11.3
+
+
+
+
+
+
+
+Results 3 : CD4 impact on TID estimate
+========================================================
+type: sub-section
+
+
+Average time undiagnosed decreases by about 6% in both groups
+======================================================== 
+
+**Average time undiagnosed  =  the mean of the TID curve**<br>
+
+_Mean TID for the Base Case and CD4 Case, by MSM status_
+
+Population| Base Case | CD4 Case | Difference | Percent Change
+----------| :------------: | :--------------:| :----------: | :-------:
+MSM | 1.83 | 1.72 | 0.11 | -6.13
+non-MSM | 4.38 | 4.13 | 0.25 | -5.74
+
+TID actually changes by 0.39 more percentage points for MSM than non-MSM
+
+
+
+
+Results 4: CD4 impact on undiagnosed estimates
+======================================================== 
+type: sub-section
+
+
+Undiagnosed estimates decrease 5-6% in 2014
+======================================================== 
+
+**Undiagnosed cases**
+
+*Subgroup decreases closely parallel the decreases in mean undiagnosed time (6.13% for MSM and 5.74% for non-MSM)*
+
+Population | Base Case | CD4 Case | Difference | Percent Change
+---------- | :---------: | :--------: | :----------: | :------------:
+Total | 1319.0 | 1247.0 | 72.0 | 5.5
+MSM | 604.7 | 568.4 | 36.3 | 6.0
+non-MSM | 714.3 | 678.2 | 36.1 | 5.1
+
+
+
+**Undiagnosed fractions decrease 0.5-0.7 percentage points in 2014**
+
+
+Population | Base Case | CD4 Case | Absolute Difference  | Percent Change
+---------- | :---------: | :--------: | :----------: | :---------:
+Total | 9.4 | 8.9 | 0.5 | 5.3
+MSM | 6.2 | 5.8 | 0.4 | 6.5
+non-MSM | 17.1 | 16.4 |0.7 | 4.0 
+
+_The fractions take into account diagnosed PLWH. Since the Base Case undiagnosed fraction is much higher for non-MSM, it is less sensitive than the MSM fraction to the CD4 Case's decrease of about 36 undiagnosed cases._
+
+Conclusions, limitations and possibilities
+======================================================== 
+type: sub-section
+
+
+In WA most cases with long windows were not recently infected
+======================================================== 
+
+**If we can interpret the CD4 data with confidence**
+
+
+In WA, only 10% of cases with testing history had infection windows that indicated less probability of recent infection than indicated by their CD4 count
+
+
+In WA, CD4 data incorporation did not impact subgroups differentially
+======================================================== 
+
+**We expected to see greater impact in non-MSM than MSM**
+
+* non-MSM did have a higher fraction of cases impacted (17% for non-MSM versus 7% for MSM)
+
+* But among the modified cases, the MSM had larger decreases in their median infection (50th percentiles: 1.94 years for non-MSM versus 2.34 years for MSM) 
+
+* This translated into (very) slightly higher impacts on mean TID and mean undiagnosed estimates for MSM
+
+
+Limitations
+======================================================== 
+
+**We prioritize testing history data**
+* If testing history indicates more recent infection than CD4 does, we use the testing history
+* What fraction of our LNT data is unverified self-report?
+* Little is known about the accuracy of self-reports of the last negative test before diagnosis
+
+**We use CD4 conservatively**
+* Literature on CD4 trajectories is fairly sparse
+* Data indicate plenty of heterogeneity, hence the need for using a fairly conservative approach for the CD4 Case
+ 
+Future work
+======================================================== 
+
+**Recall that we are still using the "missing at random" assumption for cases without a testing history**
+* But they have a higher prevalence of concurrent HIV/AIDS diagnoses
+* And a lower prevalence of BED-based recent infection
+
+    + _This is one major factor that may be contributing to a downward (i.e., too optimistic) bias in our undiagnosed estimates now_
+
+* We could also use CD4 data in cases with missing testing history
+
+
+**Longer term:  We want to integrate multiple markers**
+* Use a Bayesian approach to combine information from BED, CD4 and concurrent diagnoses
+
+
+Appendix:  Additional details
+======================================================== 
+type: sub-section
+
+
+Among impacted cases, MSM actually have slightly greater decreases in median time since infection
+======================================================== 
+<center>
+_Among impacted cases (N = 296), density of differences in the median time since infection comparing the Base Case to the CD4 Case. Lines indicate the means of the distributions._
+```{r, echo = FALSE, fig.width = 11, fig.height = 4, dpi = 300, out.width = '1500px', cache = FALSE}
+medDiff4Plot
+``` 
+</center>
+
+Mean decrease in median time since infection is slighly larger for MSM (3.10 years) than for non-MSM (3.01 years).
+
+Among impacted cases, MSM actually have slightly greater decreases in median time since infection
+======================================================== 
+<center>
+_Among impacted cases (N = 296), density of differences in the median time since infection comparing the Base Case to the CD4 Case. Lines indicate the medians of the distributions._
+```{r, echo = FALSE, fig.width = 11, fig.height = 4, dpi = 300, out.width = '1500px', cache = FALSE}
+medDiff3Plot
+``` 
+</center>
+
+Median decrease in median time since infection is slighly larger for MSM (2.34 years) than for non-MSM (1.94 years).
+
+Overall impact on TID is subtle
+======================================================== 
+```{r cd4caseTIDReal, include = FALSE, echo = FALSE}
+```
+
+**MSM**<br>
+<center>
+_Time from infection to diagnosis: probability curve (top) and undiagnosed fraction curve (bottom)_
+```{r, echo = FALSE, fig.width = 11, fig.height = 5, dpi = 300, out.width = '1920px', cache = FALSE}
+plot(cd4real.MSM, 0.25, cases = c('Base Case', 'CD4 Case'))
+``` 
+</center>
+
+Overall impact on TID is subtle
+======================================================== 
+**non-MSM**<br>
+<center>
+_Time from infection to diagnosis: probability curve (top) and undiagnosed fraction curve (bottom)_
+```{r, echo = FALSE, fig.width = 11, fig.height = 5, dpi = 300, out.width = '1920px', cache = FALSE}
+plot(cd4real.nonMSM, 0.25, cases = c('Base Case', 'CD4 Case'))
+``` 
+</center>
+
+
+Incidence and undiagnosed results over time
+======================================================== 
+
+<center><img src="2016_CD4Case_2_results.png" height="800px" width="1000px" /></center>
+
+Missing-at-random assumption likely underestimates undiagnosed levels
+======================================================== 
+```{r missAtRand, include = FALSE, echo = FALSE}
+```
+
+_Indicators of recent infection by testing history status_
+```{r, echo=FALSE, results='asis'}
+print(xtable(missLong,digits=0,
+             align=c('l',rep('c', 2))), 
+      type='html',include.rownames=TRUE)
+```
+Among 3589 cases (N=70%) with CD4 measured within 30 days

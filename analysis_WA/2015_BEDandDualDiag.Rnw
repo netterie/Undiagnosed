@@ -1,0 +1,139 @@
+\documentclass{article}
+%\usepackage{wrapfigure}
+\usepackage{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2.5cm,rmargin=2.5cm}
+\begin{document}
+
+<<knitr, include=FALSE, echo=FALSE>>=
+#############################################################
+# SETUP
+#############################################################
+rm(list=ls())
+# TEMPORARY: SOURCE FUNCTIONS
+source('/Users/jeanette/Dropbox/School/PhD/HIV_WA/HIVBackCalc/R/internal_fxns.R')
+
+# Change year min and max
+year_min <- 2005
+year_max <- 2014
+
+# Load libraries, data and data-cleaning file
+# Eventually this function should return the cleaned dataset,
+# but data-cleaning has the name hardcoded as msm and I'm not
+# going to generalize that right now
+setup_hivbackcalc(workd='/Users/jeanette/Dropbox/School/PhD/HIV_WA',
+                  datafile='data/wa_backcalc_data_201506.csv',
+                  source_these='analysis_WA/format_data.R',
+                  package_updated=FALSE, 
+                  packagefile='HIVBackCalc/R/internal_fxns.R')
+
+library(xtable)
+#############################################################
+# KNITR
+#############################################################
+
+library(knitr)
+if (1==0) {
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+}
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+read_chunk(file.path(workd,'analysis_WA/run_main.R'))
+#read_chunk(file.path(workd,'analysis_WA/describe_data.R'))
+
+
+#############################################################
+# ADDITIONAL FORMATTING FOR EXPLORING BED + DUAL DIAGNOSES
+#############################################################
+BEDlabels <- c('Long-standing infection', 'Recent infection',
+            'Other/unknown')
+           
+dataf <- within(dataf, {
+                est_infect_period=factor(est_infect_period,
+                                         levels=1:3,
+                                         labels=BEDlabels)
+                AidsMinusHIVDx=timeAids-timeDx
+                dualDiag=ifelse(AidsMinusHIVDx<1,TRUE,FALSE)
+                dualDiag[is.na(timeAids)] <- FALSE
+                dualDiagChar=ifelse(dualDiag, 'AIDS w/in 1yr of HIV',
+                                    'no AIDS or not w/in 1yr of HIV')
+            })
+
+@
+
+
+\title{Recent infections and dual diagnoses in WA State, 2005-2014}
+\author{Martina Morris and Jeanette Birnbaum}
+\maketitle
+
+\section{Overview}
+
+Sample size: \Sexpr{nrow(dataf)}. This is the formatted dataset used for analysis.
+
+<<everHadNegTest_subgroups, echo=FALSE, results='hide'>>=
+variables <- c(`BED Result`='est_infect_period', 
+               `Dual Diagnosis 1yr`='dualDiagChar')
+everHadNegTest_subgrouptab <- tabulate_everHadNegTest(dataf,
+                                                      variables,
+                                                      supercolumn=TRUE,
+                                                      fullsample_row=TRUE)
+tab1 <- ddply(dataf, .(dualDiagChar, est_infect_period), 
+              summarise, 
+              minInfPeriod=min(infPeriod, na.rm=TRUE), 
+              meanInfPeriod=mean(infPeriod, na.rm=TRUE), 
+              maxInfPeriod=max(infPeriod, na.rm=TRUE), 
+              percMissingInfPeriod=100*round(sum(is.na(infPeriod))/length(infPeriod),2))
+
+colnames(tab1) <- c('Dual Diag', 'BED', 'Min', 'Mean', 'Max', 'Perc Missing')
+
+tab2 <- with(dataf, table(BEDResult=est_infect_period, dualDiagChar, useNA='ifany'))
+@
+
+\subsection{Breakdown of BED results and dual diagnoses}
+
+<<dualDiagbyBED, results='asis', tidy=FALSE, echo=FALSE>>=
+    print(xtable(tab2))
+@
+
+\subsection{Testing history by dual diagnoses and BED result}
+<<everHadNegTest_print, results='asis', tidy=FALSE, echo=FALSE>>=
+
+print(xtable(everHadNegTest_subgrouptab,
+             caption='Testing history responses by dual diagnosis status and BED result status',
+             label='tab:sample',
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=FALSE,
+      size='small',
+#      include.colnames=FALSE,
+#      add.to.row=list(pos=list(-1),
+#                      command='Characteristic & Subgroup & N & Column \\% & \\% Yes & \\% No & \\% Missing'))
+      sanitize.text.function=function(str) {
+          gsub('(\\.)*Percent(\\.)*', ' \\\\% ',str);
+          #gsub('<=', '', str)
+      })
+
+@
+
+<<<infPeriodsummaryprint, results='asis', tidy=FALSE, echo=FALSE>>=
+print(xtable(tab1,
+             caption='infPeriod summary by dual diagnosis status and BED result status',
+             label='tab:infPeriod',
+             digits=3),
+      table.placement='!h',
+      caption.placement='top',
+      include.rownames=FALSE,
+      size='small'
+      )
+@
+
+
+\end{document}
+
+
