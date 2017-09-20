@@ -1,0 +1,637 @@
+---
+title: "Late Diagnosis Exploration Using WA State Data"
+author: "Martina Morris & Jeanette Birnbaum"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  pdf_document:
+      toc: true
+      toc_depth: 2
+      number_sections: true
+
+---
+
+```{r edit, include=FALSE, echo=FALSE}
+rm(list=ls())
+#############################################################
+# NOTES
+#############################################################
+# As of 11/4/16, the way use this file is to set runNew to TRUE
+# to get fresh results. runNew to FALSE will used saved results
+
+#############################################################
+# EDIT THESE PARAMETERS
+#############################################################
+# Run a fresh estimation? And, define named vector of cases
+runNew <- FALSE
+estimation_cases <- c(`Base Case`='base_case', `Upper Bound`='upper_bound')
+
+# Specify year min and max for analysis
+year_min <- 2005
+year_max <- 2014
+
+# Specify time step
+diagInterval <- 0.25
+
+# Local path of the Undiagnosed repo (that contains "wa", "templates", etc)
+undx_repo <- '/Users/jeanette/Dropbox/School/PhD/HIV_WA'
+
+# Within above repo, path to data files
+data_path <- 'data/wa_backcalc_data_201610.csv'
+prev_path <- 'data/wa_prev_2010-2015.csv'
+results_path <- 'wa/concurrentdx2015/results/raw/latedx2014.csv'
+
+# Within above repo, path to code files
+format_path <- 'wa/code/formatWA.R'
+```
+
+```{r setup, include=FALSE}
+#############################################################
+# TECHNICAL SETUP
+#############################################################
+
+#--------------------------------------------------------------------------------
+# Packages
+#--------------------------------------------------------------------------------
+# Install Rjkb using 
+#   devtools::install_github('netterie/Rjkb/Rjkb')
+library(Rjkb)
+library(knitr)
+library(gridExtra)
+library(xtable)
+
+#--------------------------------------------------------------------------------
+# Knitr
+#--------------------------------------------------------------------------------
+knit_hooks$set(inline = function(x) {
+                    prettyNum(round(x,2), big.mark=",")
+                  })
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', 
+               fig.show='hold', concordance=TRUE, external=TRUE,
+               tidy=TRUE, size='footnotesize', verbose=TRUE,
+               purl=TRUE, warning=FALSE, echo=FALSE, message=FALSE)
+options(formatR.arrow=TRUE,width=80,digits=7)
+
+#--------------------------------------------------------------------------------
+# xtable
+#--------------------------------------------------------------------------------
+options(xtable.comment = FALSE)
+```
+
+```{r data, include=FALSE}
+#############################################################
+# AUTOMATED DATA LOADING AND FILE PATH SETUP
+#############################################################
+
+# Install the package
+devtools::install_github('hivbackcalc/package1.0/HIVBackCalc')
+
+# Load the data and format it; load the HIVBackCalc package.
+# Update the package before running this script - don't source interim work.
+setup_hivbackcalc(workd=undx_repo,
+                  datafile=data_path,
+                  source_these=format_path,
+                  load_package=TRUE)
+
+# Save a copy of full dataset and original results path
+datafOrig <- dataf
+results_path_orig <- results_path
+prev_path_orig <- prev_path
+
+# Read in the prevalence data - note the importance of check.names
+prev_data <- read.csv(file.path(undx_repo, prev_path), 
+                      check.names=FALSE,
+                      header=TRUE)
+# Edit the prevalence data - FAKE
+colnames(prev_data) <- gsub('Inside KC', 'Late Dx', colnames(prev_data))
+colnames(prev_data) <- gsub('Outside KC', 'No Late Dx', colnames(prev_data))
+```
+
+```{r run, include=FALSE}
+# Create late diagnosis variable
+dataf <- within(dataf, {
+                AidsMinusHIVDx=timeAids-timeDx 
+                lateDiag=ifelse(AidsMinusHIVDx<1,TRUE,FALSE)
+                lateDiag[is.na(timeAids)] <- FALSE
+                lateDiagChar=ifelse(lateDiag, 
+                                    'Late Dx', 
+                                    'No Late Dx/No AIDS')
+                      })
+# Combine MSM status with lateDiag for a 4-subgroup variable
+dataf <- transform(dataf, 
+                   aidsMSM=ifelse(lateDiag & mode2=='MSM', 
+                                'MSM Late Dx',
+                                ifelse(lateDiag & mode2=='non-MSM',
+                                       'non-MSM Late Dx',
+                                       ifelse(!lateDiag & mode2=='MSM',
+                                              'MSM No Late Dx',
+                                              'non-MSM No Late Dx')))
+                   )
+
+# Stratified by late dx 
+# (no fractions since there's no PLWH by concurrent dx group)
+ldx <- runAnalysis(dataf, list(c(`Mode`='mode2', `Late Diagnosis`='lateDiag')),
+                   subvar='aidsMSM', intLength=diagInterval, cases=estimation_cases,
+                   runEstimation=runNew, savedEstimation=!runNew, prev=prev_data,
+                   save=gsub('.csv', '_ldxWA.csv', 
+                              file.path(undx_repo, results_path)))
+
+# Comparison scenario: not stratified by concurrent dx
+orig <- runAnalysis(dataf, list(c(`Mode`='mode2')),
+                   subvar='mode2', intLength=diagInterval, cases=estimation_cases,
+                   runEstimation=runNew, savedEstimation=!runNew, prev=prev_data,
+                   save=gsub('.csv', '_origWA.csv', 
+                              file.path(undx_repo, results_path)))
+
+# For MSM vs non-MSM, just compute simple marginals. Use the results
+# from the 'ldx' object and collapse across inside/outside KC. Honestly
+# it was a somewhat arbitrary choice to focus on inside/outside KC more
+# than MSM/non-MSM.
+# p.s. I wonder why check.names=FALSE doesn't work. Here it doesn't matter,
+# in other cases perhaps within is the way to go
+msmResults <- nonmsmResults <-  ldx$resultsCompiled$results
+# Change the marginals to reflect msm/non-msm values, not the total
+msmResults$resultsAll <- transform(msmResults$resultsAll,
+                        value=`MSM Late Dx`+`MSM No Late Dx`,
+                        check.names=FALSE)
+nonmsmResults$resultsAll <- transform(nonmsmResults$resultsAll,
+                        value=`non-MSM Late Dx`+`non-MSM No Late Dx`,
+                        check.names=FALSE)
+# Calculate true prev
+# This weird structure is just to make it easier to compile with the inKC/outKC
+# results later
+# Remember, to get this results, the actual estimation was stratified
+# by inside/outside KC
+msmResults$resultsCompiled$trueprev <- calcTruePrev(sumResults(msmResults,
+                                                               acrossYears=FALSE,
+                                                               addclass=TRUE),
+                                                    prev=subset(prev_data,
+                                                                select=c(Year,
+                                                                         MSM)))
+msmResults$resultsCompiled$trueprev$Subgroup <- 'Total-stratified'
+nonmsmResults$resultsCompiled$trueprev <- calcTruePrev(sumResults(nonmsmResults,
+                                                               acrossYears=FALSE,
+                                                               addclass=TRUE),
+                                                    prev=subset(prev_data,
+                                                                select=c(Year,
+                                                                         `non-MSM`)))
+nonmsmResults$resultsCompiled$trueprev$Subgroup <- 'Total-stratified'
+
+
+# Compile and clean results - COME BACK TO THIS
+thesecols <- c('Year', 'Diagnoses/Case', 'Estimate', 'Mean')
+prettyprev <- orig$resultsCompiled$trueprev[,c(thesecols, 'Subgroup')]
+prettyprev$Method <- 'Without Late Dx'
+prettyprev2 <- subset(ldx$resultsCompiled$trueprev[,c(thesecols, 'Subgroup')],
+                      Subgroup=='Total-stratified')
+prettyprev2$Method <- 'With Late Dx'
+
+# MSM/non-MSM - I don't know where these colnames should have been
+# standardized...maybe within the subResults function?
+prettyMSM <- msmResults$resultsCompiled$trueprev[,thesecols]
+prettyMSM$Subgroup <- 'MSM'
+prettyMSM$Method <- 'With Late Dx'
+prettynonMSM <- nonmsmResults$resultsCompiled$trueprev[,thesecols]
+prettynonMSM$Subgroup <- 'non-MSM'
+prettynonMSM$Method <- 'With Late Dx'
+# Add them all together
+prettyprev <- rbind(prettyprev, prettyprev2, prettyMSM, prettynonMSM)
+# Melt and reshape?
+longall <- subset(melt(prettyprev, id.vars=c('Method', 'Subgroup', 'Diagnoses/Case', 
+                                          'Estimate', 'Year')), 
+               variable=='Mean' & (Estimate=='Undiagnosed Cases' |
+                                   Estimate=='Undiagnosed Fraction (%)'))
+wideall <- dcast(longall, Subgroup+Year+`Diagnoses/Case`~Method+Estimate, value.var='value')
+#wideall <- subset(wideall, Subgroup!='Total-stratified')
+# Compute percent change
+wideall <- transform(wideall,
+                     `% Change, Cases`=round(100*((`With Late Dx_Undiagnosed Cases`-
+                                                 `Without Late Dx_Undiagnosed Cases`)/
+                                                 `Without Late Dx_Undiagnosed Cases`),
+                             2),
+                     `% Change, Fraction`=round(100*((`With Late Dx_Undiagnosed Fraction (%)`-
+                                                 `Without Late Dx_Undiagnosed Fraction (%)`)/
+                                                 `Without Late Dx_Undiagnosed Fraction (%)`),
+                             2)
+                     )
+colnames(wideall) <- c('Subgroup', 'Year', 'Case', 
+                       'Cases, Late Dx',
+                       'Fraction, Late Dx',
+                       'Cases', 
+                       'Fraction',
+                       '% Change (Cases)', 
+                       '% Change (Fraction)')
+wideall <- wideall[c('Year', 'Subgroup', 'Case', 
+                       'Cases', 
+                       'Cases, Late Dx',
+                       '% Change (Cases)', 
+                       'Fraction',
+                       'Fraction, Late Dx',
+                       '% Change (Fraction)')]
+
+if (runNew) {
+    write.csv(wideall, file.path(undx_repo, 
+                    gsub('.csv', '_final.csv', results_path)),
+                    row.names=FALSE,
+                    na='')
+}
+
+# For printing with xtable
+printnames=c('Cases'='Original', 
+             'Cases, Late Dx'='With Late Dx Strata', 
+             'Fraction'='Original', 
+             'Fraction, Late Dx'='With Late Dx Strata', 
+             '% Change (Cases)'='% Change', 
+             '% Change (Fraction)'='% Change')
+```
+
+```{r note1}
+# Note that \newpage works because we're knitting to pdf. See 
+# http://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+\newpage
+
+# Summary of Results
+*Late diagnoses* are ones defined by an AIDS diagnosis within 1 year of the HIV diagnosis. The goal of this project was to integrate late HIV diagnoses into the testing history method for estimating undiagnosed cases of HIV, and to report the impact of the new information on the estimate. We did this by stratifying the estimation by late diagnosis status, which allows each stratum to have a different, and more accurate, distributions of time from infection to diagnosis (TID). 
+
+* The adjusted undiagnosed estimates fall within 5% of the original estimates for most years, a relatively small change. While stratifying by late diagnoses paints a clearer picture of the late and non-late strata, the overall results are similar to a weighted average of the stratum-specific results, which is what the original analysis produces. 
+    + The original analysis appears to reasonably reflect the contribution of late diagnoses to the overall average TID and undiagnosed cases. The original analysis stratifies by MSM/non-MSM status, which is highly correlated with late diagnoses. Thus the additional stratification by late diagnoses has only minor influence.
+
+* The direction of the change in estimates varies across years. In earlier years, incorporating late diagnoses increases undiagnosed estimates slightly, but in later years, it decreases undiagnosed estimates. We believe this is because it picks up on a declining trend in late diagnoses that was masked in the unstratified analysis.
+
+## Estimates of undiagnosed HIV (using Base Case assumptions)
+```{r sumtable0, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Base Case' & Subgroup=='Total-stratified', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+# Multirow at top
+addtorow <- list(pos=list(-1),
+                 command='\\hline & \\multicolumn{3}{c|}{Cases} & \\multicolumn{3}{c}{Fraction} \\\\')
+
+# Print
+print(xtable(toprint,
+             caption='Total Population Undiagnosed',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```
+
+```{r sumtable1, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Base Case' & Subgroup=='MSM', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+# Print
+print(xtable(toprint,
+             caption='MSM Undiagnosed',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```
+
+```{r sumtable2, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Base Case' & Subgroup=='non-MSM', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+print(xtable(toprint,
+             caption='non-MSM Undiagnosed',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```
+
+\newpage
+# Data description and basic trends
+## Analytic sample
+Analytic data set has `r nrow(dataf)` cases for 2005-2014. We note that 79 cases who were 16 or younger and had no observed date of LNT were excluded from the original dataset, along with diagnoses prior to 2005. We limit this analysis to diagnoses occuring by 2014 so that all cases have the opportunity to present with AIDS within 1 year of diagnosis, our definition of late diagnosis. 
+
+## Diagnoses by MSM/Late Dx subgroups
+The figure below shows that 33% of all diagnoses in 2005-2014 were late diagnoses, but non-MSM have disproportionately more late diagnoses than MSM. 
+```{r, fig.width=6, fig.height=3.5, fig.pos='!h', fig.cap="Number of diagnoses overall (top bar) and separately by non-MSM and MSM subgroups. Colors indicate late diagnosis and percentages sum to 100 percent within each bar."}
+plot_categorical(dataf, 'lateDiagChar', group='mode2', stack=TRUE, margin='yes',
+                 regular_legend=TRUE)
+```
+
+## Diagnoses over time by MSM/Late Dx subgroups
+When we look over time, we see a slight downward trend in absolute numbers of late diagnoses as well as the percent of diagnoses that are late. This will impact our estimation in the late diagnoses strata - the method will model a decline in incidence to match this trend.
+
+
+```{r dx1,  fig.pos='!h', fig.height=3.5, fig.width=7, fig.cap='Diagnoses per quarter by MSM/non-MSM subgroups. Colors indicate late diagnoses.'}
+ldx$dx$plot + aes(color=mode2) + facet_grid(.~lateDiagChar, scales='free_y')
+```
+
+
+```{r perclate, fig.pos='!h', fig.height=3, fig.width=5, fig.cap='Within MSM/non-MSM subgroups, percent of diagnoses that were late'}
+d <- ggplot(transform(dataf, latePerc=ifelse(lateDiag, 100, 0)), 
+            aes(x=yearDx, colour=mode2))
+d + stat_summary_bin(aes(y = latePerc), fun.y = "mean", geom = "point") + 
+    stat_summary_bin(aes(y = latePerc), fun.y = "mean", geom = "line") + 
+    scale_x_continuous(name='Year of Diagnosis',
+                       breaks=c(min(dataf$yearDx):max(dataf$yearDx))) + 
+    scale_y_continuous(name='Percent of diagnoses that were late') + 
+    theme_bw() + scale_colour_discrete(name='')
+
+# Cool but not quite what we need
+#plot_categorical(dataf, 'lateDiagChar', group='yearDx', panel='mode2', 
+#                 stack=TRUE, margin='no', regular_legend=TRUE, flipcoord=FALSE) + 
+#facet_grid(panel~., scales='free_y')
+```
+
+\newpage
+
+# Testing Histories
+
+## Responses to "Ever had a negative test?"
+The table below gives the breakdown of testing histories in the sample, overall (last row) and by MSM/late diagnosis subgroups. The subgroup data are also shown in the following bar plot, where the percentages displayed in the bars correspond to the row percentages in the table. 
+
+Late diagnoses are more likely to have missing testing history and more likely to have no testing history, for both MSM and non-MSM subgroups. However the contrast is much greater for MSM, e.g. the 6% reporting no prior negative test more than doubles to 17% among late diagnoses. 
+
+Given our missing-at-random assumption for testing history, the differential patterns of never-testing are potentially significant. When we do not stratify the estimation by late diagnosis, we assume that the late diagnoses have the same TID as the rest of the cases (within MSM/non-MSM subgroups). The greater ratio of No:Yes testing history among late-diagnosed MSM suggests otherwise. Stratifying the estimation by late diagnosis status thus allows us to be more accurate in how missing data are handled. 
+
+```{r, fig.width=8, fig.height=3.5, fig.pos='!h', fig.cap="Testing history response frequencies by MSM and late diagnosis subgroups."}
+dataf <- transform(dataf, everHad3=ifelse(is.na(everHadNegTest), 'Missing',
+                                          ifelse(everHadNegTest, 'Yes', 'No')))
+plot_categorical(dataf, 'everHad3', panel='mode2',
+                 group='lateDiagChar', stack=TRUE, margin='no',
+                 regular_legend=TRUE) + facet_grid(.~panel, scales='free_x') + 
+theme(legend.position='bottom')
+```
+
+```{r th1, results='asis'}
+# Fancify the table a little
+thtab <- arrange(ldx$th$table, Mode)[c(2:5,1),]
+thtab[,'Late Diagnosis'] <- ifelse(thtab[,'Late Diagnosis'],
+                                          'Yes', 'No')
+thtab$Mode[2]  <- thtab$Mode[4]  <- ''
+thtab[,2][5] <- 'All'
+colnames(thtab) <- gsub('Percent', '%', colnames(thtab))
+
+# For printing with xtable: Multirow at top
+addtorow <- list(pos=list(-1),
+                 command='\\hline & & & & \\multicolumn{3}{|c}{Ever Had a Negative Test} \\\\')
+
+# Print with xtable
+print(xtable(thtab,
+             caption='Breakdown of testing histories in the sample. Column percent shows the composition of the total sample. The Percent Yes, Percent No and Percent Missing columns indicate the row percents of the three possible testing history statuses within each subgroup',
+             align=c('l','l','l', 'r', 'r', '|r', 'r', 'r'),
+             digits=0),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,4,5),
+      size='small'
+      )
+```
+
+```{r, fig.height=4, fig.width=6}
+# plotTestHist(dataf, panel='aidsMSM') + facet_wrap(~Panel, ncol=2)
+```
+## Reported infection windows
+The plot below shows how reported testing windows are distributed between 0-1, 1-5, and 5-18 year categories within MSM and late diagoses subgroups (percents sum to 100 within each subgroup). We see that shorter windows are less common among late diagnoses, but the contrast is much greater in non-MSM. Close to half of non-MSM late diagnoses with non-missing testing history are never-testers for whom the min(age-16, 18) assumption gives them an 18-year window. These infection window intervals suggest that late diagnoses will have very different TIDs from the non-late diagnoses.
+
+
+```{r, fig.width=6, fig.height=3.5, fig.pos='!h', fig.cap="Inter-test interval window lengths among those with non-missing testing history. 18 (NT) refers to the 18-year windows that arise from never-testers"}
+dataf <- transform(dataf, infPeriod2=ifelse(!everHadNegTest & hdx_age>34, 19, infPeriod))
+dataf <- transform(dataf, infCat=cut(infPeriod2, breaks=c(0,2.5,5,18,19)))
+levels(dataf$infCat)[length(levels(dataf$infCat))] <- '18 (NT)'
+if (1==0) {
+    # Decided against these
+    #plot_categorical(dataf, 'infCat', group='lateDiagChar', regular_legend=TRUE,
+    #                 panel='mode2', stack=TRUE) + facet_grid(.~panel, scales='free_x')
+    plot_categorical(dataf, 'infCat', group='lateDiagChar', regular_legend=TRUE,
+                     panel='mode2', stack=TRUE, flipcoord=FALSE) + 
+    facet_grid(panel~., scales='free_y')
+    plot_categorical(dataf, 'infCat', group='mode2', regular_legend=TRUE,
+                     panel='lateDiagChar', stack=FALSE, flipcoord=FALSE, yperc=TRUE) + 
+    facet_grid(panel~., scales='free_y') + scale_y_continuous(name='Percent')
+}
+plot_categorical(dataf, 'infCat', group='lateDiagChar', regular_legend=TRUE,
+                 panel='mode2', stack=FALSE, flipcoord=FALSE, yperc=TRUE) + 
+facet_grid(panel~., scales='free_y') + scale_y_continuous(name='Percent')
+```
+
+We note that the literature suggests that only 10% of HIV cases are "rapid progressors" who progress to AIDS within 2-3 years [^1][^2]. It thus seems unlikely that 34% of MSM late diagnoses have progressed from HIV to AIDS within 2.5 years, but that is 34% _of late diagnoses with non-missing testing history_. Of the 959 MSM late diagnoses, 40% have missing testing history. Given the typical times to AIDS progression, these late diagnoses with missing testing history probably have longer inter-test intervals than the late diagnoses who do report testing history.
+
+[^1]: Haynes BF, Pantaleo G, Fauci AS. Toward an understanding of the correlates of protective immunity to HIV infection. Science. 1996 Jan 19;271(5247):324–8. 
+[^2]: According to the CDC’s gamma(2,4) AIDS incubation distribution, 10% of cases will progress to AIDS in 2.12 years; only 2.6% within 1 year. 
+
+# Time from Infection to Diagnosis (TID)
+The Base Case TID plots show how the longer infection windows for late diagnoses that we saw in the previous section translate into TID distributions that are shifted towards longer times between infection and diagnosis. For MSM, the percent remaining undiagnosed at 5 years is about 25% for late diagnoses but only about 10% for others. In non-MSM at 5 years, over 40% of late diagnoses remain undiagnosed compared to only 25% of others. 
+
+```{r tid1, plot=TRUE, fig.height=4.75}
+
+MSM.tid <- list( 
+                orig=orig$tid$separate[['MSM']]$base_case,
+                not_late=ldx$tid$separate[['MSM No Late Dx']]$base_case,
+                late=ldx$tid$separate[['MSM Late Dx']]$base_case)
+class(MSM.tid) <- append(class(MSM.tid), 'TID')
+nonMSM.tid <- list(
+                orig=orig$tid$separate[['non-MSM']]$base_case,
+                not_late=ldx$tid$separate[['non-MSM No Late Dx']]$base_case,
+                late=ldx$tid$separate[['non-MSM Late Dx']]$base_case)
+class(nonMSM.tid) <- append(class(nonMSM.tid), 'TID')
+grid.arrange(
+                  plot(MSM.tid, diagInterval, cases=c('Original', 'No Late Dx', 'Late Dx')) + 
+                      ggtitle('MSM Base Case'),
+                  plot(nonMSM.tid, diagInterval, cases=c('Original', 'No Late Dx', 'Late Dx')) + 
+                      ggtitle('non-MSM Base Case'),
+             ncol=2)
+```
+
+Comparing the stratified TIDs to the original single TID highlights the fact that the single TID is essentially a weighted average of the stratified ones. Thus, results for the total population may be similar if patterns of missing data are not very different across the strata. This is because the stratified approach applies the stratified TIDs to their respective strata, including cases with missing testing history. If the late-diagnoses strata had longer TIDs and disproportiately more cases with missing testing history, then more diagnoses would get longer TIDs than in the unstratified approach. Table 4 suggests that this is not the case in WA State; within MSM/non-MSM strata, the percent of cases missing testing history is similar for late and non-late diagnosis groups.
+
+# Incidence and undiagnosed counts
+The upper plot panels show diagnoses and estimated base case incidence for the original and adjusted methods, while the lower plot panels show base case undiagnosed estimated. While both methods estimate declining incidence and undiagnosed counts, incorporating late diagnoses leads to a slightly steeper decline. This is presumably because the stratified estimation is more sensitive to the decline in late diagnoses in the most recent years.
+
+```{r inc1, plot=TRUE, fig.height=4}
+# Create a new object of class results that has the two methods' Base Cases
+select.var <- c('time', 'group', 'var', 'value')
+r1 <- transform(subset(orig$resultsCompiled$results$resultsAll, var!='Upper Bound',
+                       select=select.var),
+                var=ifelse(var=='Base Case', 'Original', '# Diagnosed'))
+r2 <- transform(subset(ldx$resultsCompiled$results$resultsAll, var=='Base Case',
+                       select=select.var),
+                var='With Late Dx Strata')
+resultsCombined <- list(resultsAll=rbind(r1, r2))
+class(resultsCombined) <- append(class(resultsCombined), 'results')
+plot(resultsCombined)
+
+#grid.arrange(orig$resultsPlots[['Total-stratified']] + ggtitle('Original Method'), 
+#             ldx$resultsPlots[['Total-stratified']] + ggtitle('Stratified by Late Dx'), ncol=2)
+```
+
+# Conclusions and Future Work
+While stratifying the testing history by late diagnosis status allows us to be more precise, particularly with our assumption that testing histories are missing at random, the overall impact on undiagnosed estimates in WA State is minor. The original approach represents undiagnosed in the total population well. A useful next step would be to more closely investigate the characteristics of cases with missing testing history and test for statistically significant differences from cases with testing history. These results could inform an application of standard missing data adjustments to correct for missing testing history bias.
+
+# Tables of all undiagnosed HIV estimates (including Upper Bound)
+
+```{r, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Base Case' & Subgroup=='Total-stratified', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+# Multirow at top
+addtorow <- list(pos=list(-1),
+                 command='\\hline & \\multicolumn{3}{c|}{Cases} & \\multicolumn{3}{c}{Fraction} \\\\')
+
+# Print
+print(xtable(toprint,
+             caption='Base Case: Total Population',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```
+
+```{r, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Upper Bound' & Subgroup=='Total-stratified', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+# Multirow at top
+addtorow <- list(pos=list(-1),
+                 command='\\hline & \\multicolumn{3}{c|}{Cases} & \\multicolumn{3}{c}{Fraction} \\\\')
+
+# Print
+print(xtable(toprint,
+             caption='Upper Bound: Total Population',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```
+
+
+
+```{r frac1, plot=TRUE, fig.height=3.75}
+#orig$resultsPrevPlots[['Total-stratified']] + ggtitle('Original Method')
+```
+
+```{r frac2, plot=TRUE, fig.height=3.75}
+#ldx$resultsPrevPlots[['Total-stratified']] + ggtitle('Stratified by Late Dx')
+```
+
+```{r, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Base Case' & Subgroup=='MSM', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+# Multirow at top
+addtorow <- list(pos=list(-1),
+                 command='\\hline & \\multicolumn{3}{c|}{Cases} & \\multicolumn{3}{c}{Fraction} \\\\')
+
+# Print
+print(xtable(toprint,
+             caption='Base Case: MSM',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```
+
+```{r, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Upper Bound' & Subgroup=='MSM', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+# Multirow at top
+addtorow <- list(pos=list(-1),
+                 command='\\hline & \\multicolumn{3}{c|}{Cases} & \\multicolumn{3}{c}{Fraction} \\\\')
+
+# Print
+print(xtable(toprint,
+             caption='Upper Bound: MSM',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```
+
+
+```{r, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Base Case' & Subgroup=='non-MSM', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+print(xtable(toprint,
+             caption='Base Case: non-MSM',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```
+
+
+```{r, results='asis'}
+# For printing with xtable
+toprint <- subset(wideall, Case=='Upper Bound' & Subgroup=='non-MSM', 
+                  select=-c(Case, Subgroup))
+toprint <- rename(toprint, replace=printnames)
+
+print(xtable(toprint,
+             caption='Upper Bound: non-MSM',
+             align=c('l','l', '|c', rep('c',2), '|c', 'c','c'),
+             digits=c(0,0,0,0,1,1,1,1)),
+      table.placement='!h',
+      caption.placement='top',
+      add.to.row=addtorow,
+      include.rownames=FALSE,
+      hline.after=c(-1,0,5),
+      size='small'
+      )
+```

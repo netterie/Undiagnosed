@@ -1,0 +1,25 @@
+"Year","Subgroup","Case","Undiagnosed Cases","Undiagosed Cases, Stratifying by Concurrent Dx","Percent Change (Cases)","Undiagnosed Fraction","Undiagosed Fraction, Stratifying by Concurrent Dx","Percent Change (Fraction)"
+2010,"MSM","Base Case",713.6,752.8,5.49,8,8.4,5
+2010,"MSM","Upper Bound",1395,1433,2.72,14.5,14.9,2.76
+2011,"MSM","Base Case",689.8,724.8,5.07,7.6,8,5.26
+2011,"MSM","Upper Bound",1352,1374,1.63,14,14.2,1.43
+2012,"MSM","Base Case",662,684.9,3.46,7.3,7.5,2.74
+2012,"MSM","Upper Bound",1305,1308,0.23,13.4,13.4,0
+2013,"MSM","Base Case",636.2,646.4,1.6,6.8,6.9,1.47
+2013,"MSM","Upper Bound",1265,1252,-1.03,12.6,12.5,-0.79
+2014,"MSM","Base Case",620.7,618,-0.43,6.6,6.6,0
+2014,"MSM","Upper Bound",1241,1213,-2.26,12.4,12.1,-2.42
+2015,"MSM","Base Case",617.8,607.3,-1.7,6.4,6.3,-1.56
+2015,"MSM","Upper Bound",1230,1189,-3.33,11.9,11.6,-2.52
+2010,"non-MSM","Base Case",779.5,787.9,1.08,22.6,22.8,0.88
+2010,"non-MSM","Upper Bound",1477,1382,-6.43,35.6,34.1,-4.21
+2011,"non-MSM","Base Case",769,765.7,-0.43,22.2,22.1,-0.45
+2011,"non-MSM","Upper Bound",1460,1355,-7.19,35.1,33.4,-4.84
+2012,"non-MSM","Base Case",748.2,734.9,-1.78,21.5,21.2,-1.4
+2012,"non-MSM","Upper Bound",1427,1318,-7.64,34.3,32.5,-5.25
+2013,"non-MSM","Base Case",728.2,705.6,-3.1,20.7,20.1,-2.9
+2013,"non-MSM","Upper Bound",1397,1288,-7.8,33.3,31.5,-5.41
+2014,"non-MSM","Base Case",719.2,688.3,-4.3,20.2,19.5,-3.47
+2014,"non-MSM","Upper Bound",1377,1270,-7.77,32.7,30.9,-5.5
+2015,"non-MSM","Base Case",709.9,671.2,-5.45,19.6,18.7,-4.59
+2015,"non-MSM","Upper Bound",1356,1252,-7.67,31.8,30.1,-5.35
