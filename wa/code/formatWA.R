@@ -231,6 +231,11 @@ dataf$everHadNegTest[toTRUE2] <- TRUE
 toFALSE <- dataf$everHadNegTest & is.na(dataf$lag_lneg_hdx_dt)
 dataf$everHadNegTest[toFALSE] <- FALSE
 
+## ---- fix_everHadNegTest_toNA ----
+## an alternative to setting to FALSE
+toNA <- dataf$everHadNegTest & is.na(dataf$lag_lneg_hdx_dt)
+dataf$everHadNegTest[toNA] <- NA
+
 ## ---- check_everHadNegTest ----
 (checkEver <- with(dataf,table(everHadNegTest, 
                                TID_NA=is.na(lag_lneg_hdx_dt), useNA='always')))
