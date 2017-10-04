@@ -1,5 +1,5 @@
 ---
-title: "2015 Undiagnosed Estimates for WA State"
+title: "2016 Undiagnosed Estimates for WA State"
 author: "Jeanette Birnbaum"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
@@ -27,7 +27,7 @@ estimation_cases <- c(`Base Case`='base_case', `Upper Bound`='upper_bound')
 
 # Specify year min and max for analysis
 year_min <- 2005
-year_max <- 2015
+year_max <- 2016
 
 # Specify time step
 diagInterval <- 0.25
@@ -36,13 +36,13 @@ diagInterval <- 0.25
 undx_repo <- '/Users/jeanette/Dropbox/School/PhD/HIV_WA'
 
 # Within above repo, path to data files
-data_path <- 'data/wa_backcalc_data_201610.csv'
-prev_path <- 'data/wa_prev_2010-2015.csv'
-results_path <- 'wa/undx2015/results/undx2015.csv'
+data_path <- 'data/wa_backcalc_data_201709.csv'
+prev_path <- 'data/wa_prev_2010-2016.csv'
+results_path <- 'wa/undx2016/results/undx2016.csv'
 
 # Within above repo, path to code files
 format_path <- 'wa/code/formatWA.R'
-run_path <- 'wa/code/run_undx.R'
+# run_path <- 'wa/code/run_undx.R'
 ```
 
 ```{r setup, include=FALSE}
@@ -56,12 +56,14 @@ run_path <- 'wa/code/run_undx.R'
 library(Rjkb)
 library(knitr)
 library(gridExtra)
+library(kableExtra)
 
 # Read chunks
-read_chunk(file.path(undx_repo, run_path))
+# read_chunk(file.path(undx_repo, run_path))
 
 # Knitr options
 knitr::opts_chunk$set(echo = FALSE)
+options(knitr.table.format = "latex") 
 ```
 
 ```{r data, include=FALSE}
@@ -228,6 +230,8 @@ write.csv(wideall, file.path(undx_repo,
 # Summary of Results
 The undiagnosed fraction declined slightly overall, and in every group.  However, note that the number of both undiagnosed and total cases rose slightly in all groups.
 
+In both tables, the MSM and KC results are separate marginal results, i.e. they are two different ways of dividing the statewide results.
+
 ```{r summary, include=FALSE}
 # Perhaps this could be a function
     theseRes <- ldply(list(all, inKC, outKC, msmResults, nonmsmResults),
@@ -255,20 +259,28 @@ The undiagnosed fraction declined slightly overall, and in every group.  However
                     'Undiagnosed Fraction (%)')]
 ```
 
-## 2015
-```{r sumtable2015, results='asis'}
-kable(subset(wide, Year==2015, select=-Year), row.names=FALSE, caption='In both tables, the MSM and KC results are separate marginal results, i.e. they are two different ways of dividing the statewide results.')
+## 2016
+
+```{r sumtable2016, results='asis'}
+kable(subset(wide, Year==2016, select=-Year), row.names=FALSE, booktabs=T) %>%
+# caption='In both tables, the MSM and KC results are separate marginal results, i.e. they are two different ways of dividing the statewide results.', booktabs=T) %>%
+      group_rows("By MSM", 2, 3) %>%
+        group_rows("By KC", 4, 5)
 ```
 
-## 2014
-```{r sumtable2014, results='asis'}
-kable(subset(wide, Year==2014, select=-Year), row.names=FALSE)
+## 2015
+
+```{r sumtable2015, results='asis'}
+kable(subset(wide, Year==2015, select=-Year), row.names=FALSE, booktabs=T) %>%
+      group_rows("By MSM", 2, 3) %>%
+        group_rows("By KC", 4, 5)
 ```
 
 \newpage
+
 # Diagnoses
 ## Analytic sample
-Analytic data set has `r nrow(dataf)` cases for 2005-2015. From the original file provided by Jason, we excluded 14776 cases based on year (excluding diagnoses prior to 2005)  restrictions, and an additional 79 cases who were 16 or younger and had no observed date of LNT. 
+Analytic data set has `r nrow(dataf)` cases for 2005-2016. From the original file provided by Jason, we excluded 14776 cases based on year (excluding diagnoses prior to 2005)  restrictions, and an additional 79 cases who were 16 or younger and had no observed date of LNT. 
 
 ## Diagnoses over time by MSM/Area subgroups
 ```{r dx1,  plot=TRUE}
@@ -278,7 +290,9 @@ all$dx$plot + aes(color=KCMSM)
 # Subgroup Sizes and Testing Histories
 
 ```{r th1, results='asis'}
-kable(all$th$table, caption='Column Percent shows the composition of the total sample. The Percent Yes, Percent No and Percent Missing columns indicate the row percents of the three possible testing history statuses within each subgroup')
+kable(all$th$table[,2:ncol(all$th$table)], caption='Column Percent shows the composition of the total sample. The Percent Yes, Percent No and Percent Missing columns indicate the row percents of the three possible testing history statuses within each subgroup', booktabs=T) %>% 
+      group_rows("Inside KC", 2, 3) %>%
+        group_rows("Outside KC", 4, 5)
 ```
 
 As we would expect, the presence of observed LNTs is higher for MSM than non-MSM and inside KC vs outside KC. MSM outside of KC have much lower observed LNTs (only 25%) than MSM inside KC (41%). This means that the outside-KC estimates, regardless of mode subgroup, are based on low levels of observed LNTs. This makes them particularly dependent on our 'missing at random' assumption.
@@ -286,7 +300,7 @@ As we would expect, the presence of observed LNTs is higher for MSM than non-MSM
 # Time from Infection to Diagnosis (TID)
 The plots below show the TID curves for the four MSM/Area subgroups. BC=Base Case and UB=Upper Bound. For each subgroup, the upper plot panel is the probability of diagnosis curve (the pdf) and the lower plot panel is the survivor curve (1-cdf). The lower plot panel's y-axis thus indicates the fraction remaining undiagnosed at a given number of years since infection (x-axis).
 
-```{r tid1, plot=TRUE, fig.height=7}
+```{r tid1, plot=TRUE, fig.height=6}
 groups <- names(all$tid$separate)
 grid.arrange(
                   plot(all$tid$separate[[1]],diagInterval, cases=c('BC', 'UB')) + 
@@ -305,7 +319,7 @@ These plots correspond to what we saw in the testing history responses above. MS
 # Incidence and undiagnosed counts
 The upper plot panels show diagnoses and estimated incidence, while the lower plot panels show undiagnosed cases. The upper panels have different y-scales.
 
-```{r inc1, plot=TRUE, fig.height=7}
+```{r inc1, plot=TRUE, fig.height=6}
 grid.arrange(inKC$resultsPlots[['Total-stratified']] + ggtitle('Inside KC'), 
              outKC$resultsPlots[['Total-stratified']] + ggtitle('Outside KC'), ncol=2)
 ```
@@ -313,7 +327,7 @@ grid.arrange(inKC$resultsPlots[['Total-stratified']] + ggtitle('Inside KC'),
 Taking the y-scales into account, you can see that the number of new diagnoses/cases each quarter is higher inside KC than outside, but the undiagnosed case counts are similar. This reflects longer times to diagnosis outside KC than inside KC. 
 
 # Undiagnosed fractions
-These plots show the total number of PLWH (x-axis) broken down by diagnosed and undiagnosed (colors) for the Base Case versus Upper Bound estimates (panels). Undiagnosed fractions are indicated by the percent labels. There is clearly a trend of greater diagnosed PLWH over 2010-2015. If this is a function of reporting rather than a real increase, it may be masking true trends in the undiagnosed fraction as well as true differences between inside and outside KC. Again, apologies for different x-scales on the inside versus outside KC plots.
+These plots show the total number of PLWH (x-axis) broken down by diagnosed and undiagnosed (colors) for the Base Case versus Upper Bound estimates (panels). Undiagnosed fractions are indicated by the percent labels. There is clearly a trend of greater diagnosed PLWH over 2010-2016. If this is a function of reporting rather than a real increase, it may be masking true trends in the undiagnosed fraction as well as true differences between inside and outside KC. Again, apologies for different x-scales on the inside versus outside KC plots.
 
 ```{r frac1, plot=TRUE, fig.height=3.75}
 inKC$resultsPrevPlots[['Total-stratified']] + ggtitle('Inside KC')
