@@ -1,0 +1,438 @@
+---
+title: "2017 Undiagnosed Estimates for WA State"
+author: "Jeanette Birnbaum"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  pdf_document:
+      toc: true
+      toc_depth: 2
+      number_sections: true
+
+---
+
+```{r edit, include=FALSE, echo=FALSE}
+rm(list=ls())
+#############################################################
+# NOTES
+#############################################################
+# As of 11/4/16, the way use this file is to set runNew to TRUE
+# to get fresh results. runNew to FALSE will used saved results
+
+#############################################################
+# EDIT THESE PARAMETERS
+#############################################################
+# Run a fresh estimation? And, define named vector of cases
+runNew <- FALSE
+estimation_cases <- c(`Base Case`='base_case', `Upper Bound`='upper_bound')
+
+# Specify year min and max for analysis
+year_min <- 2005
+year_max <- 2017
+year_of_estimation <- 2018
+
+# Specify time step
+diagInterval <- 0.25
+
+# Local path of the Undiagnosed repo (that contains "wa", "templates", etc)
+undx_repo <- '/Users/jeanette/Dropbox/School/PhD/HIV_WA'
+
+# Within above repo, path to data files
+data_path <- 'data/wa_backcalc_data_201807_standard_varnames.csv'
+prev_path <- 'data/wa_prev_2010-2017.csv'
+results_path <- 'wa/undx2017/results/undx2017.csv'
+
+# Within above repo, path to code files
+format_path <- 'wa/code/formatWA.R'
+# run_path <- 'wa/code/run_undx.R'
+```
+
+```{r setup, include=FALSE}
+#############################################################
+# TECHNICAL SETUP
+#############################################################
+
+# Load libraries
+# Install Rjkb using 
+#   devtools::install_github('netterie/Rjkb/Rjkb')
+library(Rjkb)
+library(knitr)
+library(gridExtra)
+library(kableExtra)
+
+# Read chunks
+# read_chunk(file.path(undx_repo, run_path))
+
+# Knitr options
+knitr::opts_chunk$set(echo = FALSE)
+options(knitr.table.format = "latex") 
+```
+
+```{r data, include=FALSE}
+#############################################################
+# AUTOMATED DATA LOADING AND FILE PATH SETUP
+#############################################################
+
+# Install the package
+# devtools::install_github('hivbackcalc/package1.0/HIVBackCalc')
+
+# Load the data and format it; load the HIVBackCalc package.
+# Update the package before running this script - don't source interim work.
+setup_hivbackcalc(workd=undx_repo,
+                  datafile=data_path,
+                  source_these=format_path,
+                  load_package=TRUE)
+
+# Save a copy of full dataset and original results path
+datafOrig <- dataf
+results_path_orig <- results_path
+prev_path_orig <- prev_path
+
+# Read in the prevalence data - note the importance of check.names
+prev_data <- read.csv(file.path(undx_repo, prev_path), 
+                      check.names=FALSE,
+                      header=TRUE)
+# New 10/25/18 - subset to Using_MI='Yes', because without the MI program redistributing NIR etc, the prevalence data have noticeably more het cases than the prev data from previous years
+prev_data <- subset(prev_data, Using_MI=='Yes', select=-Using_MI)
+
+# New 9/6/18 - old prevalence file, because there seem to be substantial differences for some cells
+old_prev <- read.csv(file.path(undx_repo, 'data/wa_prev_2010-2016.csv'), 
+                      check.names=FALSE,
+                      header=TRUE)
+
+# New 10/26/18 - last year's results
+old_results <- read.csv(file.path(undx_repo, 'wa/undx2016/results/undx2016_formattedByHand.csv'),
+                        header=TRUE, 
+                        check.names=FALSE,
+                        stringsAsFactors=FALSE)
+```
+
+```{r run, include=FALSE}
+# Improve upon the dx_in_king variable, and make one 4-part subgroup variable
+dataf <- transform(dataf, KC=ifelse(dx_in_king=='Y', 'Inside KC', 'Outside KC'),
+                   KCMSM=ifelse(dx_in_king=='Y' & mode2=='MSM', 
+                                'MSM Inside KC',
+                                ifelse(dx_in_king=='Y' & mode2=='non-MSM',
+                                       'non-MSM Inside KC',
+                                       ifelse(dx_in_king=='N' & mode2=='MSM',
+                                              'MSM Outside KC',
+                                              'non-MSM Outside KC'))))
+# All of WA (undx fractions will not be correct for subgroups because 
+# those PLWH numbers in prev_data were faked from the MSM/KC marginals)
+all <- runAnalysis(dataf, list(c(`King County`='KC', `Mode`='mode2')),
+                   subvar='KCMSM', intLength=diagInterval, cases=estimation_cases,
+                   runEstimation=runNew,
+                   savedEstimation=!runNew,
+                   prev=prev_data,
+                   save=gsub('.csv', '_allWA.csv', 
+                              file.path(undx_repo, results_path)))
+
+# Inside King County (undx fractions will not be correct for MSM/non-MSM, again)
+prevInKC <- with(prev_data, 
+                 data.frame(
+                      Year=Year,
+                      MSM=`MSM Inside KC`, 
+                      `non-MSM`=`non-MSM Inside KC`,
+                      Total=`Inside KC`,
+                      check.names=FALSE))
+inKC <- runAnalysis(subset(dataf, dx_in_king=='Y'),
+                    c('Mode'='mode2'), 
+                    subvar='mode2', 
+                    intLength=diagInterval, cases=estimation_cases, 
+                    runEstimation=runNew,
+                    savedEstimation=!runNew,
+                    prev=prevInKC,
+                    save=gsub('.csv', '_inKC.csv', 
+                              file.path(undx_repo, results_path)))
+# Outside King County (undx fractions will not be correct for MSM/non-MSM, again)
+prevOutKC <- with(prev_data, 
+                 data.frame(
+                      Year=Year,
+                      MSM=`MSM Outside KC`, 
+                      `non-MSM`=`non-MSM Outside KC`,
+                      Total=`Outside KC`,
+                      check.names=FALSE))
+outKC <- runAnalysis(subset(dataf, dx_in_king=='N'),
+                    c('Mode'='mode2'), 
+                    subvar='mode2', 
+                    intLength=diagInterval, cases=estimation_cases, 
+                    runEstimation=runNew,
+                    savedEstimation=!runNew,
+                    prev=prevOutKC,
+                    save=gsub('.csv', '_outKC.csv', 
+                              file.path(undx_repo, results_path)))
+
+# For MSM vs non-MSM, just compute simple marginals. Use the results
+# from the 'all' object and collapse across inside/outside KC. Honestly
+# it was a somewhat arbitrary choice to focus on inside/outside KC more
+# than MSM/non-MSM.
+# p.s. I wonder why check.names=FALSE doesn't work. Here it doesn't matter,
+# in other cases perhaps within is the way to go
+msmResults <- nonmsmResults <-  all$resultsCompiled$results
+# Change the marginals to reflect msm/non-msm values, not the total
+msmResults$resultsAll <- transform(msmResults$resultsAll,
+                        value=`MSM Inside KC`+`MSM Outside KC`,
+                        check.names=FALSE)
+nonmsmResults$resultsAll <- transform(nonmsmResults$resultsAll,
+                        value=`non-MSM Inside KC`+`non-MSM Outside KC`,
+                        check.names=FALSE)
+# Calculate true prev
+# This weird structure is just to make it easier to compile with the inKC/outKC
+# results later
+# Remember, to get this results, the actual estimation was stratified
+# by inside/outside KC
+msmResults$resultsCompiled$trueprev <- calcTruePrev(sumResults(msmResults,
+                                                               acrossYears=FALSE,
+                                                               addclass=TRUE),
+                                                    prev=subset(prev_data,
+                                                                select=c(Year,
+                                                                         MSM)))
+msmResults$resultsCompiled$trueprev$Subgroup <- 'Total-stratified'
+nonmsmResults$resultsCompiled$trueprev <- calcTruePrev(sumResults(nonmsmResults,
+                                                               acrossYears=FALSE,
+                                                               addclass=TRUE),
+                                                    prev=subset(prev_data,
+                                                                select=c(Year,
+                                                                         `non-MSM`)))
+nonmsmResults$resultsCompiled$trueprev$Subgroup <- 'Total-stratified'
+
+
+# Compile and clean results
+prettyprev <- all$resultsCompiled$trueprev
+# Remove PLWHA and fraction rows that were fake
+prettyprev <- subset(prettyprev, !(Subgroup!='Total-stratified' &
+                                   Estimate!='Undiagnosed Cases'))
+# All InKC/OutKC results that are correct
+prettyinKC <- subset(inKC$resultsCompiled$trueprev, 
+                               Subgroup=='Total-stratified')
+prettyinKC$Subgroup='Inside KC'
+prettyoutKC <- subset(outKC$resultsCompiled$trueprev, 
+                               Subgroup=='Total-stratified') 
+prettyoutKC$Subgroup='Outside KC'
+# MSM/non-MSM - I don't know where these colnames should have been
+# standardized...maybe within the subResults function?
+prettyMSM <- msmResults$resultsCompiled$trueprev[,colnames(prettyprev)]
+prettyMSM$Subgroup <- 'MSM'
+prettynonMSM <- nonmsmResults$resultsCompiled$trueprev[,colnames(prettyprev)]
+prettynonMSM$Subgroup <- 'non-MSM'
+# Add them all together
+prettyprev <- rbind(prettyprev, prettyMSM, prettynonMSM, prettyinKC, prettyoutKC)
+# Melt and reshape?
+longall <- subset(melt(prettyprev, id.vars=c('Subgroup', 'Diagnoses/Case', 
+                                          'Estimate', 'Year')), 
+               variable=='Mean')
+wideall <- dcast(longall, Subgroup+Year+`Diagnoses/Case`~Estimate, value.var='value')
+sublevels=c('MSM Inside KC', 'non-MSM Inside KC', 'Inside KC', 'MSM Outside KC', 
+            'non-MSM Outside KC', 'Outside KC', 'MSM', 'non-MSM', 'Total-stratified')
+wideall$Subgroup <- factor(wideall$Subgroup, levels=sublevels, labels=sublevels)
+wideall <- arrange(wideall, Year, Subgroup)
+wideall <- wideall[,c('Subgroup', 'Year', 'Diagnoses/Case', 
+                      'PLWHA', 'Undiagnosed Cases', 'True Prevalence',
+                      'Undiagnosed Fraction (%)')]
+write.csv(wideall, file.path(undx_repo, 
+                    gsub('.csv', '_final.csv', results_path)),
+                    row.names=FALSE,
+                    na='')
+```
+
+```{r note1}
+# Note that \newpage works because we're knitting to pdf. See 
+# http://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+\newpage
+
+# Summary of Results
+In all tables, the MSM and KC results are separate marginal results, i.e. they are two different ways of dividing the statewide results.
+
+Year of estimation impacts the undiagnosed % through:
+
+1. **PLWH estimate** - the annual update typically alters the estimates for prior years
+2. **Undiagnosed estimate**, via
+    a. _Input data_ - rolling DOH data cleaning may alter the number and attributes of included cases
+    b. _TID estimate_ - the population time from infection to diagnosis (TID) curve depends on the population composition of last negative test dates (LNTs). New cases can impact this key parameter through their LNT dates. 
+    
+Going forward, there should be a section of the report devoted to comparing the latest dataset to the data provided in prior years on all the aforementioned measures. This report contains information on the change in PLWH data between the 2017 and 2018 years of estimation. 
+
+```{r summary, include=FALSE}
+# Perhaps this could be a function
+    theseRes <- ldply(list(all, inKC, outKC, msmResults, nonmsmResults),
+                       function(x) { 
+                           return(subset(x$resultsCompiled$trueprev,
+                                         Subgroup=='Total-stratified' &
+                                             Year>=2015 & `Diagnoses/Case`%in%
+                                             c('Base Case', 'PLWHA'))
+                                  )
+                       })
+    nRep <- length(unique(theseRes$Year))*4
+    theseRes$Group <- c(rep('WA State', nRep),
+                       rep('Inside KC', nRep),
+                       rep('Outside KC', nRep),
+                       rep('MSM', nRep),
+                       rep('non-MSM', nRep))
+    long <- subset(melt(theseRes, id.vars <- c('Subgroup', 'Diagnoses/Case', 'Estimate',
+                                                'Group', 'Year')),
+                   variable=='Mean')[,c('Group', 'Year', 'Estimate', 'value')]
+    wide <- dcast(long, Group+Year~Estimate)
+    widelevs <- c('WA State', 'MSM', 'non-MSM', 'Inside KC', 'Outside KC')
+    wide$Group <- factor(wide$Group, widelevs, widelevs)
+    wide <- arrange(wide, Group)
+    wide <- wide[,c('Group', 'Year', 'PLWHA', 'Undiagnosed Cases', 'True Prevalence',
+                    'Undiagnosed Fraction (%)')]
+    write.csv(wide, file.path(undx_repo, 
+                    gsub('.csv', '_final_summary.csv', results_path)),
+                    row.names=FALSE,
+                    na='')
+```
+
+## 2017
+Year of estimation: `r year_of_estimation`
+
+```{r sumtable-current, results='asis'}
+kable(subset(wide, Year==2017, select=-Year), row.names=FALSE, booktabs=T) %>%
+# caption='In both tables, the MSM and KC results are separate marginal results, i.e. they are two different ways of dividing the statewide results.', booktabs=T) %>%
+      group_rows("By MSM", 2, 3) %>%
+        group_rows("By KC", 4, 5)
+```
+
+## 2016
+Year of estimation: `r year_of_estimation`
+
+```{r sumtable-prior, results='asis'}
+kable(subset(wide, Year==2016, select=-Year), row.names=FALSE, booktabs=T) %>%
+      group_rows("By MSM", 2, 3) %>%
+        group_rows("By KC", 4, 5)
+```
+
+## 2016
+Year of estimation: `r year_of_estimation-1`
+
+```{r sumtable-prior-lastyer, results='asis'}
+old_results <- subset(old_results, 
+                      Subgroup!='MSM Outside KC' &
+                        Subgroup != 'MSM Inside KC' &
+                          Subgroup != 'non-MSM Outside KC' &
+                          Subgroup != 'non-MSM Inside KC' &
+                      Year==2016 & 
+                      `Diagnoses/Case`!='Upper Bound')
+old_results$PLWHA[c(1,3,5,7,9)] <- old_results$PLWHA[c(2,4,6,8,10)]
+old_results <- subset(old_results, `Diagnoses/Case`=='Base Case',
+                      select=-`Diagnoses/Case`)
+if (mean(
+    with(old_results, round(100*`Undiagnosed Cases`/`True Prevalence`, 1))-
+    old_results$`Undiagnosed Fraction (%)`)>0.01) 
+    stop('Error in importing results from last year')
+
+colnames(old_results)[1] <- 'Group'
+old_results$Group[which(old_results$Group=='Total-stratified')] <- 'WA State'
+old_results <- old_results[c(5,3,4,1,2),]
+
+kable(subset(old_results, select=-Year), row.names=FALSE, booktabs=T) %>%
+      group_rows("By MSM", 2, 3) %>%
+        group_rows("By KC", 4, 5)
+```
+
+
+\newpage
+
+# Diagnoses
+## Analytic sample
+Analytic data set has `r nrow(dataf)` cases for `r year_min`-`r year_max`. From the original file provided by DOH, we excluded `r nrow(read.csv(file.path(undx_repo, data_path)))` cases who were either diagnosed before 2005 or were 16 or younger and had no observed date of LNT. 
+
+## Diagnoses over time by MSM/Area subgroups
+```{r dx1,  plot=TRUE}
+all$dx$plot + aes(color=KCMSM)
+```
+
+\newpage
+# Subgroup Sizes and Testing Histories
+
+```{r th1, results='asis'}
+kable(all$th$table[,2:ncol(all$th$table)], caption='Column Percent shows the composition of the total sample. The Percent Yes, Percent No and Percent Missing columns indicate the row percents of the three possible testing history statuses within each subgroup', booktabs=T) %>% 
+      group_rows("Inside KC", 2, 3) %>%
+        group_rows("Outside KC", 4, 5)
+```
+
+As we would expect, the presence of observed LNTs is higher for MSM than non-MSM and inside KC vs outside KC. MSM outside of KC have much lower observed LNTs than MSM inside KC. This means that the outside-KC estimates, regardless of mode subgroup, are based on low levels of observed LNTs. This makes them particularly dependent on our 'missing at random' assumption.
+
+\newpage
+# Time from Infection to Diagnosis (TID)
+The plots below show the TID curves for the four MSM/Area subgroups. BC=Base Case and UB=Upper Bound. For each subgroup, the upper plot panel is the probability of diagnosis curve (the pdf) and the lower plot panel is the survivor curve (1-cdf). The lower plot panel's y-axis thus indicates the fraction remaining undiagnosed at a given number of years since infection (x-axis).
+
+```{r tid1, plot=TRUE, fig.height=6}
+groups <- names(all$tid$separate)
+grid.arrange(
+                  plot(all$tid$separate[[1]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[1]),
+                  plot(all$tid$separate[[2]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[2]),
+                  plot(all$tid$separate[[3]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[3]),
+                  plot(all$tid$separate[[4]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[4]),
+             ncol=2)
+```
+
+These plots correspond to what we saw in the testing history responses above. MSM outside KC have longer times to diagnosis than MSM inside KC. For example, at 2.5 years since infection, the Base Case fraction of MSM remaining undiagnosed is less than 25% inside KC but is greater than 25% outside KC. The non-MSM TIDs are more similar, with about 50% of cases remaining undiagnosed at 2.5 years.
+
+\newpage
+
+# Prevalence estimates from DOH
+We note here that the prevalence estimates for all years typically change at the annual update. The plot below shows the impact of year of estimation on the total and subgroup estimates. In 2018, we clarified that we historically have used the MI program to distribute the NIR category. When we do not, the heterosexual prevalence is substantially higher.
+
+Below, Current refers to the `r year_of_estimation` estimation. Prior refers to the `r year_of_estimation-1` estimates. 
+
+```{r prev, plot=TRUE, fig.height=6, fig.cap="Absolute difference in HIV+ cases (top) and percent difference (bottom) between current and prior PLWH estimates, for 5 groups: Inside KC, Outside KC, MSM, non-MSM, and the Total. Note that Inside KC/Outside KC and MSM/non-MSM are separate marginal estimates."}
+prev_data$`Estimate Year`='Current'
+old_prev$`Estimate Year`='Prior'
+cprev <- subset(rbind(prev_data, old_prev),
+                select=c('Year', 'Inside KC', 'Outside KC', 'MSM', 'non-MSM', 'Total', 'Estimate Year'))
+cprevl <- melt(cprev, id.vars=c('Year', 'Estimate Year'))
+cprevw <- dcast(cprevl, Year+variable~`Estimate Year`)
+cprevw <- transform(cprevw, `Difference in Cases`=Current-Prior, 
+                    `Percent Difference`=round(100*(Current-Prior)/Prior,1),
+                    Group=variable,
+                    check.names=FALSE)
+cprevw <- subset(cprevw, Year<2017)
+cprevp <- melt(subset(cprevw, select=c('Year', 'Group', 'Difference in Cases', 'Percent Difference')), id.vars=c('Year', 'Group'))
+cprevp <- within(cprevp, {
+    add <- ifelse(variable=='Difference in Cases', 5, 0.1)
+    add <- ifelse(value<0, add*(-1), add)
+    pos <- value+add
+    add = NULL
+    })
+
+prev_scale_max <- year_of_estimation-2
+
+ggplot(cprevp, aes(x=Year, y=value, fill=Group, label=value)) + 
+    geom_bar(stat='identity', position=position_dodge()) + 
+    geom_text(aes(y=pos), position=position_dodge(width=0.9), size=3.25) +
+    scale_x_continuous(breaks=2010:prev_scale_max, name='Year') + 
+    facet_grid(variable~., scales='free_y') + theme_bw() +
+    ggtitle('Change in PLWH estimates between prior and current year, \nin absolute (top) and percent (bottom) differences')
+```
+
+
+\newpage
+# Incidence and undiagnosed counts
+The upper plot panels show diagnoses and estimated incidence, while the lower plot panels show undiagnosed cases. The upper panels have different y-scales.
+
+```{r inc1, plot=TRUE, fig.height=6}
+grid.arrange(inKC$resultsPlots[['Total-stratified']] + ggtitle('Inside KC'), 
+             outKC$resultsPlots[['Total-stratified']] + ggtitle('Outside KC'), ncol=2)
+```
+
+Taking the y-scales into account, you can see that the number of new diagnoses/cases each quarter is higher inside KC than outside, but the undiagnosed case counts are similar. This reflects longer times to diagnosis outside KC than inside KC. 
+
+\newpage
+# Undiagnosed fractions
+These plots show the total number of PLWH (x-axis) broken down by diagnosed and undiagnosed (colors) for the Base Case versus Upper Bound estimates (panels). Undiagnosed fractions are indicated by the percent labels. There is clearly a trend of greater diagnosed PLWH over the years. If this is a function of reporting rather than a real increase, it may be masking true trends in the undiagnosed fraction as well as true differences between inside and outside KC. 
+Please note the different x-scales on the inside versus outside KC plots.
+
+```{r frac1, plot=TRUE, fig.height=3.75}
+inKC$resultsPrevPlots[['Total-stratified']] + ggtitle('Inside KC')
+```
+
+```{r frac2, plot=TRUE, fig.height=3.75}
+outKC$resultsPrevPlots[['Total-stratified']] + ggtitle('Outside KC')
+```
+
