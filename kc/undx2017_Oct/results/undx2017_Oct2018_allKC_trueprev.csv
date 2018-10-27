@@ -1,0 +1,139 @@
+"Subgroup","Year","Diagnoses/Case","Estimate","Min.","Mean","Max."
+"non-MSM",2011,"PLWHA","PLWHA",NA,1411,NA
+"non-MSM",2011,NA,NA,NA,NA,NA
+"non-MSM",2011,NA,"True Prevalence",NA,NA,NA
+"non-MSM",2011,NA,"Undiagnosed Fraction (%)",NA,NA,NA
+"non-MSM",2012,"PLWHA","PLWHA",NA,1434,NA
+"non-MSM",2012,"Base Case","Undiagnosed Cases",286.5,293.7,303.8
+"non-MSM",2012,"Base Case","True Prevalence",1720.5,1727.7,1737.8
+"non-MSM",2012,"Base Case","Undiagnosed Fraction (%)",16.7,17,17.5
+"non-MSM",2012,"Upper Bound","Undiagnosed Cases",505.3,514,525.9
+"non-MSM",2012,"Upper Bound","True Prevalence",1939.3,1948,1959.9
+"non-MSM",2012,"Upper Bound","Undiagnosed Fraction (%)",26.1,26.4,26.8
+"non-MSM",2013,"PLWHA","PLWHA",NA,1470,NA
+"non-MSM",2013,"Base Case","Undiagnosed Cases",270.4,275.6,282.9
+"non-MSM",2013,"Base Case","True Prevalence",1740.4,1745.6,1752.9
+"non-MSM",2013,"Base Case","Undiagnosed Fraction (%)",15.5,15.8,16.1
+"non-MSM",2013,"Upper Bound","Undiagnosed Cases",487.5,493.2,501
+"non-MSM",2013,"Upper Bound","True Prevalence",1957.5,1963.2,1971
+"non-MSM",2013,"Upper Bound","Undiagnosed Fraction (%)",24.9,25.1,25.4
+"non-MSM",2014,"PLWHA","PLWHA",NA,1531,NA
+"non-MSM",2014,"Base Case","Undiagnosed Cases",259.4,263.6,268.5
+"non-MSM",2014,"Base Case","True Prevalence",1790.4,1794.6,1799.5
+"non-MSM",2014,"Base Case","Undiagnosed Fraction (%)",14.5,14.7,14.9
+"non-MSM",2014,"Upper Bound","Undiagnosed Cases",473.4,479,485
+"non-MSM",2014,"Upper Bound","True Prevalence",2004.4,2010,2016
+"non-MSM",2014,"Upper Bound","Undiagnosed Fraction (%)",23.6,23.8,24.1
+"non-MSM",2015,"PLWHA","PLWHA",NA,1551,NA
+"non-MSM",2015,"Base Case","Undiagnosed Cases",248.4,250.3,254.8
+"non-MSM",2015,"Base Case","True Prevalence",1799.4,1801.3,1805.8
+"non-MSM",2015,"Base Case","Undiagnosed Fraction (%)",13.8,13.9,14.1
+"non-MSM",2015,"Upper Bound","Undiagnosed Cases",458.1,461.7,467.6
+"non-MSM",2015,"Upper Bound","True Prevalence",2009.1,2012.7,2018.6
+"non-MSM",2015,"Upper Bound","Undiagnosed Fraction (%)",22.8,22.9,23.2
+"non-MSM",2016,"PLWHA","PLWHA",NA,1580,NA
+"non-MSM",2016,"Base Case","Undiagnosed Cases",238.4,242.7,246.9
+"non-MSM",2016,"Base Case","True Prevalence",1818.4,1822.7,1826.9
+"non-MSM",2016,"Base Case","Undiagnosed Fraction (%)",13.1,13.3,13.5
+"non-MSM",2016,"Upper Bound","Undiagnosed Cases",441.7,448.4,455
+"non-MSM",2016,"Upper Bound","True Prevalence",2021.7,2028.4,2035
+"non-MSM",2016,"Upper Bound","Undiagnosed Fraction (%)",21.8,22.1,22.4
+"non-MSM",2017,"PLWHA","PLWHA",NA,1658,NA
+"non-MSM",2017,"Base Case","Undiagnosed Cases",233.1,235.7,237
+"non-MSM",2017,"Base Case","True Prevalence",1891.1,1893.7,1895
+"non-MSM",2017,"Base Case","Undiagnosed Fraction (%)",12.3,12.4,12.5
+"non-MSM",2017,"Upper Bound","Undiagnosed Cases",429.5,434.8,438.6
+"non-MSM",2017,"Upper Bound","True Prevalence",2087.5,2092.8,2096.6
+"non-MSM",2017,"Upper Bound","Undiagnosed Fraction (%)",20.6,20.8,20.9
+"MSM",2011,"PLWHA","PLWHA",NA,4985,NA
+"MSM",2011,NA,NA,NA,NA,NA
+"MSM",2011,NA,"True Prevalence",NA,NA,NA
+"MSM",2011,NA,"Undiagnosed Fraction (%)",NA,NA,NA
+"MSM",2012,"PLWHA","PLWHA",NA,4949,NA
+"MSM",2012,"Base Case","Undiagnosed Cases",294.3,300,306.4
+"MSM",2012,"Base Case","True Prevalence",5243.3,5249,5255.4
+"MSM",2012,"Base Case","Undiagnosed Fraction (%)",5.6,5.7,5.8
+"MSM",2012,"Upper Bound","Undiagnosed Cases",572.7,581.6,592.1
+"MSM",2012,"Upper Bound","True Prevalence",5521.7,5530.6,5541.1
+"MSM",2012,"Upper Bound","Undiagnosed Fraction (%)",10.4,10.5,10.7
+"MSM",2013,"PLWHA","PLWHA",NA,5012,NA
+"MSM",2013,"Base Case","Undiagnosed Cases",283.9,286.6,291.3
+"MSM",2013,"Base Case","True Prevalence",5295.9,5298.6,5303.3
+"MSM",2013,"Base Case","Undiagnosed Fraction (%)",5.4,5.4,5.5
+"MSM",2013,"Upper Bound","Undiagnosed Cases",556.2,560.4,566.8
+"MSM",2013,"Upper Bound","True Prevalence",5568.2,5572.4,5578.8
+"MSM",2013,"Upper Bound","Undiagnosed Fraction (%)",10,10.1,10.2
+"MSM",2014,"PLWHA","PLWHA",NA,5068,NA
+"MSM",2014,"Base Case","Undiagnosed Cases",266.7,280.1,289.7
+"MSM",2014,"Base Case","True Prevalence",5334.7,5348.1,5357.7
+"MSM",2014,"Base Case","Undiagnosed Fraction (%)",5,5.2,5.4
+"MSM",2014,"Upper Bound","Undiagnosed Cases",525.9,544.4,559.7
+"MSM",2014,"Upper Bound","True Prevalence",5593.9,5612.4,5627.7
+"MSM",2014,"Upper Bound","Undiagnosed Fraction (%)",9.4,9.7,9.9
+"MSM",2015,"PLWHA","PLWHA",NA,5133,NA
+"MSM",2015,"Base Case","Undiagnosed Cases",253.3,262.7,268.4
+"MSM",2015,"Base Case","True Prevalence",5386.3,5395.7,5401.4
+"MSM",2015,"Base Case","Undiagnosed Fraction (%)",4.7,4.9,5
+"MSM",2015,"Upper Bound","Undiagnosed Cases",497.5,513.2,525.1
+"MSM",2015,"Upper Bound","True Prevalence",5630.5,5646.2,5658.1
+"MSM",2015,"Upper Bound","Undiagnosed Fraction (%)",8.8,9.1,9.3
+"MSM",2016,"PLWHA","PLWHA",NA,5197,NA
+"MSM",2016,"Base Case","Undiagnosed Cases",230.7,238.2,247.3
+"MSM",2016,"Base Case","True Prevalence",5427.7,5435.2,5444.3
+"MSM",2016,"Base Case","Undiagnosed Fraction (%)",4.3,4.4,4.5
+"MSM",2016,"Upper Bound","Undiagnosed Cases",463.3,474,487
+"MSM",2016,"Upper Bound","True Prevalence",5660.3,5671,5684
+"MSM",2016,"Upper Bound","Undiagnosed Fraction (%)",8.2,8.4,8.6
+"MSM",2017,"PLWHA","PLWHA",NA,5291,NA
+"MSM",2017,"Base Case","Undiagnosed Cases",221.5,226.1,229.6
+"MSM",2017,"Base Case","True Prevalence",5512.5,5517.1,5520.6
+"MSM",2017,"Base Case","Undiagnosed Fraction (%)",4,4.1,4.2
+"MSM",2017,"Upper Bound","Undiagnosed Cases",445.7,454,461.4
+"MSM",2017,"Upper Bound","True Prevalence",5736.7,5745,5752.4
+"MSM",2017,"Upper Bound","Undiagnosed Fraction (%)",7.8,7.9,8
+"Total-stratified",2011,"PLWHA","PLWHA",NA,6396,NA
+"Total-stratified",2011,NA,NA,NA,NA,NA
+"Total-stratified",2011,NA,"True Prevalence",NA,NA,NA
+"Total-stratified",2011,NA,"Undiagnosed Fraction (%)",NA,NA,NA
+"Total-stratified",2012,"PLWHA","PLWHA",NA,6383,NA
+"Total-stratified",2012,"Base Case","Undiagnosed Cases",580.9,593.8,610.2
+"Total-stratified",2012,"Base Case","True Prevalence",6963.9,6976.8,6993.2
+"Total-stratified",2012,"Base Case","Undiagnosed Fraction (%)",8.3,8.5,8.7
+"Total-stratified",2012,"Upper Bound","Undiagnosed Cases",1078,1096,1118
+"Total-stratified",2012,"Upper Bound","True Prevalence",7461,7479,7501
+"Total-stratified",2012,"Upper Bound","Undiagnosed Fraction (%)",14.4,14.7,14.9
+"Total-stratified",2013,"PLWHA","PLWHA",NA,6482,NA
+"Total-stratified",2013,"Base Case","Undiagnosed Cases",554.3,562.2,574.2
+"Total-stratified",2013,"Base Case","True Prevalence",7036.3,7044.2,7056.2
+"Total-stratified",2013,"Base Case","Undiagnosed Fraction (%)",7.9,8,8.1
+"Total-stratified",2013,"Upper Bound","Undiagnosed Cases",1044,1054,1068
+"Total-stratified",2013,"Upper Bound","True Prevalence",7526,7536,7550
+"Total-stratified",2013,"Upper Bound","Undiagnosed Fraction (%)",13.9,14,14.1
+"Total-stratified",2014,"PLWHA","PLWHA",NA,6599,NA
+"Total-stratified",2014,"Base Case","Undiagnosed Cases",526.1,543.7,555.9
+"Total-stratified",2014,"Base Case","True Prevalence",7125.1,7142.7,7154.9
+"Total-stratified",2014,"Base Case","Undiagnosed Fraction (%)",7.4,7.6,7.8
+"Total-stratified",2014,"Upper Bound","Undiagnosed Cases",999.3,1023,1045
+"Total-stratified",2014,"Upper Bound","True Prevalence",7598.3,7622,7644
+"Total-stratified",2014,"Upper Bound","Undiagnosed Fraction (%)",13.2,13.4,13.7
+"Total-stratified",2015,"PLWHA","PLWHA",NA,6684,NA
+"Total-stratified",2015,"Base Case","Undiagnosed Cases",501.7,513,523.2
+"Total-stratified",2015,"Base Case","True Prevalence",7185.7,7197,7207.2
+"Total-stratified",2015,"Base Case","Undiagnosed Fraction (%)",7,7.1,7.3
+"Total-stratified",2015,"Upper Bound","Undiagnosed Cases",955.6,974.9,992.8
+"Total-stratified",2015,"Upper Bound","True Prevalence",7639.6,7658.9,7676.8
+"Total-stratified",2015,"Upper Bound","Undiagnosed Fraction (%)",12.5,12.7,12.9
+"Total-stratified",2016,"PLWHA","PLWHA",NA,6777,NA
+"Total-stratified",2016,"Base Case","Undiagnosed Cases",469.1,480.9,494.2
+"Total-stratified",2016,"Base Case","True Prevalence",7246.1,7257.9,7271.2
+"Total-stratified",2016,"Base Case","Undiagnosed Fraction (%)",6.5,6.6,6.8
+"Total-stratified",2016,"Upper Bound","Undiagnosed Cases",905,922.4,942
+"Total-stratified",2016,"Upper Bound","True Prevalence",7682,7699.4,7719
+"Total-stratified",2016,"Upper Bound","Undiagnosed Fraction (%)",11.8,12,12.2
+"Total-stratified",2017,"PLWHA","PLWHA",NA,6949,NA
+"Total-stratified",2017,"Base Case","Undiagnosed Cases",454.6,461.9,466.5
+"Total-stratified",2017,"Base Case","True Prevalence",7403.6,7410.9,7415.5
+"Total-stratified",2017,"Base Case","Undiagnosed Fraction (%)",6.1,6.2,6.3
+"Total-stratified",2017,"Upper Bound","Undiagnosed Cases",875.2,888.8,900
+"Total-stratified",2017,"Upper Bound","True Prevalence",7824.2,7837.8,7849
+"Total-stratified",2017,"Upper Bound","Undiagnosed Fraction (%)",11.2,11.3,11.5
