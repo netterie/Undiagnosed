@@ -12,12 +12,12 @@ _HIVBackcalc_ | Old version of the package | Archive AFTER finding a better plac
 _PLoS/replication_ | Jeanette's replication of KC analysis | Archive after creating a script to show how to use the appropriate package branch to replicate the KC analysis
 _PLoS/analysis_ | Ian's original code | 
 _analysis_WA_ | All the WA-DOH projects before Nov 2016 | Just archive? Most reports would need to have links and functions updated to be able to be re-run
-*analysis_philly* | Philly analysis | Archive - maybe we will come back to it some day
 bayes | Ian's Naive Bayes code | Leave as-is, maybe we will return to it some day
 literature | Place to collect papers | It's nonessential but fine
 presentations | Smattering of presentations | House a _list_ of presentations and their location across here vs Dropbox folder?
 __wa__ | Location of regular WA updates | See "DOH Estimates" in the Wiki sidebar for guide to this folder. Once report is re-run with the plots adapted to ggplot Dec 2016, can delete the code that was replaced by run_analysis()
 __kc__ | Location of regular KC updates
+__philly__ | Location of initial Philly descriptives and incidence/undx run for Darcy
 __website__ | Main website for the Undiagnosed project | Work on it, some day! http://hivbackcalc.github.io/
 
 
