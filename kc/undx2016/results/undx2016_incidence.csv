@@ -1,0 +1,73 @@
+"Quarter-Year","Measure","non-MSM","MSM","Total"
+2011,"# Diagnosed",13,46,59
+2011.25,"# Diagnosed",10,49,59
+2011.5,"# Diagnosed",13,45,58
+2011.75,"# Diagnosed",10,51,61
+2012,"# Diagnosed",19,50,69
+2012.25,"# Diagnosed",19,53,72
+2012.5,"# Diagnosed",11,48,59
+2012.75,"# Diagnosed",12,43,55
+2013,"# Diagnosed",11,48,59
+2013.25,"# Diagnosed",16,42,58
+2013.5,"# Diagnosed",13,40,53
+2013.75,"# Diagnosed",7,39,46
+2014,"# Diagnosed",16,31,47
+2014.25,"# Diagnosed",12,54,66
+2014.5,"# Diagnosed",14,54,68
+2014.75,"# Diagnosed",12,28,40
+2015,"# Diagnosed",19,35,54
+2015.25,"# Diagnosed",11,36,47
+2015.5,"# Diagnosed",9,46,55
+2015.75,"# Diagnosed",15,34,49
+2016,"# Diagnosed",12,38,50
+2016.25,"# Diagnosed",16,30,46
+2016.5,"# Diagnosed",16,28,44
+2016.75,"# Diagnosed",13,27,40
+2011,"Base Case Incidence",13.4,47.3,60.7
+2011.25,"Base Case Incidence",13.6,47.2,60.7
+2011.5,"Base Case Incidence",13.8,46.9,60.8
+2011.75,"Base Case Incidence",14.1,46.7,60.8
+2012,"Base Case Incidence",14.1,46.2,60.3
+2012.25,"Base Case Incidence",13.8,45.5,59.2
+2012.5,"Base Case Incidence",13.4,44.4,57.8
+2012.75,"Base Case Incidence",13.3,43.3,56.6
+2013,"Base Case Incidence",13.2,42.3,55.5
+2013.25,"Base Case Incidence",13.2,41.2,54.3
+2013.5,"Base Case Incidence",13.1,40.2,53.4
+2013.75,"Base Case Incidence",13.3,39.5,52.8
+2014,"Base Case Incidence",13.5,38.9,52.4
+2014.25,"Base Case Incidence",13.7,38.5,52.2
+2014.5,"Base Case Incidence",13.9,37.4,51.3
+2014.75,"Base Case Incidence",14,35.8,49.9
+2015,"Base Case Incidence",14.1,34.9,49
+2015.25,"Base Case Incidence",14.1,34.1,48.2
+2015.5,"Base Case Incidence",14.3,33.2,47.5
+2015.75,"Base Case Incidence",14.6,31.9,46.5
+2016,"Base Case Incidence",14.8,30.8,45.6
+2016.25,"Base Case Incidence",15,29.6,44.6
+2016.5,"Base Case Incidence",15,28.9,43.8
+2016.75,"Base Case Incidence",15,28.5,43.5
+2011,"Upper Bound Incidence",14,46.3,60.3
+2011.25,"Upper Bound Incidence",14.1,46,60.1
+2011.5,"Upper Bound Incidence",14.2,45.5,59.8
+2011.75,"Upper Bound Incidence",14.2,45,59.2
+2012,"Upper Bound Incidence",14.2,44.2,58.4
+2012.25,"Upper Bound Incidence",14.1,43.2,57.3
+2012.5,"Upper Bound Incidence",14,42.1,56.2
+2012.75,"Upper Bound Incidence",14,41,55
+2013,"Upper Bound Incidence",14,39.9,54
+2013.25,"Upper Bound Incidence",14.1,38.9,53
+2013.5,"Upper Bound Incidence",14.2,37.9,52.1
+2013.75,"Upper Bound Incidence",14.2,37.1,51.3
+2014,"Upper Bound Incidence",14.4,36.3,50.6
+2014.25,"Upper Bound Incidence",14.5,35.4,49.9
+2014.5,"Upper Bound Incidence",14.6,34.2,48.8
+2014.75,"Upper Bound Incidence",14.7,32.9,47.6
+2015,"Upper Bound Incidence",14.8,32,46.8
+2015.25,"Upper Bound Incidence",14.8,31,45.9
+2015.5,"Upper Bound Incidence",15,30,45
+2015.75,"Upper Bound Incidence",15.1,28.9,44
+2016,"Upper Bound Incidence",15.1,28,43.1
+2016.25,"Upper Bound Incidence",15.2,27.2,42.4
+2016.5,"Upper Bound Incidence",15.2,26.7,41.9
+2016.75,"Upper Bound Incidence",15.2,26.6,41.7
