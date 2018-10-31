@@ -25,7 +25,7 @@ runNew <- TRUE
 estimation_cases <- c(`Base Case`='base_case', `Upper Bound`='upper_bound')
 
 # Specify year min and max for analysis
-year_min <- 2011
+year_min <- 2012
 year_max <- 2017
 
 # Specify time step
@@ -69,6 +69,7 @@ options(knitr.table.format = "latex")
 
 # Install the package
 # devtools::install_github('hivbackcalc/package1.0/HIVBackCalc')
+library(HIVBackCalc)
 
 # Load the data and format it; load the HIVBackCalc package.
 # Update the package before running this script - don't source interim work.
@@ -107,6 +108,9 @@ dataf <- within(dataf, {
                     mode3[mode==9] <- 'NIR+NRR'
                       })
 table(dataf$mode3)
+dim(dataf)
+dim(datafOrig)
+table(dataf$yearDx)
 ```
 
 ```{r run, include=FALSE}
