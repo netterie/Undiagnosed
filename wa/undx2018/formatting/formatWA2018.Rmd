@@ -1,0 +1,251 @@
+---
+title: "Format WA Data - 2018 Estimates"
+author: "Jeanette Birnbaum"
+date: '`r format(Sys.Date(), "%Y-%B-%d")`'
+output:
+  pdf_document:
+      toc: true
+      toc_depth: 2
+      number_sections: true
+---
+
+```{r edit, include=FALSE, echo=FALSE}
+rm(list=ls())
+#############################################################
+# EDIT THESE PARAMETERS
+#############################################################
+# Specify year min and max for analysis
+year_min <- 2005
+year_max <- 2018
+
+# Local path of the Undiagnosed repo (that contains "wa", "templates", etc)
+undx_repo <- '/Users/jeanette/Dropbox/School/PhD/HIV_WA'
+
+# Within above repo, path to data file and formatting file
+data_path <- 'data/wa_backcalc_data_201908.csv'
+format_path <- 'wa/code/formatWA.R'
+```
+
+```{r setup, include=FALSE, echo=FALSE}
+# Empty workspace and load libraries
+# Install Rjkb using 
+#   devtools::install_github('netterie/Rjkb/Rjkb')
+library(Rjkb)
+library(knitr)
+
+# Knitr options
+knitr::opts_chunk$set(echo = TRUE)
+
+# Formatting code
+read_chunk(file.path(undx_repo, format_path))
+printSummaries <- TRUE
+```
+
+```{r data, include=FALSE, echo=FALSE}
+# Load the data and format it; load the HIVBackCalc package.
+# Update the package before running this script - don't source interim work.
+setup_hivbackcalc(workd=undx_repo,
+                  datafile=data_path,
+                  source_these='',
+                  load_package=TRUE)
+```
+
+# Raw Data Overview
+
+## Sample Size
+```{r overview, echo=FALSE}
+```
+
+N = `r Nobs0`
+
+## Variable list
+```{r rprintSummaries, echo=FALSE, include=FALSE}
+```
+
+```{r str}
+str(dataf)
+```
+## Variable summaries
+```{r summarize, echo=FALSE}
+```
+# Subset based on hst=WA and year
+
+## First, split the combined year-quarter of diagnosis and AIDS variables
+```{r split_yr_qtr, include=TRUE}
+```
+
+## Subset the data based on hst=WA and year
+```{r subset_initial}
+```
+Excluded `r Nobs0-Nobs1` cases based on year and hst restrictions and missingness in age and year of diagnosis.
+
+## New sample size
+New sample size is `r Nobs1`
+
+# Year and quarter of diagnosis: cleaning it up
+## Years represented
+```{r yearDx, echo=FALSE}
+table(dataf$yearDx, useNA='ifany')
+```
+
+## Quarters represented
+```{r quarterDx, echo=FALSE}
+table(dataf$quarterDx, useNA='ifany')
+```
+
+## Distribute unknown quarters uniformly across Q1-Q4
+```{r impute_qtr}
+```
+
+# Tabulate and collapse race and mode of diagnosis variables
+## Race and mode by year
+```{r investigate_race_mode}
+    table(dataf$new_race, dataf$yearDx, useNA='ifany')
+    table(dataf$new_mode, dataf$yearDx, useNA='ifany')
+```
+## Collapse
+```{r collapse}
+```
+
+```{r investigate_race_mode_again}
+    table(dataf$race, dataf$yearDx, useNA='ifany')
+    table(dataf$mode, dataf$yearDx, useNA='ifany')
+    table(dataf$mode2, dataf$yearDx, useNA='ifany')
+```
+
+# AIDS at Diagnosis
+
+## AIDS at initial diagnosis?
+```{r aidsAtDx, echo=FALSE}
+    table(dataf$aidsAtDx, useNA='ifany')
+```
+
+## Years of AIDS diagnosis represented:
+```{r yearAids, echo=FALSE}
+    table(dataf$yearAids, useNA='ifany')
+```
+
+## Quarters of AIDS diagnosis represented:
+```{r quarterAids, echo=FALSE}
+    table(dataf$quarterAids, useNA='ifany')
+```
+
+# Ever had a last negative test (everHadNegTest)
+
+## Coding
+This variable will be coded as Yes=TRUE, No=FALSE, and Don't Know/Refused/Missing=NA
+
+```{r everHadNegTest}
+```
+
+## Make compatible with recorded LNT dates
+
+### Change incorrect FALSEs
+We have `r checkEver[1,1]` cases with everHadNegTest=FALSE and `r checkEver[3,1]` with everHadNegTest=NA but have a time since last negative test. Change their everHadNegTest flag.
+
+```{r fix_everHadNegTest_toTRUE}
+```
+### Change incorrect TRUEs
+We have `r checkEver[2,2]` cases who have everHadNegTest=TRUE but have NO time since last negative test. Change their everHadNegTest flag. Change, 9/27/17 - previously was setting to false; now, set to NA.
+
+```{r fix_everHadNegTest_toNA}
+```
+
+### Check
+
+```{r check_everHadNegTest}
+```
+
+# Time since last negative test (infPeriod)
+
+## Apply age-16 assumption and summarize
+```{r infPeriod}
+```
+
+```{r summaryInf}
+summary(dataf$infPeriod,digits=3)
+```
+
+## Diagnoses younger than 16
+
+```{r infPeriod_investigate_neg}
+```
+
+There are `r sum(a1['TRUE',c(1,3)])` cases who do not have a date of last negative test and may not fit the assumption of TID=age-16. Of those, `r sum(a1['TRUE',c(1,3)])-sum(a2['TRUE',c(1,3)])` are age 16 at diagnosis and will have TID=0 using this assumption. Primary mode of transmission is Ped ('Perinatal or pediatric').
+
+```{r infPeriod_cap_neg}
+```
+Excluded `r Nobs1-Nobs2` cases due to age $\leq$ 16 and no observed infPeriod data.
+
+## Maximum window of 18 years
+```{r infPeriod_cap_tested}
+```
+Among those with everHadNegTest=TRUE, we capped `r check_cap1[2,1]` cases at aidsUB.
+
+```{r infPeriod_cap_nottested}
+```
+Among those with everHadNegTest=FALSE, no one had an original TID value.
+
+```{r infPeriod_cap_NAtested}
+```
+Among those with everHadNegTest=NA, no one had an original TID value.
+
+# Final analytic dataset
+## Reminder of data cleaning
+Final subset is of size `r nrow(dataf)`
+* Diagnoses included: 
+    - Year: non-missing, and 2005 onwards
+    - Occurred in WA state
+    - Excluded `r Nobs0-Nobs1` cases based on year and hst restrictions (no missingness in age and year of diagnosis in data for 2015 estimates).
+* Ages included:
+    - If missing age, must have recorded time of last negative test
+    - If age $\leq$ 16, must have recorded time of last negative test
+    - Excluded `r Nobs1-Nobs2` cases due to age $\leq$ 16 and no observed LNT. 
+
+## Variable summaries
+```{r final_summary, echo=FALSE}
+```
+
+## Cross-tabulation of KC diagnosis counts for SHAMP
+```{r shamp, echo=TRUE}
+# See diagnoses by year
+table(dataf$yearDx)
+
+# Subset to non-MSM in KC and look again
+# Note that "Hetero" excludes "Blood/Needle"
+nonMSMkc <- subset(dataf, dx_in_king=='Y' & mode2=='non-MSM')
+table(nonMSMkc$yearDx)
+
+# Create race3 which is just White/Black/Other
+nonMSMkc$race3 <- ifelse(nonMSMkc$race!='White' & nonMSMkc$race!='Black', 'Other', as.character(nonMSMkc$race))
+nonMSMkc$race3 <- factor(nonMSMkc$race3, levels=c('White', 'Black', 'Other'),
+                         labels=c('White', 'Black', 'Other'))
+table(nonMSMkc$race3, nonMSMkc$yearDx)
+table(nonMSMkc$race3, nonMSMkc$timeDx)
+```
+```{r shamp-plot}
+ggplot(nonMSMkc, aes(x=timeDx, fill=birth_sex)) + 
+    geom_histogram(position='dodge', binwidth=0.25) + 
+    facet_grid(race3~.) +
+    scale_x_continuous(breaks=seq(2005,2018,by=1)) +
+    theme(axis.text.x=element_text(angle=90,hjust=1)) +
+ggtitle('Quarterly non-MSM HIV diagnoses in KC, by race and sex')
+```
+
+```{r shamp-plot2}
+ggplot(nonMSMkc, aes(x=timeDx, fill=birth_sex)) + 
+    geom_histogram(position='dodge', binwidth=0.5) + 
+    facet_grid(race3~.) +
+    scale_x_continuous(breaks=seq(2005,2018,by=1)) +
+    theme(axis.text.x=element_text(angle=90,hjust=1)) +
+ggtitle('Half-year non-MSM HIV diagnoses in KC, by race and sex')
+```
+
+```{r shamp-plot3}
+ggplot(nonMSMkc, aes(x=timeDx, fill=birth_sex)) + 
+    geom_histogram(position='dodge', binwidth=1) + 
+    facet_grid(race3~.) +
+    scale_x_continuous(breaks=seq(2005,2018,by=1)) +
+    theme(axis.text.x=element_text(angle=90,hjust=1)) +
+ggtitle('Yearly non-MSM HIV diagnoses in KC, by race and sex')
+```

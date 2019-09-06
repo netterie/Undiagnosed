@@ -1,0 +1,316 @@
+"Subgroup","Year","Diagnoses/Case","Estimate","Min.","Mean","Max."
+"MSM Inside KC",2010,"PLWHA","PLWHA",NA,4949,NA
+"MSM Inside KC",2010,"Base Case","Undiagnosed Cases",342,351.4,363.4
+"MSM Inside KC",2010,"Base Case","True Prevalence",5291,5300.4,5312.4
+"MSM Inside KC",2010,"Base Case","Undiagnosed Fraction (%)",6.5,6.6,6.8
+"MSM Inside KC",2010,"Upper Bound","Undiagnosed Cases",670.3,683.7,701.1
+"MSM Inside KC",2010,"Upper Bound","True Prevalence",5619.3,5632.7,5650.1
+"MSM Inside KC",2010,"Upper Bound","Undiagnosed Fraction (%)",11.9,12.1,12.4
+"MSM Inside KC",2011,"PLWHA","PLWHA",NA,4835,NA
+"MSM Inside KC",2011,"Base Case","Undiagnosed Cases",336.6,338.4,340.6
+"MSM Inside KC",2011,"Base Case","True Prevalence",5171.6,5173.4,5175.6
+"MSM Inside KC",2011,"Base Case","Undiagnosed Fraction (%)",6.5,6.5,6.6
+"MSM Inside KC",2011,"Upper Bound","Undiagnosed Cases",658.2,662.5,667.8
+"MSM Inside KC",2011,"Upper Bound","True Prevalence",5493.2,5497.5,5502.8
+"MSM Inside KC",2011,"Upper Bound","Undiagnosed Fraction (%)",12,12.1,12.1
+"MSM Inside KC",2012,"PLWHA","PLWHA",NA,4830,NA
+"MSM Inside KC",2012,"Base Case","Undiagnosed Cases",319.5,326.3,334.1
+"MSM Inside KC",2012,"Base Case","True Prevalence",5149.5,5156.3,5164.1
+"MSM Inside KC",2012,"Base Case","Undiagnosed Fraction (%)",6.2,6.3,6.5
+"MSM Inside KC",2012,"Upper Bound","Undiagnosed Cases",630,640.2,652.6
+"MSM Inside KC",2012,"Upper Bound","True Prevalence",5460,5470.2,5482.6
+"MSM Inside KC",2012,"Upper Bound","Undiagnosed Fraction (%)",11.5,11.7,11.9
+"MSM Inside KC",2013,"PLWHA","PLWHA",NA,4929,NA
+"MSM Inside KC",2013,"Base Case","Undiagnosed Cases",308.1,310.9,316.6
+"MSM Inside KC",2013,"Base Case","True Prevalence",5237.1,5239.9,5245.6
+"MSM Inside KC",2013,"Base Case","Undiagnosed Fraction (%)",5.9,5.9,6
+"MSM Inside KC",2013,"Upper Bound","Undiagnosed Cases",611.2,615.9,623.6
+"MSM Inside KC",2013,"Upper Bound","True Prevalence",5540.2,5544.9,5552.6
+"MSM Inside KC",2013,"Upper Bound","Undiagnosed Fraction (%)",11,11.1,11.2
+"MSM Inside KC",2014,"PLWHA","PLWHA",NA,5018,NA
+"MSM Inside KC",2014,"Base Case","Undiagnosed Cases",287.6,303.3,314.9
+"MSM Inside KC",2014,"Base Case","True Prevalence",5305.6,5321.3,5332.9
+"MSM Inside KC",2014,"Base Case","Undiagnosed Fraction (%)",5.4,5.7,5.9
+"MSM Inside KC",2014,"Upper Bound","Undiagnosed Cases",574.6,596.9,614.8
+"MSM Inside KC",2014,"Upper Bound","True Prevalence",5592.6,5614.9,5632.8
+"MSM Inside KC",2014,"Upper Bound","Undiagnosed Fraction (%)",10.3,10.6,10.9
+"MSM Inside KC",2015,"PLWHA","PLWHA",NA,5088,NA
+"MSM Inside KC",2015,"Base Case","Undiagnosed Cases",275.6,283.6,288.4
+"MSM Inside KC",2015,"Base Case","True Prevalence",5363.6,5371.6,5376.4
+"MSM Inside KC",2015,"Base Case","Undiagnosed Fraction (%)",5.1,5.3,5.4
+"MSM Inside KC",2015,"Upper Bound","Undiagnosed Cases",549,562.8,573.3
+"MSM Inside KC",2015,"Upper Bound","True Prevalence",5637,5650.8,5661.3
+"MSM Inside KC",2015,"Upper Bound","Undiagnosed Fraction (%)",9.7,10,10.1
+"MSM Inside KC",2016,"PLWHA","PLWHA",NA,5131,NA
+"MSM Inside KC",2016,"Base Case","Undiagnosed Cases",254.1,260.6,269.5
+"MSM Inside KC",2016,"Base Case","True Prevalence",5385.1,5391.6,5400.5
+"MSM Inside KC",2016,"Base Case","Undiagnosed Fraction (%)",4.7,4.8,5
+"MSM Inside KC",2016,"Upper Bound","Undiagnosed Cases",519,527,538.4
+"MSM Inside KC",2016,"Upper Bound","True Prevalence",5650,5658,5669.4
+"MSM Inside KC",2016,"Upper Bound","Undiagnosed Fraction (%)",9.2,9.3,9.5
+"MSM Inside KC",2017,"PLWHA","PLWHA",NA,5217,NA
+"MSM Inside KC",2017,"Base Case","Undiagnosed Cases",256.4,258.1,260.2
+"MSM Inside KC",2017,"Base Case","True Prevalence",5473.4,5475.1,5477.2
+"MSM Inside KC",2017,"Base Case","Undiagnosed Fraction (%)",4.7,4.7,4.8
+"MSM Inside KC",2017,"Upper Bound","Undiagnosed Cases",516.8,520.9,524.2
+"MSM Inside KC",2017,"Upper Bound","True Prevalence",5733.8,5737.9,5741.2
+"MSM Inside KC",2017,"Upper Bound","Undiagnosed Fraction (%)",9,9.1,9.1
+"MSM Inside KC",2018,"PLWHA","PLWHA",NA,5283,NA
+"MSM Inside KC",2018,"Base Case","Undiagnosed Cases",247.5,250.6,253.7
+"MSM Inside KC",2018,"Base Case","True Prevalence",5530.5,5533.6,5536.7
+"MSM Inside KC",2018,"Base Case","Undiagnosed Fraction (%)",4.5,4.5,4.6
+"MSM Inside KC",2018,"Upper Bound","Undiagnosed Cases",500.8,504.7,508.5
+"MSM Inside KC",2018,"Upper Bound","True Prevalence",5783.8,5787.7,5791.5
+"MSM Inside KC",2018,"Upper Bound","Undiagnosed Fraction (%)",8.7,8.7,8.8
+"non-MSM Inside KC",2010,"PLWHA","PLWHA",NA,1612,NA
+"non-MSM Inside KC",2010,"Base Case","Undiagnosed Cases",334,336,338.8
+"non-MSM Inside KC",2010,"Base Case","True Prevalence",1946,1948,1950.8
+"non-MSM Inside KC",2010,"Base Case","Undiagnosed Fraction (%)",17.2,17.2,17.4
+"non-MSM Inside KC",2010,"Upper Bound","Undiagnosed Cases",663,664.3,666.3
+"non-MSM Inside KC",2010,"Upper Bound","True Prevalence",2275,2276.3,2278.3
+"non-MSM Inside KC",2010,"Upper Bound","Undiagnosed Fraction (%)",29.1,29.2,29.2
+"non-MSM Inside KC",2011,"PLWHA","PLWHA",NA,1565,NA
+"non-MSM Inside KC",2011,"Base Case","Undiagnosed Cases",329.3,330.8,332.4
+"non-MSM Inside KC",2011,"Base Case","True Prevalence",1894.3,1895.8,1897.4
+"non-MSM Inside KC",2011,"Base Case","Undiagnosed Fraction (%)",17.4,17.4,17.5
+"non-MSM Inside KC",2011,"Upper Bound","Undiagnosed Cases",666.2,670.3,675.9
+"non-MSM Inside KC",2011,"Upper Bound","True Prevalence",2231.2,2235.3,2240.9
+"non-MSM Inside KC",2011,"Upper Bound","Undiagnosed Fraction (%)",29.9,30,30.2
+"non-MSM Inside KC",2012,"PLWHA","PLWHA",NA,1557,NA
+"non-MSM Inside KC",2012,"Base Case","Undiagnosed Cases",327.5,329.5,332.7
+"non-MSM Inside KC",2012,"Base Case","True Prevalence",1884.5,1886.5,1889.7
+"non-MSM Inside KC",2012,"Base Case","Undiagnosed Fraction (%)",17.4,17.5,17.6
+"non-MSM Inside KC",2012,"Upper Bound","Undiagnosed Cases",676.6,677.5,678.4
+"non-MSM Inside KC",2012,"Upper Bound","True Prevalence",2233.6,2234.5,2235.4
+"non-MSM Inside KC",2012,"Upper Bound","Undiagnosed Fraction (%)",30.3,30.3,30.3
+"non-MSM Inside KC",2013,"PLWHA","PLWHA",NA,1562,NA
+"non-MSM Inside KC",2013,"Base Case","Undiagnosed Cases",323.4,325.3,328.6
+"non-MSM Inside KC",2013,"Base Case","True Prevalence",1885.4,1887.3,1890.6
+"non-MSM Inside KC",2013,"Base Case","Undiagnosed Fraction (%)",17.2,17.2,17.4
+"non-MSM Inside KC",2013,"Upper Bound","Undiagnosed Cases",679.1,683.2,691.2
+"non-MSM Inside KC",2013,"Upper Bound","True Prevalence",2241.1,2245.2,2253.2
+"non-MSM Inside KC",2013,"Upper Bound","Undiagnosed Fraction (%)",30.3,30.4,30.7
+"non-MSM Inside KC",2014,"PLWHA","PLWHA",NA,1596,NA
+"non-MSM Inside KC",2014,"Base Case","Undiagnosed Cases",326,328.9,330.9
+"non-MSM Inside KC",2014,"Base Case","True Prevalence",1922,1924.9,1926.9
+"non-MSM Inside KC",2014,"Base Case","Undiagnosed Fraction (%)",17,17.1,17.2
+"non-MSM Inside KC",2014,"Upper Bound","Undiagnosed Cases",695.7,697.8,699.4
+"non-MSM Inside KC",2014,"Upper Bound","True Prevalence",2291.7,2293.8,2295.4
+"non-MSM Inside KC",2014,"Upper Bound","Undiagnosed Fraction (%)",30.4,30.4,30.5
+"non-MSM Inside KC",2015,"PLWHA","PLWHA",NA,1611,NA
+"non-MSM Inside KC",2015,"Base Case","Undiagnosed Cases",324.7,330,337.9
+"non-MSM Inside KC",2015,"Base Case","True Prevalence",1935.7,1941,1948.9
+"non-MSM Inside KC",2015,"Base Case","Undiagnosed Fraction (%)",16.8,17,17.3
+"non-MSM Inside KC",2015,"Upper Bound","Undiagnosed Cases",702.5,713.7,727.9
+"non-MSM Inside KC",2015,"Upper Bound","True Prevalence",2313.5,2324.7,2338.9
+"non-MSM Inside KC",2015,"Upper Bound","Undiagnosed Fraction (%)",30.4,30.7,31.1
+"non-MSM Inside KC",2016,"PLWHA","PLWHA",NA,1645,NA
+"non-MSM Inside KC",2016,"Base Case","Undiagnosed Cases",340.8,350.3,360
+"non-MSM Inside KC",2016,"Base Case","True Prevalence",1985.8,1995.3,2005
+"non-MSM Inside KC",2016,"Base Case","Undiagnosed Fraction (%)",17.2,17.6,18
+"non-MSM Inside KC",2016,"Upper Bound","Undiagnosed Cases",734.8,749.2,763.5
+"non-MSM Inside KC",2016,"Upper Bound","True Prevalence",2379.8,2394.2,2408.5
+"non-MSM Inside KC",2016,"Upper Bound","Undiagnosed Fraction (%)",30.9,31.3,31.7
+"non-MSM Inside KC",2017,"PLWHA","PLWHA",NA,1684,NA
+"non-MSM Inside KC",2017,"Base Case","Undiagnosed Cases",366.9,383.2,402
+"non-MSM Inside KC",2017,"Base Case","True Prevalence",2050.9,2067.2,2086
+"non-MSM Inside KC",2017,"Base Case","Undiagnosed Fraction (%)",17.9,18.5,19.3
+"non-MSM Inside KC",2017,"Upper Bound","Undiagnosed Cases",772.4,791,810.5
+"non-MSM Inside KC",2017,"Upper Bound","True Prevalence",2456.4,2475,2494.5
+"non-MSM Inside KC",2017,"Upper Bound","Undiagnosed Fraction (%)",31.4,32,32.5
+"non-MSM Inside KC",2018,"PLWHA","PLWHA",NA,1740,NA
+"non-MSM Inside KC",2018,"Base Case","Undiagnosed Cases",408.4,409.4,410.5
+"non-MSM Inside KC",2018,"Base Case","True Prevalence",2148.4,2149.4,2150.5
+"non-MSM Inside KC",2018,"Base Case","Undiagnosed Fraction (%)",19,19,19.1
+"non-MSM Inside KC",2018,"Upper Bound","Undiagnosed Cases",812,814.1,816.2
+"non-MSM Inside KC",2018,"Upper Bound","True Prevalence",2552,2554.1,2556.2
+"non-MSM Inside KC",2018,"Upper Bound","Undiagnosed Fraction (%)",31.8,31.9,31.9
+"non-MSM Outside KC",2010,"PLWHA","PLWHA",NA,1128,NA
+"non-MSM Outside KC",2010,"Base Case","Undiagnosed Cases",403.9,412.7,420.9
+"non-MSM Outside KC",2010,"Base Case","True Prevalence",1531.9,1540.7,1548.9
+"non-MSM Outside KC",2010,"Base Case","Undiagnosed Fraction (%)",26.4,26.8,27.2
+"non-MSM Outside KC",2010,"Upper Bound","Undiagnosed Cases",780.1,788.1,795.9
+"non-MSM Outside KC",2010,"Upper Bound","True Prevalence",1908.1,1916.1,1923.9
+"non-MSM Outside KC",2010,"Upper Bound","Undiagnosed Fraction (%)",40.9,41.1,41.4
+"non-MSM Outside KC",2011,"PLWHA","PLWHA",NA,1174,NA
+"non-MSM Outside KC",2011,"Base Case","Undiagnosed Cases",399.8,401.1,403.8
+"non-MSM Outside KC",2011,"Base Case","True Prevalence",1573.8,1575.1,1577.8
+"non-MSM Outside KC",2011,"Base Case","Undiagnosed Fraction (%)",25.4,25.5,25.6
+"non-MSM Outside KC",2011,"Upper Bound","Undiagnosed Cases",777.5,780.7,784.3
+"non-MSM Outside KC",2011,"Upper Bound","True Prevalence",1951.5,1954.7,1958.3
+"non-MSM Outside KC",2011,"Upper Bound","Undiagnosed Fraction (%)",39.8,39.9,40.1
+"non-MSM Outside KC",2012,"PLWHA","PLWHA",NA,1207,NA
+"non-MSM Outside KC",2012,"Base Case","Undiagnosed Cases",375.3,381.8,390.9
+"non-MSM Outside KC",2012,"Base Case","True Prevalence",1582.3,1588.8,1597.9
+"non-MSM Outside KC",2012,"Base Case","Undiagnosed Fraction (%)",23.7,24,24.5
+"non-MSM Outside KC",2012,"Upper Bound","Undiagnosed Cases",763,766.3,772.5
+"non-MSM Outside KC",2012,"Upper Bound","True Prevalence",1970,1973.3,1979.5
+"non-MSM Outside KC",2012,"Upper Bound","Undiagnosed Fraction (%)",38.7,38.8,39
+"non-MSM Outside KC",2013,"PLWHA","PLWHA",NA,1242,NA
+"non-MSM Outside KC",2013,"Base Case","Undiagnosed Cases",371,372.9,374.3
+"non-MSM Outside KC",2013,"Base Case","True Prevalence",1613,1614.9,1616.3
+"non-MSM Outside KC",2013,"Base Case","Undiagnosed Fraction (%)",23,23.1,23.2
+"non-MSM Outside KC",2013,"Upper Bound","Undiagnosed Cases",764.3,767.6,769.8
+"non-MSM Outside KC",2013,"Upper Bound","True Prevalence",2006.3,2009.6,2011.8
+"non-MSM Outside KC",2013,"Upper Bound","Undiagnosed Fraction (%)",38.1,38.2,38.3
+"non-MSM Outside KC",2014,"PLWHA","PLWHA",NA,1258,NA
+"non-MSM Outside KC",2014,"Base Case","Undiagnosed Cases",371.4,375.6,379.2
+"non-MSM Outside KC",2014,"Base Case","True Prevalence",1629.4,1633.6,1637.2
+"non-MSM Outside KC",2014,"Base Case","Undiagnosed Fraction (%)",22.8,23,23.2
+"non-MSM Outside KC",2014,"Upper Bound","Undiagnosed Cases",773,780.8,787.6
+"non-MSM Outside KC",2014,"Upper Bound","True Prevalence",2031,2038.8,2045.6
+"non-MSM Outside KC",2014,"Upper Bound","Undiagnosed Fraction (%)",38.1,38.3,38.5
+"non-MSM Outside KC",2015,"PLWHA","PLWHA",NA,1326,NA
+"non-MSM Outside KC",2015,"Base Case","Undiagnosed Cases",384.6,396.2,403.8
+"non-MSM Outside KC",2015,"Base Case","True Prevalence",1710.6,1722.2,1729.8
+"non-MSM Outside KC",2015,"Base Case","Undiagnosed Fraction (%)",22.5,23,23.3
+"non-MSM Outside KC",2015,"Upper Bound","Undiagnosed Cases",794.7,806,812.2
+"non-MSM Outside KC",2015,"Upper Bound","True Prevalence",2120.7,2132,2138.2
+"non-MSM Outside KC",2015,"Upper Bound","Undiagnosed Fraction (%)",37.5,37.8,38
+"non-MSM Outside KC",2016,"PLWHA","PLWHA",NA,1386,NA
+"non-MSM Outside KC",2016,"Base Case","Undiagnosed Cases",406.7,408.7,410.1
+"non-MSM Outside KC",2016,"Base Case","True Prevalence",1792.7,1794.7,1796.1
+"non-MSM Outside KC",2016,"Base Case","Undiagnosed Fraction (%)",22.7,22.8,22.8
+"non-MSM Outside KC",2016,"Upper Bound","Undiagnosed Cases",811,812.1,813.1
+"non-MSM Outside KC",2016,"Upper Bound","True Prevalence",2197,2198.1,2199.1
+"non-MSM Outside KC",2016,"Upper Bound","Undiagnosed Fraction (%)",36.9,36.9,37
+"non-MSM Outside KC",2017,"PLWHA","PLWHA",NA,1483,NA
+"non-MSM Outside KC",2017,"Base Case","Undiagnosed Cases",411.1,415,417.3
+"non-MSM Outside KC",2017,"Base Case","True Prevalence",1894.1,1898,1900.3
+"non-MSM Outside KC",2017,"Base Case","Undiagnosed Fraction (%)",21.7,21.9,22
+"non-MSM Outside KC",2017,"Upper Bound","Undiagnosed Cases",810.5,813.4,814.8
+"non-MSM Outside KC",2017,"Upper Bound","True Prevalence",2293.5,2296.4,2297.8
+"non-MSM Outside KC",2017,"Upper Bound","Undiagnosed Fraction (%)",35.3,35.4,35.5
+"non-MSM Outside KC",2018,"PLWHA","PLWHA",NA,1581,NA
+"non-MSM Outside KC",2018,"Base Case","Undiagnosed Cases",419.8,420.7,421.6
+"non-MSM Outside KC",2018,"Base Case","True Prevalence",2000.8,2001.7,2002.6
+"non-MSM Outside KC",2018,"Base Case","Undiagnosed Fraction (%)",21,21,21.1
+"non-MSM Outside KC",2018,"Upper Bound","Undiagnosed Cases",816.4,817.5,818.5
+"non-MSM Outside KC",2018,"Upper Bound","True Prevalence",2397.4,2398.5,2399.5
+"non-MSM Outside KC",2018,"Upper Bound","Undiagnosed Fraction (%)",34.1,34.1,34.1
+"MSM Outside KC",2010,"PLWHA","PLWHA",NA,3460,NA
+"MSM Outside KC",2010,"Base Case","Undiagnosed Cases",346.3,347.1,348.6
+"MSM Outside KC",2010,"Base Case","True Prevalence",3806.3,3807.1,3808.6
+"MSM Outside KC",2010,"Base Case","Undiagnosed Fraction (%)",9.1,9.1,9.2
+"MSM Outside KC",2010,"Upper Bound","Undiagnosed Cases",678.3,679,680
+"MSM Outside KC",2010,"Upper Bound","True Prevalence",4138.3,4139,4140
+"MSM Outside KC",2010,"Upper Bound","Undiagnosed Fraction (%)",16.4,16.4,16.4
+"MSM Outside KC",2011,"PLWHA","PLWHA",NA,3630,NA
+"MSM Outside KC",2011,"Base Case","Undiagnosed Cases",336.7,340.3,345.2
+"MSM Outside KC",2011,"Base Case","True Prevalence",3966.7,3970.3,3975.2
+"MSM Outside KC",2011,"Base Case","Undiagnosed Fraction (%)",8.5,8.6,8.7
+"MSM Outside KC",2011,"Upper Bound","Undiagnosed Cases",661.3,664.5,671.1
+"MSM Outside KC",2011,"Upper Bound","True Prevalence",4291.3,4294.5,4301.1
+"MSM Outside KC",2011,"Upper Bound","Undiagnosed Fraction (%)",15.4,15.5,15.6
+"MSM Outside KC",2012,"PLWHA","PLWHA",NA,3742,NA
+"MSM Outside KC",2012,"Base Case","Undiagnosed Cases",324.2,329.3,337
+"MSM Outside KC",2012,"Base Case","True Prevalence",4066.2,4071.3,4079
+"MSM Outside KC",2012,"Base Case","Undiagnosed Fraction (%)",8,8.1,8.3
+"MSM Outside KC",2012,"Upper Bound","Undiagnosed Cases",638.5,645.1,656
+"MSM Outside KC",2012,"Upper Bound","True Prevalence",4380.5,4387.1,4398
+"MSM Outside KC",2012,"Upper Bound","Undiagnosed Fraction (%)",14.6,14.7,14.9
+"MSM Outside KC",2013,"PLWHA","PLWHA",NA,3917,NA
+"MSM Outside KC",2013,"Base Case","Undiagnosed Cases",311.4,318.2,324.8
+"MSM Outside KC",2013,"Base Case","True Prevalence",4228.4,4235.2,4241.8
+"MSM Outside KC",2013,"Base Case","Undiagnosed Fraction (%)",7.4,7.5,7.7
+"MSM Outside KC",2013,"Upper Bound","Undiagnosed Cases",617.9,627.5,636.6
+"MSM Outside KC",2013,"Upper Bound","True Prevalence",4534.9,4544.5,4553.6
+"MSM Outside KC",2013,"Upper Bound","Undiagnosed Fraction (%)",13.6,13.8,14
+"MSM Outside KC",2014,"PLWHA","PLWHA",NA,3956,NA
+"MSM Outside KC",2014,"Base Case","Undiagnosed Cases",304.7,306.8,310
+"MSM Outside KC",2014,"Base Case","True Prevalence",4260.7,4262.8,4266
+"MSM Outside KC",2014,"Base Case","Undiagnosed Fraction (%)",7.2,7.2,7.3
+"MSM Outside KC",2014,"Upper Bound","Undiagnosed Cases",611.6,614.6,619.7
+"MSM Outside KC",2014,"Upper Bound","True Prevalence",4567.6,4570.6,4575.7
+"MSM Outside KC",2014,"Upper Bound","Undiagnosed Fraction (%)",13.4,13.4,13.5
+"MSM Outside KC",2015,"PLWHA","PLWHA",NA,4185,NA
+"MSM Outside KC",2015,"Base Case","Undiagnosed Cases",306,315.2,322.4
+"MSM Outside KC",2015,"Base Case","True Prevalence",4491,4500.2,4507.4
+"MSM Outside KC",2015,"Base Case","Undiagnosed Fraction (%)",6.8,7,7.2
+"MSM Outside KC",2015,"Upper Bound","Undiagnosed Cases",606.7,620.8,630.1
+"MSM Outside KC",2015,"Upper Bound","True Prevalence",4791.7,4805.8,4815.1
+"MSM Outside KC",2015,"Upper Bound","Undiagnosed Fraction (%)",12.7,12.9,13.1
+"MSM Outside KC",2016,"PLWHA","PLWHA",NA,4326,NA
+"MSM Outside KC",2016,"Base Case","Undiagnosed Cases",300.9,303.9,306.6
+"MSM Outside KC",2016,"Base Case","True Prevalence",4626.9,4629.9,4632.6
+"MSM Outside KC",2016,"Base Case","Undiagnosed Fraction (%)",6.5,6.6,6.6
+"MSM Outside KC",2016,"Upper Bound","Undiagnosed Cases",600.3,603.8,606.2
+"MSM Outside KC",2016,"Upper Bound","True Prevalence",4926.3,4929.8,4932.2
+"MSM Outside KC",2016,"Upper Bound","Undiagnosed Fraction (%)",12.2,12.2,12.3
+"MSM Outside KC",2017,"PLWHA","PLWHA",NA,4595,NA
+"MSM Outside KC",2017,"Base Case","Undiagnosed Cases",301,303.3,306.9
+"MSM Outside KC",2017,"Base Case","True Prevalence",4896,4898.3,4901.9
+"MSM Outside KC",2017,"Base Case","Undiagnosed Fraction (%)",6.1,6.2,6.3
+"MSM Outside KC",2017,"Upper Bound","Undiagnosed Cases",595.6,599.1,604.5
+"MSM Outside KC",2017,"Upper Bound","True Prevalence",5190.6,5194.1,5199.5
+"MSM Outside KC",2017,"Upper Bound","Undiagnosed Fraction (%)",11.5,11.5,11.6
+"MSM Outside KC",2018,"PLWHA","PLWHA",NA,4798,NA
+"MSM Outside KC",2018,"Base Case","Undiagnosed Cases",301.1,301.4,301.8
+"MSM Outside KC",2018,"Base Case","True Prevalence",5099.1,5099.4,5099.8
+"MSM Outside KC",2018,"Base Case","Undiagnosed Fraction (%)",5.9,5.9,5.9
+"MSM Outside KC",2018,"Upper Bound","Undiagnosed Cases",593.8,594.6,595.5
+"MSM Outside KC",2018,"Upper Bound","True Prevalence",5391.8,5392.6,5393.5
+"MSM Outside KC",2018,"Upper Bound","Undiagnosed Fraction (%)",11,11,11
+"Total-stratified",2010,"PLWHA","PLWHA",NA,11149,NA
+"Total-stratified",2010,"Base Case","Undiagnosed Cases",1428,1447,1470
+"Total-stratified",2010,"Base Case","True Prevalence",12577,12596,12619
+"Total-stratified",2010,"Base Case","Undiagnosed Fraction (%)",11.4,11.5,11.6
+"Total-stratified",2010,"Upper Bound","Undiagnosed Cases",2795,2815,2840
+"Total-stratified",2010,"Upper Bound","True Prevalence",13944,13964,13989
+"Total-stratified",2010,"Upper Bound","Undiagnosed Fraction (%)",20,20.2,20.3
+"Total-stratified",2011,"PLWHA","PLWHA",NA,11204,NA
+"Total-stratified",2011,"Base Case","Undiagnosed Cases",1406,1411,1417
+"Total-stratified",2011,"Base Case","True Prevalence",12610,12615,12621
+"Total-stratified",2011,"Base Case","Undiagnosed Fraction (%)",11.1,11.2,11.2
+"Total-stratified",2011,"Upper Bound","Undiagnosed Cases",2773,2778,2782
+"Total-stratified",2011,"Upper Bound","True Prevalence",13977,13982,13986
+"Total-stratified",2011,"Upper Bound","Undiagnosed Fraction (%)",19.8,19.9,19.9
+"Total-stratified",2012,"PLWHA","PLWHA",NA,11336,NA
+"Total-stratified",2012,"Base Case","Undiagnosed Cases",1347,1367,1395
+"Total-stratified",2012,"Base Case","True Prevalence",12683,12703,12731
+"Total-stratified",2012,"Base Case","Undiagnosed Fraction (%)",10.6,10.8,11
+"Total-stratified",2012,"Upper Bound","Undiagnosed Cases",2710,2729,2759
+"Total-stratified",2012,"Upper Bound","True Prevalence",14046,14065,14095
+"Total-stratified",2012,"Upper Bound","Undiagnosed Fraction (%)",19.3,19.4,19.6
+"Total-stratified",2013,"PLWHA","PLWHA",NA,11650,NA
+"Total-stratified",2013,"Base Case","Undiagnosed Cases",1319,1327,1341
+"Total-stratified",2013,"Base Case","True Prevalence",12969,12977,12991
+"Total-stratified",2013,"Base Case","Undiagnosed Fraction (%)",10.2,10.2,10.3
+"Total-stratified",2013,"Upper Bound","Undiagnosed Cases",2690,2694,2704
+"Total-stratified",2013,"Upper Bound","True Prevalence",14340,14344,14354
+"Total-stratified",2013,"Upper Bound","Undiagnosed Fraction (%)",18.8,18.8,18.8
+"Total-stratified",2014,"PLWHA","PLWHA",NA,11828,NA
+"Total-stratified",2014,"Base Case","Undiagnosed Cases",1303,1315,1324
+"Total-stratified",2014,"Base Case","True Prevalence",13131,13143,13152
+"Total-stratified",2014,"Base Case","Undiagnosed Fraction (%)",9.9,10,10.1
+"Total-stratified",2014,"Upper Bound","Undiagnosed Cases",2681,2690,2699
+"Total-stratified",2014,"Upper Bound","True Prevalence",14509,14518,14527
+"Total-stratified",2014,"Upper Bound","Undiagnosed Fraction (%)",18.5,18.5,18.6
+"Total-stratified",2015,"PLWHA","PLWHA",NA,12210,NA
+"Total-stratified",2015,"Base Case","Undiagnosed Cases",1315,1325,1332
+"Total-stratified",2015,"Base Case","True Prevalence",13525,13535,13542
+"Total-stratified",2015,"Base Case","Undiagnosed Fraction (%)",9.7,9.8,9.8
+"Total-stratified",2015,"Upper Bound","Undiagnosed Cases",2696,2703,2711
+"Total-stratified",2015,"Upper Bound","True Prevalence",14906,14913,14921
+"Total-stratified",2015,"Upper Bound","Undiagnosed Fraction (%)",18.1,18.1,18.2
+"Total-stratified",2016,"PLWHA","PLWHA",NA,12488,NA
+"Total-stratified",2016,"Base Case","Undiagnosed Cases",1318,1323,1331
+"Total-stratified",2016,"Base Case","True Prevalence",13806,13811,13819
+"Total-stratified",2016,"Base Case","Undiagnosed Fraction (%)",9.5,9.6,9.6
+"Total-stratified",2016,"Upper Bound","Undiagnosed Cases",2687,2692,2699
+"Total-stratified",2016,"Upper Bound","True Prevalence",15175,15180,15187
+"Total-stratified",2016,"Upper Bound","Undiagnosed Fraction (%)",17.7,17.7,17.8
+"Total-stratified",2017,"PLWHA","PLWHA",NA,12979,NA
+"Total-stratified",2017,"Base Case","Undiagnosed Cases",1341,1360,1378
+"Total-stratified",2017,"Base Case","True Prevalence",14320,14339,14357
+"Total-stratified",2017,"Base Case","Undiagnosed Fraction (%)",9.4,9.5,9.6
+"Total-stratified",2017,"Upper Bound","Undiagnosed Cases",2710,2724,2738
+"Total-stratified",2017,"Upper Bound","True Prevalence",15689,15703,15717
+"Total-stratified",2017,"Upper Bound","Undiagnosed Fraction (%)",17.3,17.3,17.4
+"Total-stratified",2018,"PLWHA","PLWHA",NA,13402,NA
+"Total-stratified",2018,"Base Case","Undiagnosed Cases",1378,1382,1386
+"Total-stratified",2018,"Base Case","True Prevalence",14780,14784,14788
+"Total-stratified",2018,"Base Case","Undiagnosed Fraction (%)",9.3,9.3,9.4
+"Total-stratified",2018,"Upper Bound","Undiagnosed Cases",2725,2731,2737
+"Total-stratified",2018,"Upper Bound","True Prevalence",16127,16133,16139
+"Total-stratified",2018,"Upper Bound","Undiagnosed Fraction (%)",16.9,16.9,17
