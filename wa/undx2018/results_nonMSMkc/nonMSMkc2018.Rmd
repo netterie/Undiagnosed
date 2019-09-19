@@ -1,0 +1,188 @@
+---
+title: "2018 Undiagnosed Estimates for SHAMP - non-MSM in KC"
+author: "Jeanette Birnbaum"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  pdf_document:
+      toc: true
+      toc_depth: 2
+      number_sections: true
+
+---
+
+```{r edit, include=FALSE, echo=FALSE}
+rm(list=ls())
+#############################################################
+# NOTES
+#############################################################
+# As of 11/4/16, the way use this file is to set runNew to TRUE
+# to get fresh results. runNew to FALSE will used saved results
+
+#############################################################
+# EDIT THESE PARAMETERS
+#############################################################
+# Run a fresh estimation? And, define named vector of cases
+runNew <- TRUE
+estimation_cases <- c(`Base Case`='base_case', `Upper Bound`='upper_bound')
+
+# Specify year min and max for analysis
+year_min <- 2010
+year_max <- 2018
+year_of_estimation <- 2019
+
+# Specify time step
+diagInterval <- 1
+
+# Local path of the Undiagnosed repo (that contains "wa", "templates", etc)
+undx_repo <- '/Users/jeanette/Dropbox/School/PhD/HIV_WA'
+
+# Within above repo, path to data files
+data_path <- 'data/wa_backcalc_data_201908.csv'
+prev_path <- 'data/wa_prev_2010-2018.csv'
+results_path <- 'wa/undx2018/results_nonMSMkc/nonMSMkc2018.csv'
+
+# Within above repo, path to code files
+format_path <- 'wa/code/formatWA.R'
+# run_path <- 'wa/code/run_undx.R'
+```
+
+```{r setup, include=FALSE}
+#############################################################
+# TECHNICAL SETUP
+#############################################################
+
+# Load libraries
+# Install Rjkb using 
+#   devtools::install_github('netterie/Rjkb/Rjkb')
+library(Rjkb)
+library(knitr)
+library(gridExtra)
+library(kableExtra)
+
+# Read chunks
+# read_chunk(file.path(undx_repo, run_path))
+
+# Knitr options
+knitr::opts_chunk$set(echo = FALSE)
+options(knitr.table.format = "latex") 
+```
+
+```{r data, include=FALSE}
+#############################################################
+# AUTOMATED DATA LOADING AND FILE PATH SETUP
+#############################################################
+
+# Install the package
+# devtools::install_github('hivbackcalc/package1.0/HIVBackCalc')
+
+# Load the data and format it; load the HIVBackCalc package.
+# Update the package before running this script - don't source interim work.
+setup_hivbackcalc(workd=undx_repo,
+                  datafile=data_path,
+                  source_these=format_path,
+                  load_package=TRUE)
+
+# Save a copy of full dataset and original results path
+datafOrig <- dataf
+results_path_orig <- results_path
+prev_path_orig <- prev_path
+
+# Read in the prevalence data - note the importance of check.names
+#prev_data <- read.csv(file.path(undx_repo, prev_path), 
+#                      check.names=FALSE,
+#                      header=TRUE)
+```
+
+```{r run, include=FALSE}
+# Improve upon the dx_in_king variable, and make one 4-part subgroup variable
+dataf <- transform(dataf, KC=ifelse(dx_in_king=='Y', 'Inside KC', 'Outside KC'),
+                   KCMSM=ifelse(dx_in_king=='Y' & mode2=='MSM', 
+                                'MSM Inside KC',
+                                ifelse(dx_in_king=='Y' & mode2=='non-MSM',
+                                       'non-MSM Inside KC',
+                                       ifelse(dx_in_king=='N' & mode2=='MSM',
+                                              'MSM Outside KC',
+                                              'non-MSM Outside KC'))))
+
+# Now, subset to non-MSM in KC and create a subgroup variable for race-sex
+nonMSMkc <- subset(dataf, dx_in_king=='Y' & mode2=='non-MSM')
+
+# Create race3 which is just White/Black/Other
+nonMSMkc$race3 <- ifelse(nonMSMkc$race!='White' & nonMSMkc$race!='Black', 'Other', as.character(nonMSMkc$race))
+nonMSMkc$race3 <- factor(nonMSMkc$race3, levels=c('White', 'Black', 'Other'),
+                         labels=c('White', 'Black', 'Other'))
+
+# Create race-sex
+nonMSMkc$race.sex <- paste(nonMSMkc$birth_sex, nonMSMkc$race3)
+if (1==0) {
+    nonMSMkc$race.sex <- paste(nonMSMkc$race3, nonMSMkc$birth_sex)
+    race.sex.lev <- c('White M', 'White F', 'Black M', 'Black F',
+                      'Other M', 'Other F')
+    nonMSMkc$race.sex <- factor(nonMSMkc$race.sex,
+                                levels=race.sex.lev,
+                                labels=race.sex.lev)
+}
+
+# All of WA (undx fractions will not be correct for subgroups because 
+# those PLWH numbers in prev_data were faked from the MSM/KC marginals)
+all <- runAnalysis(nonMSMkc, list(c(`Race`='race3', `Sex`='birth_sex')),
+                   subvar='race.sex', intLength=diagInterval, cases=estimation_cases,
+                   runEstimation=runNew,
+                   savedEstimation=!runNew,
+                   prev=NULL,
+                   save=gsub('.csv', '_race.sex.csv', 
+                              file.path(undx_repo, results_path)))
+```
+
+## Data
+WA DOH data, subsetted to diagnoses in KC and non-MSM, years 2010-2018.
+
+## Diagnosis Counts
+```{r dx1,  plot=TRUE}
+all$dx$plot + aes(color=race.sex) + facet_grid(race3~.)
+```
+
+## Testing Histories
+```{r th1, results='asis'}
+kable(all$th$table[,2:ncol(all$th$table)], caption='Column Percent shows the composition of the total sample. The Percent Yes, Percent No and Percent Missing columns indicate the row percents of the three possible testing history statuses within each subgroup', booktabs=T) %>% 
+      group_rows("White", 2, 3) %>%
+        group_rows("Black", 4, 5) %>%
+            group_rows("Other", 6, 7)
+```
+
+## TID
+
+```{r tid1, plot=TRUE, fig.height=8}
+groups <- names(all$tid$separate)
+grid.arrange(
+                  plot(all$tid$separate[[3]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[3]),
+                  plot(all$tid$separate[[6]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[6]),
+                  plot(all$tid$separate[[1]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[1]),
+                  plot(all$tid$separate[[4]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[4]),
+                  plot(all$tid$separate[[2]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[2]),
+                  plot(all$tid$separate[[5]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[5]),
+             ncol=2)
+```
+
+## Incidence and Undiagnosed Counts
+
+```{r, plot=TRUE}
+all$resultsPlots[['Total-stratified']] + ggtitle('All non-MSM in KC')
+```
+
+
+```{r inc1, plot=TRUE, fig.height=10}
+grid.arrange(all$resultsPlots[['F White']] + ggtitle('F White'),
+             all$resultsPlots[['M White']] + ggtitle('M White'),               
+             all$resultsPlots[['F Black']] + ggtitle('F Black'),
+             all$resultsPlots[['M Black']] + ggtitle('M Black'), 
+             all$resultsPlots[['F Other']] + ggtitle('F Other'),
+             all$resultsPlots[['M Other']] + ggtitle('M Other'), 
+             ncol=2)
+```

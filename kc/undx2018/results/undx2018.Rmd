@@ -1,0 +1,237 @@
+---
+title: "2018 Undiagnosed Estimates for King County"
+author: "Jeanette Birnbaum"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  pdf_document:
+      toc: true
+      toc_depth: 2
+      number_sections: true
+
+---
+
+```{r edit, include=FALSE, echo=FALSE}
+rm(list=ls())
+#############################################################
+# NOTES
+#############################################################
+# As of 11/4/16, the way use this file is to set runNew to TRUE
+# to get fresh results. runNew to FALSE will used saved results
+
+#############################################################
+# EDIT THESE PARAMETERS
+#############################################################
+# Run a fresh estimation? And, define named vector of cases
+runNew <- TRUE
+estimation_cases <- c(`Base Case`='base_case', `Upper Bound`='upper_bound')
+
+# Specify year min and max for analysis
+year_min <- 2012
+year_max <- 2018
+
+# Specify time step
+diagInterval <- 0.25
+
+# Local path of the Undiagnosed repo (that contains "wa", "templates", etc)
+undx_repo <- '/Users/jeanette/Dropbox/School/PhD/HIV_WA'
+
+# Within above repo, path to data files
+data_path <- 'data/kc_2019_jbexport_formattedByApp.csv'
+prev_path <- 'data/kc_2019_PLWHA.csv'
+results_path <- 'kc/undx2018/results/undx2018.csv'
+
+```
+
+```{r setup, include=FALSE}
+#############################################################
+# TECHNICAL SETUP
+#############################################################
+
+# Load libraries
+# Install Rjkb using 
+#   devtools::install_github('netterie/Rjkb/Rjkb')
+library(Rjkb)
+library(knitr)
+library(gridExtra)
+library(kableExtra)
+
+# Read chunks
+# read_chunk(file.path(undx_repo, run_path))
+
+# Knitr options
+knitr::opts_chunk$set(echo = FALSE)
+options(knitr.table.format = "latex") 
+```
+
+```{r data, include=FALSE}
+#############################################################
+# AUTOMATED DATA LOADING AND FILE PATH SETUP
+#############################################################
+
+# Install the package
+# devtools::install_github('hivbackcalc/package1.0/HIVBackCalc')
+
+# Load the data and format it; load the HIVBackCalc package.
+# Update the package before running this script - don't source interim work.
+setup_hivbackcalc(workd=undx_repo,
+                  datafile=data_path,
+                  source_these='',
+                  load_package=TRUE)
+
+# Make some unexpected adjustments to variable formats...
+dataf <- transform(dataf,
+                   everHadNegTest=as.logical(everHadNegTest),
+                   infPeriod=as.numeric(infPeriod))
+
+
+# Save a copy of full dataset and original results path
+datafOrig <- dataf
+results_path_orig <- results_path
+prev_path_orig <- prev_path
+
+# Read in the prevalence data - note the importance of check.names
+prev_data <- read.csv(file.path(undx_repo, prev_path), 
+                      check.names=FALSE,
+                      header=TRUE)
+prev_data <- subset(prev_data, Year>=year_min)
+```
+
+```{r run, include=FALSE}
+all <- runAnalysis(dataf, c(`Mode`='mode2'),
+                   subvar='mode2', intLength=diagInterval, 
+                   cases=estimation_cases,
+                   runEstimation=runNew,
+                   savedEstimation=!runNew,
+                   prev=prev_data,
+                   save=gsub('.csv', '_allKC.csv', 
+                              file.path(undx_repo, results_path)))
+
+
+# Compile and clean results
+prettyprev <- all$resultsCompiled$trueprev
+
+# Add PLWHA to the Base Case. Then to the Upper Bound in a 2nd version.
+prettyprev <- within(prettyprev, {
+                         `Diagnoses/Case`=as.character(`Diagnoses/Case`)
+                         `Diagnoses/Case`=ifelse(`Diagnoses/Case`=='PLWHA', 'Base Case',
+                                                 `Diagnoses/Case`)
+                         
+                   })
+
+prettyprevUB <- all$resultsCompiled$trueprev
+prettyprevUB <- within(prettyprevUB, {
+                         `Diagnoses/Case`=as.character(`Diagnoses/Case`)
+                         `Diagnoses/Case`=ifelse(`Diagnoses/Case`=='PLWHA', 
+                                                 'Upper Bound',
+                                                 `Diagnoses/Case`)
+                         
+                   })
+
+# Melt and reshape?
+longall <- subset(melt(prettyprev, id.vars=c('Subgroup', 'Diagnoses/Case', 
+                                          'Estimate', 'Year')), 
+               variable=='Mean')
+longallUB <- subset(melt(prettyprevUB, id.vars=c('Subgroup', 'Diagnoses/Case', 
+                                          'Estimate', 'Year')), 
+               variable=='Mean')
+
+wideall <- dcast(longall, Subgroup+Year+`Diagnoses/Case`~Estimate, value.var='value')
+sublevels=c('MSM', 'non-MSM', 'Total-stratified')
+sublabels=c('MSM', 'non-MSM', 'Total')
+wideall$Subgroup <- factor(wideall$Subgroup, levels=sublevels, labels=sublabels)
+wideall <- arrange(wideall, Year, Subgroup)
+
+wideallUB <- dcast(longallUB, Subgroup+Year+`Diagnoses/Case`~Estimate, value.var='value')
+wideallUB$Subgroup <- factor(wideallUB$Subgroup, levels=sublevels, labels=sublabels)
+wideallUB <- arrange(wideallUB, Year, Subgroup)
+
+write.csv(wideall, file.path(undx_repo, 
+                    gsub('.csv', '_final.csv', results_path)),
+                    row.names=FALSE,
+                    na='')
+```
+
+```{r note1}
+# Note that \newpage works because we're knitting to pdf. See 
+# http://stackoverflow.com/questions/25240541/how-to-add-newpage-in-rmarkdown-in-a-smart-way
+```
+
+\newpage
+
+# Summary of Results
+The estimated undiagnosed fraction declined slightly overall, and in every group, since 2015.  However, note that the number of both undiagnosed and total cases rose slightly in all groups.
+
+```{r summary, include=FALSE}
+
+```
+
+## Base Case
+```{r sumtable2018, results='asis'}
+kable(
+      subset(wideall, Year>2016 & `Diagnoses/Case`=='Base Case', 
+             select=-c(Year, `Diagnoses/Case`)
+             ), row.names=FALSE, booktabs=T) %>%
+# caption='In both tables, the MSM and KC results are separate marginal results, i.e. they are two different ways of dividing the statewide results.', booktabs=T) %>%
+      group_rows("2017", 1, 3) %>%
+        group_rows("2018", 4, 6)
+```
+
+## Upper Bound
+```{r , results='asis'}
+kable(
+      subset(wideallUB, Year>2016 & `Diagnoses/Case`=='Upper Bound', 
+             select=-c(Year, `Diagnoses/Case`)
+             ), row.names=FALSE, booktabs=T) %>%
+# caption='In both tables, the MSM and KC results are separate marginal results, i.e. they are two different ways of dividing the statewide results.', booktabs=T) %>%
+      group_rows("2017", 1, 3) %>%
+        group_rows("2018", 4, 6)
+```
+
+\newpage
+
+# Diagnoses
+## Analytic sample
+Analytic data set has `r nrow(dataf)` cases for 2012-2018. 
+
+## Diagnoses over time by MSM/Area subgroups
+```{r dx1,  plot=TRUE}
+all$dx$plot + aes(color=mode2)
+```
+
+# Subgroup Sizes and Testing Histories
+
+```{r th1, results='asis'}
+kable(all$th$table[,2:ncol(all$th$table)], caption='Column Percent shows the composition of the total sample. The Percent Yes, Percent No and Percent Missing columns indicate the row percents of the three possible testing history statuses within each subgroup', booktabs=T)
+```
+
+
+# Time from Infection to Diagnosis (TID)
+The plots below show the TID curves for the MSM subgroups. BC=Base Case and UB=Upper Bound. For each subgroup, the upper plot panel is the probability of diagnosis curve (the pdf) and the lower plot panel is the survivor curve (1-cdf). The lower plot panel's y-axis thus indicates the fraction remaining undiagnosed at a given number of years since infection (x-axis).
+
+```{r tid1, plot=TRUE, fig.height=6}
+groups <- names(all$tid$separate)
+grid.arrange(
+                  plot(all$tid$separate[[1]],diagInterval, cases=c('BC', 'UB')) + 
+                      ggtitle(groups[1]),
+                  plot(all$tid$separate[[2]],diagInterval, cases=c('BC', 'UB')) +
+                      ggtitle(groups[2]),
+             ncol=2)
+```
+
+
+# Incidence and undiagnosed counts
+The upper plot panels show diagnoses and estimated incidence, while the lower plot panels show undiagnosed cases. The upper panels have different y-scales.
+
+```{r inc1, plot=TRUE, fig.height=6}
+all$resultsPlots[['Total-stratified']]
+```
+
+
+# Undiagnosed fractions
+These plots show the total number of PLWH (x-axis) broken down by diagnosed and undiagnosed (colors) for the Base Case versus Upper Bound estimates (panels). Undiagnosed fractions are indicated by the percent labels. 
+
+```{r frac1, plot=TRUE, fig.height=3.75}
+all$resultsPrevPlots[['Total-stratified']]
+```
+
+
